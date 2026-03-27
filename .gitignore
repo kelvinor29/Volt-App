@@ -1,0 +1,27 @@
+# --- Build Files ---
+*.iml
+.gradle
+/build
+/captures
+.externalNativeBuild
+.cxx
+/out
+
+# --- Android Studio Settings / IntelliJ ---
+.idea/
+
+# --- User Files and location ---
+local.properties
+/local.properties
+.DS_Store
+Thumbs.db
+
+# --- SECURITY ---
+secrets.properties
+*.jks
+*.keystore
+*.p12
+google-services.json
+
+# --- Temp Files ---
+*.log

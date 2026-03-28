@@ -9,12 +9,11 @@ import com.voltfitness.app.domain.usecase.routine.DeleteRoutineUseCase
 import com.voltfitness.app.domain.usecase.routine.GetRoutineDetailUseCase
 import com.voltfitness.app.domain.usecase.routine.SaveRoutineUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -120,8 +119,8 @@ class RoutineEditorViewModel @Inject constructor(
     )
     val uiState: StateFlow<RoutineEditorUiState> = _uiState.asStateFlow()
 
-    private val _effect = MutableSharedFlow<RoutineEditorEffect>()
-    val effect: SharedFlow<RoutineEditorEffect> = _effect.asSharedFlow()
+    private val _effect = Channel<RoutineEditorEffect>(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
 
     init {
         if (isNew) {
@@ -260,7 +259,7 @@ class RoutineEditorViewModel @Inject constructor(
         val state = _uiState.value
         if (state.routineName.isBlank()) {
             viewModelScope.launch {
-                _effect.emit(RoutineEditorEffect.ShowError("Routine name cannot be empty"))
+                _effect.send(RoutineEditorEffect.ShowError("Routine name cannot be empty"))
             }
             return
         }
@@ -289,12 +288,11 @@ class RoutineEditorViewModel @Inject constructor(
                         name = dayUi.name.trim()
                     )
                 }
-
                 saveRoutineUseCase(routine, days)
-                _effect.emit(RoutineEditorEffect.ShowSuccess("Routine saved successfully"))
-                _effect.emit(RoutineEditorEffect.NavigateBack)
+                _effect.send(RoutineEditorEffect.NavigateBack)
+
             } catch (e: Exception) {
-                _effect.emit(RoutineEditorEffect.ShowError("Failed to save: ${e.message}"))
+                _effect.send(RoutineEditorEffect.ShowError("Failed to save: ${e.message}"))
             } finally {
                 _uiState.update { it.copy(isSaving = false) }
             }
@@ -309,10 +307,9 @@ class RoutineEditorViewModel @Inject constructor(
             _uiState.update { it.copy(isDeleting = true) }
             try {
                 deleteRoutineUseCase(state.routineId)
-                _effect.emit(RoutineEditorEffect.ShowSuccess("Routine deleted"))
-                _effect.emit(RoutineEditorEffect.NavigateBack)
+                _effect.send(RoutineEditorEffect.NavigateBack)
             } catch (e: Exception) {
-                _effect.emit(RoutineEditorEffect.ShowError("Failed to delete: ${e.message}"))
+                _effect.send(RoutineEditorEffect.ShowError("Failed to delete: ${e.message}"))
             } finally {
                 _uiState.update { it.copy(isDeleting = false) }
             }

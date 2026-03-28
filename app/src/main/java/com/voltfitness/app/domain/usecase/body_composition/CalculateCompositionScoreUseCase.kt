@@ -1,5 +1,7 @@
 package com.voltfitness.app.domain.usecase.body_composition
 
+import javax.inject.Inject
+
 /**
  * Business logic provider for evaluating physical condition through a Body Composition Score.
  * * This Use Case mimics medical-grade analysis (similar to InBody® systems) to synthesize
@@ -33,7 +35,7 @@ object CalculateCompositionScoreUseCase {
      * @param age Chronological age used to adjust muscle retention expectations (Sarcopenia factor).
      * @return A consolidated score ranging from 40.0 (High Risk/Imbalance) to 120.0 (Peak Conditioning).
      */
-    fun calculate(
+    fun calculateCompositionScore(
         weightKg: Float,
         bodyFatPercent: Float?,
         muscleMassKg: Float?,

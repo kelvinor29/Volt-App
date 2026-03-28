@@ -50,12 +50,10 @@ sealed class Screen(val route: String) {
         fun createRoute(workoutId: Long) = "workout_detail/$workoutId"
     }
 
-    data object RoutineDetail : Screen("routine_detail/{routineId}") {
-        fun createRoute(routineId: Long) = "routine_detail/$routineId"
-    }
-
-    data object RoutineCreator : Screen("routine_creator/{folderId}") {
-        fun createRoute(folderId: Long): String = "routine_creator/$folderId"
+    data object RoutineEditor : Screen("routine_editor?routineId={routineId}&folderId={folderId}") {
+        fun createRoute(routineId: Long? = null, folderId: Long? = null): String {
+            return "routine_editor?routineId=${routineId ?: -1L}&folderId=${folderId ?: -1L}"
+        }
     }
 
     data object ExercisePicker : Screen("exercise_picker/{routineId}/{dayOrder}") {

@@ -141,34 +141,23 @@ fun VoltNavGraph(
             )
         }
 
-        // ========== ROUTINE DETAIL SCREEN ==========
+        // ========== ROUTINE EDITOR SCREEN ==========
         composable(
-            route = Screen.RoutineDetail.route,
-            arguments = listOf(navArgument("routineId") { type = NavType.StringType }),
-        ) {
-            RoutineEditorScreen(
-                navController = navController,
-                onTopAppBarStateChange = { topAppBarState.value = it },
+            route = Screen.RoutineEditor.route,
+            arguments = listOf(
+                navArgument("routineId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                },
+                navArgument("folderId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
             )
-        }
-
-        // ========== ROUTINE CREATOR SCREEN ==========
-        composable(
-            route = Screen.RoutineCreator.route,
-            arguments = listOf(navArgument("folderId") { type = NavType.LongType }),
-        ) {
-            LaunchedEffect(Unit) {
-                topAppBarState.value = TopAppBarState(
-                    title = "New Routine",
-                    subtitle = "Create your workout plan",
-                    showBackButton = true,
-                    onBackClick = { navController.popBackStack() },
-                )
-            }
+        ) { backStackEntry ->
             RoutineEditorScreen(
                 navController = navController,
-                onTopAppBarStateChange = { topAppBarState.value = it },
-                viewModel = hiltViewModel(),
+                onTopAppBarStateChange = { topAppBarState.value = it }
             )
         }
 
@@ -186,8 +175,6 @@ fun VoltNavGraph(
                 )
             }
 
-            // Observe one-shot navigation effects from the ViewModel.
-            // NavigateToAdd fires only once (guarded in VM) so this is safe across recompositions.
             LaunchedEffect(Unit) {
                 viewModel.navigationEffect.collect { effect ->
                     when (effect) {

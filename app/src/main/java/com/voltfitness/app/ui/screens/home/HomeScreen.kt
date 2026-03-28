@@ -107,13 +107,13 @@ fun HomeScreen(
                 },
                 onRoutineClick = { routine ->
                     navController.navigate(
-                        Screen.RoutineDetail.createRoute(routine.id)
+                        Screen.RoutineEditor.createRoute(routineId = routine.id)
                     )
                 },
                 onOptionsClick = { /* TODO: Routine options menu */ },
                 onAddRoutineClick = { folderId ->
                     navController.navigate(
-                        Screen.RoutineCreator.createRoute(folderId)
+                        Screen.RoutineEditor.createRoute(folderId = folderId)
                     )
                 }
             )

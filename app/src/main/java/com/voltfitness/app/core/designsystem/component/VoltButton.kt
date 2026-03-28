@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Surface
 import androidx.compose.ui.tooling.preview.Preview
@@ -120,7 +120,7 @@ private fun VoltButtonsPreview() {
                 VoltButton(
                     text = "With Icon",
                     onClick = {},
-                    icon = Icons.Default.Login,
+                    icon = Icons.AutoMirrored.Filled.Login,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -169,7 +169,6 @@ private fun VoltButtonsPreview() {
 private fun VoltButtonLoadingPreview() {
     VoltTheme {
         Surface(modifier = Modifier.padding(16.dp)) {
-            // Testing how the loader looks with a specific icon intended
             VoltButton(
                 text = "Save Changes",
                 onClick = {},

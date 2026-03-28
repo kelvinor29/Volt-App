@@ -294,6 +294,19 @@ private fun IndexRatioRow(entry: BodyCompositionDisplayItem) {
 @Composable
 private fun TorsoRow(entry: BodyCompositionDisplayItem) {
     Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        MeasurementCard(
+            modifier = Modifier.weight(1f),
+            label = "Chest",
+            value = entry.chestCm,
+            iconRes = R.drawable.ic_chest
+        )
+    }
+    Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -308,20 +321,6 @@ private fun TorsoRow(entry: BodyCompositionDisplayItem) {
             label = "Hip",
             value = entry.hipCm,
             iconRes = R.drawable.ic_hips
-        )
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        MeasurementCard(
-            modifier = Modifier.weight(1f),
-            label = "Chest",
-            value = entry.chestCm,
-            iconRes = R.drawable.ic_chest
         )
     }
 }

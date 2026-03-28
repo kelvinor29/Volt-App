@@ -23,11 +23,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,12 +47,16 @@ import java.time.LocalDate
  * Uses [PrimaryTabRow] + [HorizontalPager] to split inputs into
  * "Body Composition" (scale metrics) and "Body Measurements" (tape metrics).
  *
+ * This Composable is fully stateless — it renders [uiState] and forwards
+ * intents via [onEvent]. Navigation (back/save success) is handled by the
+ * NavGraph, which observes [AddBodyCompositionViewModel.navigationEffect].
+ *
  * Tab state lives in Compose via [PagerState] — NOT in the ViewModel.
  * All form data persists in the ViewModel's StateFlow, so switching
  * tabs never loses user input.
  *
- * @param uiState Current form state from ViewModel.
- * @param onEvent Dispatches form events to ViewModel.
+ * @param uiState Current form state from [AddBodyCompositionViewModel].
+ * @param onEvent Dispatches form events to the ViewModel.
  * @param onNavigateBack Callback to pop this screen off the navigation stack.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,26 +64,24 @@ import java.time.LocalDate
 fun AddBodyCompositionScreen(
     uiState: AddBodyCompositionUiState,
     onEvent: (AddBodyCompositionEvent) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 2 })
     val selectedTabIndex = remember { derivedStateOf { pagerState.currentPage } }
 
-    val tabs = listOf(
-        TabItem("Composition", Icons.Outlined.FitnessCenter),
-        TabItem("Measurements", Icons.Outlined.Straighten)
-    )
-
-    LaunchedEffect(uiState.saveSuccess) {
-        if (uiState.saveSuccess) onNavigateBack()
+    val tabs = remember {
+        listOf(
+            TabItem("Composition", Icons.Outlined.FitnessCenter),
+            TabItem("Measurements", Icons.Outlined.Straighten),
+        )
     }
 
     Scaffold(
         bottomBar = {
             Surface(
                 shadowElevation = 10.dp,
-                color = MaterialTheme.colorScheme.surface
+                color = MaterialTheme.colorScheme.surface,
             ) {
                 val isLastTab = selectedTabIndex.value == tabs.lastIndex
 
@@ -87,19 +89,19 @@ fun AddBodyCompositionScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, bottom = 10.dp, top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     VoltOutlinedButton(
                         text = "Dismiss",
                         onClick = onNavigateBack,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                     VoltButton(
                         text = if (isLastTab) "Save" else "Next",
-                        icon = if (isLastTab) Icons.Filled.Save else Icons.AutoMirrored.Filled.ArrowForward,
+                        icon = if (isLastTab) Icons.Filled.Save
+                        else Icons.AutoMirrored.Filled.ArrowForward,
                         onClick = {
-                            if (isLastTab)
-                                onEvent(AddBodyCompositionEvent.Save)
+                            if (isLastTab) onEvent(AddBodyCompositionEvent.Save)
                             else {
                                 coroutineScope.launch {
                                     pagerState.animateScrollToPage(selectedTabIndex.value + 1)
@@ -112,36 +114,34 @@ fun AddBodyCompositionScreen(
                     )
                 }
             }
-        }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = innerPadding.calculateBottomPadding())
+                .padding(bottom = innerPadding.calculateBottomPadding()),
         ) {
-            // Error Banner
             uiState.errorMessage?.let { error ->
                 VoltErrorBanner(
                     message = error,
                     onDismiss = { onEvent(AddBodyCompositionEvent.DismissError) },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
 
-            // Date Selector
             VoltDateSelector(
                 label = "Date of measurement",
                 selectedDate = uiState.date,
                 onDateSelected = { onEvent(AddBodyCompositionEvent.UpdateDate(it)) },
                 icon = Icons.Outlined.CalendarMonth,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
 
             PrimaryTabRow(
                 selectedTabIndex = selectedTabIndex.value,
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.primary,
-                divider = { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant) }
+                divider = { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant) },
             ) {
                 tabs.forEachIndexed { index, tab ->
                     Tab(
@@ -155,7 +155,7 @@ fun AddBodyCompositionScreen(
                             Text(
                                 text = tab.title,
                                 fontWeight = if (selectedTabIndex.value == index)
-                                    FontWeight.Bold else FontWeight.Normal
+                                    FontWeight.Bold else FontWeight.Normal,
                             )
                         },
                     )
@@ -167,7 +167,7 @@ fun AddBodyCompositionScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                beyondViewportPageCount = 1
+                beyondViewportPageCount = 1,
             ) { page ->
                 when (page) {
                     0 -> BodyCompositionTab(uiState = uiState, onEvent = onEvent)
@@ -178,38 +178,49 @@ fun AddBodyCompositionScreen(
     }
 }
 
-/** Simple data holder for tab metadata. */
 private data class TabItem(
     val title: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector
+    val icon: ImageVector,
 )
-
 
 @Preview(name = "Add Screen - Form Empty", showSystemUi = true)
 @Composable
 private fun AddBodyCompositionEmptyPreview() {
     VoltTheme {
         AddBodyCompositionScreen(
-            uiState = AddBodyCompositionUiState(
-                date = LocalDate.now(),
-            ),
+            uiState = AddBodyCompositionUiState(date = LocalDate.now()),
             onEvent = {},
-            onNavigateBack = {}
+            onNavigateBack = {},
         )
     }
 }
 
-@Preview(name = "Add Screen - Error & Saving", showSystemUi = true)
+@Preview(name = "Add Screen - Saving", showSystemUi = true)
+@Composable
+private fun AddBodyCompositionSavingPreview() {
+    VoltTheme {
+        AddBodyCompositionScreen(
+            uiState = AddBodyCompositionUiState(
+                weightKg = "75",
+                heightCm = "175",
+                isSaving = true,
+            ),
+            onEvent = {},
+            onNavigateBack = {},
+        )
+    }
+}
+
+@Preview(name = "Add Screen - Error", showSystemUi = true)
 @Composable
 private fun AddBodyCompositionErrorPreview() {
     VoltTheme {
         AddBodyCompositionScreen(
             uiState = AddBodyCompositionUiState(
                 errorMessage = "Connection timeout. Please check your internet.",
-                isSaving = true,
             ),
             onEvent = {},
-            onNavigateBack = {}
+            onNavigateBack = {},
         )
     }
 }

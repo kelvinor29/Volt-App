@@ -72,7 +72,6 @@ private val previewState = BodyCompositionUiState(
 private fun BodyCompositionScreenPreview() {
     VoltTheme {
         BodyCompositionScreen(
-            navController = rememberNavController(),
             uiState = previewState,
             onAddNewMeasurement = {},
             onEntryClick = {},
@@ -89,7 +88,6 @@ private fun BodyCompositionScreenPreview() {
 private fun BodyCompositionScreenLoadingPreview() {
     VoltTheme {
         BodyCompositionScreen(
-            navController = rememberNavController(),
             uiState = BodyCompositionUiState(isLoading = true),
             onAddNewMeasurement = {},
             onEntryClick = {},
@@ -106,7 +104,6 @@ private fun BodyCompositionScreenLoadingPreview() {
 private fun BodyCompositionScreenEmptyPreview() {
     VoltTheme {
         BodyCompositionScreen(
-            navController = rememberNavController(),
             uiState = BodyCompositionUiState(
                 isLoading = false,
                 userName = "John Doe",

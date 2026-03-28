@@ -24,7 +24,6 @@ import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.TrackChanges
-import androidx.compose.material.icons.outlined.Transgender
 import androidx.compose.material.icons.outlined.Wc
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +46,6 @@ import com.voltfitness.app.ui.theme.VoltTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.tooling.preview.Preview
 import com.voltfitness.app.core.designsystem.component.VoltDateSelector
-import com.voltfitness.app.ui.screens.body_composition.add.AddBodyCompositionEvent
 
 @Composable
 fun RegisterScreen(
@@ -141,7 +139,7 @@ fun RegisterScreen(
                         else onEvent(RegisterEvent.NextStep)
                     },
                     enabled = when (uiState.currentStep) {
-                        0 -> uiState.isNameValid && uiState.isGenderValid
+                        0 -> uiState.isNameValid && uiState.isGenderValid && uiState.isBirthDateValid
                         1 -> uiState.isActivityValid && uiState.isGoalValid && uiState.isExperienceLvlValid
                         else -> true
                     },

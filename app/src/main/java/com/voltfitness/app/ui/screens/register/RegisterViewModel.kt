@@ -35,7 +35,8 @@ data class RegisterUiState(
     val isActivityValid: Boolean get() = activityLevel.isNotBlank()
     val isGoalValid: Boolean get() = goal.isNotBlank()
     val isExperienceLvlValid: Boolean get() = experienceLevel.isNotBlank()
-    val canProceed: Boolean get() = isNameValid && isGenderValid && isActivityValid && isGoalValid && isExperienceLvlValid
+    val isBirthDateValid: Boolean get() = birthDate != null
+    val canProceed: Boolean get() = isNameValid && isGenderValid && isActivityValid && isGoalValid && isExperienceLvlValid && isBirthDateValid
 }
 
 sealed interface RegisterEvent {

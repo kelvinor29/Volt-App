@@ -9,23 +9,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.isEmpty
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.voltfitness.app.ui.screens.body_composition.BodyCompositionNavEffect
 import com.voltfitness.app.ui.screens.body_composition.BodyCompositionScreen
 import com.voltfitness.app.ui.screens.body_composition.BodyCompositionViewModel
+import com.voltfitness.app.ui.screens.body_composition.add.AddBodyCompositionNavEffect
 import com.voltfitness.app.ui.screens.body_composition.add.AddBodyCompositionScreen
+import com.voltfitness.app.ui.screens.body_composition.add.AddBodyCompositionViewModel
 import com.voltfitness.app.ui.screens.exercise.ExercisePickerScreen
 import com.voltfitness.app.ui.screens.exercise.ExercisePickerViewModel
 import com.voltfitness.app.ui.screens.home.HomeScreen
-import com.voltfitness.app.ui.screens.register.RegisterNavigationEffect
 import com.voltfitness.app.ui.screens.register.RegisterNavigationEffect.*
 import com.voltfitness.app.ui.screens.register.RegisterScreen
 import com.voltfitness.app.ui.screens.register.RegisterViewModel
@@ -37,15 +37,18 @@ import com.voltfitness.app.ui.session.SessionViewModel
 /**
  * Navigation Graph for the VoltFitness application.
  *
- * The startDestination is pre-resolved by the calling composable (VoltApp)
- * based on SessionState. This graph contains NO auth logic — it is a pure
- * navigation structure.
+ * The startDestination is pre-resolved by [VoltApp] based on [SessionState].
+ * This graph is a pure navigation structure — no business logic lives here.
  *
- * @param navController The controller handling navigation stack.
- * @param topAppBarState A mutable state used to sync the TopAppBar UI.
+ * Navigation side-effects from ViewModels (e.g. first-launch redirect,
+ * save-success pop) are observed via [LaunchedEffect] + [SharedFlow] so
+ * the Composables stay stateless.
+ *
+ * @param navController The controller handling the navigation stack.
+ * @param topAppBarState Mutable state used to sync the TopAppBar UI.
  * @param sessionViewModel Activity-scoped ViewModel for session state updates.
- * @param modifier Layout modifier for the NavHost container.
- * @param startDestination Pre-resolved route: Home or Register.
+ * @param modifier Layout modifier for the [NavHost] container.
+ * @param startDestination Pre-resolved route: [Screen.Home] or [Screen.Register].
  */
 @Composable
 fun VoltNavGraph(
@@ -53,12 +56,12 @@ fun VoltNavGraph(
     topAppBarState: MutableState<TopAppBarState>,
     sessionViewModel: SessionViewModel,
     modifier: Modifier = Modifier,
-    startDestination: String = Screen.Splash.route
+    startDestination: String = Screen.Splash.route,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
     ) {
 
         // ========== SPLASH / AUTH GUARD ==========
@@ -86,9 +89,8 @@ fun VoltNavGraph(
             if (sessionState is SessionState.Loading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
-
             }
         }
 
@@ -98,10 +100,7 @@ fun VoltNavGraph(
             val uiState by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
-                topAppBarState.value = TopAppBarState(
-                    title = "",
-                    showBackButton = false
-                )
+                topAppBarState.value = TopAppBarState(title = "", showBackButton = false)
             }
 
             LaunchedEffect(Unit) {
@@ -114,79 +113,68 @@ fun VoltNavGraph(
                             }
                             navController.navigate(Screen.BodyComposition.route)
                         }
-
                     }
                 }
             }
 
-            RegisterScreen(
-                uiState = uiState,
-                onEvent = viewModel::onEvent
-            )
+            RegisterScreen(uiState = uiState, onEvent = viewModel::onEvent)
         }
 
         // ========== HOME SCREEN ==========
         composable(route = Screen.Home.route) {
             HomeScreen(
                 navController = navController,
-                onTopAppBarStateChange = { newState ->
-                    topAppBarState.value = newState
-                }
+                onTopAppBarStateChange = { topAppBarState.value = it },
             )
         }
 
         // ========== WORKOUT DETAIL SCREEN ==========
         composable(
             route = Screen.WorkoutDetail.route,
-            arguments = listOf(navArgument("workoutId") { type = NavType.StringType })
+            arguments = listOf(navArgument("workoutId") { type = NavType.StringType }),
         ) { backStackEntry ->
             val workoutId = backStackEntry.arguments?.getString("workoutId") ?: ""
-
             WorkoutDetailScreen(
                 workoutId = workoutId,
                 navController = navController,
-                onTopAppBarStateChange = { newState ->
-                    topAppBarState.value = newState
-                }
+                onTopAppBarStateChange = { topAppBarState.value = it },
             )
         }
 
-        // ========== ROUTINE DETAIL SCREEN (Edit existing) ==========
+        // ========== ROUTINE DETAIL SCREEN ==========
         composable(
             route = Screen.RoutineDetail.route,
-            arguments = listOf(navArgument("routineId") { type = NavType.StringType })
+            arguments = listOf(navArgument("routineId") { type = NavType.StringType }),
         ) {
             RoutineEditorScreen(
                 navController = navController,
-                onTopAppBarStateChange = { topAppBarState.value = it }
+                onTopAppBarStateChange = { topAppBarState.value = it },
             )
         }
 
-        // ========== ROUTINE CREATOR SCREEN (Create new in folder) ==========
+        // ========== ROUTINE CREATOR SCREEN ==========
         composable(
             route = Screen.RoutineCreator.route,
-            arguments = listOf(navArgument("folderId") { type = NavType.LongType })
-        ) { backStackEntry ->
-
+            arguments = listOf(navArgument("folderId") { type = NavType.LongType }),
+        ) {
             LaunchedEffect(Unit) {
                 topAppBarState.value = TopAppBarState(
                     title = "New Routine",
                     subtitle = "Create your workout plan",
                     showBackButton = true,
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
                 )
             }
-
             RoutineEditorScreen(
                 navController = navController,
                 onTopAppBarStateChange = { topAppBarState.value = it },
-                viewModel = hiltViewModel()
+                viewModel = hiltViewModel(),
             )
         }
 
         // ========== BODY COMPOSITION SCREEN ==========
-        composable(route = Screen.BodyComposition.route) { backStackEntry ->
-            val viewModel: BodyCompositionViewModel = hiltViewModel(backStackEntry)
+        composable(route = Screen.BodyComposition.route) {
+            val viewModel: BodyCompositionViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
@@ -194,54 +182,60 @@ fun VoltNavGraph(
                     title = "Body Composition",
                     subtitle = "Track your physical progress",
                     showBackButton = true,
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
                 )
+            }
+
+            // Observe one-shot navigation effects from the ViewModel.
+            // NavigateToAdd fires only once (guarded in VM) so this is safe across recompositions.
+            LaunchedEffect(Unit) {
+                viewModel.navigationEffect.collect { effect ->
+                    when (effect) {
+                        BodyCompositionNavEffect.NavigateToAdd -> {
+                            navController.navigate(Screen.AddBodyComposition.route)
+                        }
+                    }
+                }
             }
 
             BodyCompositionScreen(
                 uiState = uiState,
                 onAddNewMeasurement = {
-                    viewModel.resetAddForm()
                     navController.navigate(Screen.AddBodyComposition.route)
                 },
-                onEntryClick = { },
-                navController = navController,
+                onEntryClick = { /* TODO: navigate to detail */ },
             )
         }
 
         // ========== ADD BODY COMPOSITION SCREEN ==========
-        composable(route = Screen.AddBodyComposition.route) { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                try {
-                    navController.getBackStackEntry(Screen.BodyComposition.route)
-                } catch (e: Exception) {
-                    backStackEntry
-                }
-            }
-            val viewModel: BodyCompositionViewModel = hiltViewModel(parentEntry)
-            val addUiState by viewModel.addUiState.collectAsState()
+        composable(route = Screen.AddBodyComposition.route) {
+            val viewModel: AddBodyCompositionViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
                 topAppBarState.value = TopAppBarState(
                     title = "New Measurement",
                     subtitle = "Enter your current metrics",
                     showBackButton = true,
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
                 )
             }
 
-            val historyState by viewModel.uiState.collectAsState()
+            LaunchedEffect(Unit) {
+                viewModel.navigationEffect.collect { effect ->
+                    when (effect) {
+                        AddBodyCompositionNavEffect.SavedSuccessfully -> {
+                            navController.popBackStack()
+                        }
+                    }
+                }
+            }
 
             AddBodyCompositionScreen(
-                uiState = addUiState,
-                onEvent = viewModel::onAddEvent,
-                onNavigateBack = {
-                    if (historyState.historyEntries.isEmpty()) {
-                        navController.popBackStack(Screen.Home.route, inclusive = false)
-                    } else {
-                        navController.popBackStack()
-                    }
-                })
+                uiState = uiState,
+                onEvent = viewModel::onEvent,
+                onNavigateBack = { navController.popBackStack() },
+            )
         }
 
         // ========== EXERCISE PICKER SCREEN ==========
@@ -249,8 +243,8 @@ fun VoltNavGraph(
             route = Screen.ExercisePicker.route,
             arguments = listOf(
                 navArgument("routineId") { type = NavType.LongType },
-                navArgument("dayOrder") { type = NavType.IntType }
-            )
+                navArgument("dayOrder") { type = NavType.IntType },
+            ),
         ) { backStackEntry ->
             val viewModel: ExercisePickerViewModel = hiltViewModel(backStackEntry)
             val uiState by viewModel.uiState.collectAsState()
@@ -259,7 +253,7 @@ fun VoltNavGraph(
                 topAppBarState.value = TopAppBarState(
                     title = "Add exercise",
                     showBackButton = true,
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
                 )
             }
 
@@ -270,15 +264,12 @@ fun VoltNavGraph(
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set("exercise_selection_result", selectedIds)
-
                     navController.popBackStack()
-                }
+                },
             )
         }
 
-
-        // ========== FUTURE SCREENS (Placeholders) ==========
-
+        // ========== FUTURE SCREENS ==========
         composable(route = Screen.Settings.route) {
             // TODO: Implement SettingsScreen
         }

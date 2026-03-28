@@ -28,6 +28,10 @@ class BodyCompositionRepositoryImpl @Inject constructor(
             entity?.toDomain()
         }
 
+    override fun hasEntries(userId: Long): Flow<Boolean> {
+        return dao.hasEntries(userId)
+    }
+
     override suspend fun insertEntry(entry: BodyCompositionEntry) {
         dao.insertEntry(entry.toEntity())
     }

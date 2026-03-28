@@ -14,5 +14,11 @@ interface BodyCompositionRepository {
         userId: Long
     ): Flow<BodyCompositionEntry?>
 
+    /**
+     * Emits `true` if the user has at least one body composition entry.
+     * Used to drive the first-launch redirect to [AddBodyCompositionScreen].
+     */
+    fun hasEntries(userId: Long): Flow<Boolean>
+
     suspend fun insertEntry(entry: BodyCompositionEntry)
 }

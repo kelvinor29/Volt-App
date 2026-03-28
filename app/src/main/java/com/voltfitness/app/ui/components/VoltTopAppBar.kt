@@ -9,8 +9,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -20,11 +32,16 @@ import com.voltfitness.app.ui.navigation.TopAppBarState
 import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
- * A customized Material 3 TopAppBar for the VoltFitness application.
- *
  * This component reacts to the [TopAppBarState] to dynamically show navigation
  * buttons, titles, and action items. All icons and text follow the theme's
  * high-contrast colors (white in dark mode).
+ *
+ * ### Collapse behavior
+ * The [TopAppBarState.isCollapsibleVisible] lambda is read via [derivedStateOf]
+ * so that only the AnimatedVisibility block re-composes when visibility changes,
+ * not the entire VoltTopAppBar tree. [TopAppBarState] must be annotated with
+ * [@Stable][androidx.compose.runtime.Stable] for this optimization to take effect
+ * (see TopAppBarState.kt).
  *
  * @param state The UI state containing title, subtitle, and button configurations.
  * @param modifier Modifier to be applied to the top app bar layout.
@@ -35,13 +52,18 @@ fun VoltTopAppBar(
     state: TopAppBarState,
     modifier: Modifier = Modifier
 ) {
-    // Define shared color configuration to maintain consistency across the app
+    val colorScheme = MaterialTheme.colorScheme
+
     val appBarColors = TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.background,
-        titleContentColor = MaterialTheme.colorScheme.onBackground,
-        navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-        actionIconContentColor = MaterialTheme.colorScheme.onBackground
+        containerColor = colorScheme.background,
+        titleContentColor = colorScheme.onBackground,
+        navigationIconContentColor = colorScheme.onBackground,
+        actionIconContentColor = colorScheme.onBackground
     )
+
+    val isVisible by remember(state) {
+        derivedStateOf { state.isCollapsibleVisible() }
+    }
 
     Column(modifier = modifier) {
         TopAppBar(
@@ -67,7 +89,7 @@ fun VoltTopAppBar(
                             Text(
                                 text = subtitle,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -89,27 +111,34 @@ fun VoltTopAppBar(
 
         state.collapsibleContent?.let { content ->
             AnimatedVisibility(
-                visible = state.isCollapsibleVisible(),
+                visible = isVisible,
                 enter = expandVertically(
-                    animationSpec = tween(durationMillis = 300, easing = EaseInOutCubic)
+                    animationSpec = tween(durationMillis = 200, easing = EaseInOutCubic)
                 ),
                 exit = shrinkVertically(
-                    animationSpec = tween(durationMillis = 250, easing = EaseInOutCubic)
+                    shrinkTowards = Alignment.Top,
+                    animationSpec = tween(durationMillis = 150, easing = EaseInOutCubic)
                 )
             ) {
                 Surface(
-                    color = MaterialTheme.colorScheme.background,
+                    color = colorScheme.background,
                     shadowElevation = 4.dp
                 ) {
                     content()
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = colorScheme.outlineVariant
+                    )
                 }
             }
         }
 
-        HorizontalDivider(
-            thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outlineVariant
-        )
+        if (!isVisible) {
+            HorizontalDivider(
+                thickness = 0.5.dp,
+                color = colorScheme.outlineVariant
+            )
+        }
     }
 }
 

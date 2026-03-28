@@ -1,6 +1,5 @@
 package com.voltfitness.app.ui.navigation
 
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 
 /**

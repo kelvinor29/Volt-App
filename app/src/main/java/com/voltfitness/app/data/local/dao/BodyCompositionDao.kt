@@ -23,6 +23,9 @@ interface BodyCompositionDao {
         limit: Int
     ): Flow<List<BodyCompositionEntity>>
 
+    @Query("SELECT COUNT(*) > 0 FROM body_composition_entries WHERE userId = :userId")
+    fun hasEntries(userId: Long): Flow<Boolean>
+
     @Query(
         """
         SELECT * FROM body_composition_entries

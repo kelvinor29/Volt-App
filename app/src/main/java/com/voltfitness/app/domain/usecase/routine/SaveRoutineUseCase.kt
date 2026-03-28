@@ -28,8 +28,6 @@ class SaveRoutineUseCase @Inject constructor(
     suspend operator fun invoke(routine: Routine, days: List<RoutineDay>): Long {
         val routineId = routineRepository.upsertRoutine(routine)
 
-        // Replace all days: delete existing, then insert updated list.
-        // CASCADE ensures exercise links are preserved at the entity level.
         routineRepository.deleteRoutineDaysByRoutineId(routineId)
         routineRepository.upsertRoutineDays(
             days.map { it.copy(routineId = routineId) }

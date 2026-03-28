@@ -110,7 +110,7 @@ fun RoutineEditorScreen(
     LaunchedEffect(selectedIds) {
         selectedIds?.let {
             viewModel.onEvent(RoutineEditorEvent.OnExercisesSelectedForDay(it))
-            navBackStackEntry?.savedStateHandle?.remove<List<String>>("exercise_selection_result")
+            navBackStackEntry.savedStateHandle.remove<List<String>>("exercise_selection_result")
         }
     }
 

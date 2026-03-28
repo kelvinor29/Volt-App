@@ -107,14 +107,15 @@ class RoutineEditorViewModel @Inject constructor(
     private val deleteRoutineUseCase: DeleteRoutineUseCase
 ) : ViewModel() {
 
-    private val folderId: Long = savedStateHandle["folderId"] ?: 0L
-    private val routineIdArg: String = savedStateHandle["routineId"] ?: "new"
-    private val isNew = routineIdArg == "new"
+    private val routineId: Long = savedStateHandle["routineId"] ?: -1L
+    private val folderId: Long = savedStateHandle["folderId"] ?: -1L
+    private val isNew = routineId == -1L
 
     private val _uiState = MutableStateFlow(
         RoutineEditorUiState(
             isNewRoutine = isNew,
-            folderId = folderId
+            folderId = folderId,
+            routineId = if (isNew) -1L else routineId,
         )
     )
     val uiState: StateFlow<RoutineEditorUiState> = _uiState.asStateFlow()
@@ -129,7 +130,7 @@ class RoutineEditorViewModel @Inject constructor(
                 it.copy(days = listOf(RoutineDayUi(order = 1, name = "Day 1")))
             }
         } else {
-            loadExistingRoutine(routineIdArg.toLongOrNull() ?: 0L)
+            loadExistingRoutine(routineId)
         }
     }
 

@@ -18,15 +18,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.NoteAdd
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.TrackChanges
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,8 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.voltfitness.app.core.designsystem.component.VoltButton
+import com.voltfitness.app.core.common.ProfileOptions
 import com.voltfitness.app.core.designsystem.component.VoltCheckButton
+import com.voltfitness.app.core.designsystem.component.VoltDropdownSelector
 import com.voltfitness.app.core.designsystem.component.VoltTextField
 import com.voltfitness.app.ui.components.cards.VoltDashedPlaceholder
 import com.voltfitness.app.ui.screens.exercise.components.ExerciseGifImage
@@ -63,9 +63,11 @@ fun RoutineHeaderFields(
     name: String,
     description: String,
     goal: String,
+    isMainRoutine: Boolean,
     onNameChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onGoalChange: (String) -> Unit,
+    onToggleMain: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -84,75 +86,21 @@ fun RoutineHeaderFields(
             label = "Description",
         )
 
-        VoltTextField(
-            value = goal,
-            onValueChange = onGoalChange,
-            label = "Goal",
+        VoltDropdownSelector(
+            label = "Training Goal",
+            options = ProfileOptions.goals,
+            selectedOption = goal,
+            onOptionSelected = onGoalChange
         )
-    }
-}
 
-/**
- * Reusable styled [OutlinedTextField] matching the Volt design system.
- * Extracted to avoid repeating shape, icon, and color configurations.
- */
-@Composable
-private fun RoutineTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-) {
-
-    VoltTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = label,
-        leadingIcon = Icons.Default.Edit,
-        singleLine = true
-    )
-}
-
-// =============================================================================
-// ACTION BUTTONS
-// =============================================================================
-
-/**
- * Row containing the "Main Routine" toggle and "Save" action buttons.
- *
- * @param isMainRoutine Whether the routine is currently marked as the primary routine.
- * @param isSaving Whether a save operation is in progress (disables the button).
- * @param onToggleMain Callback to toggle the main routine flag.
- * @param onSave Callback to initiate the save operation.
- * @param modifier Modifier for the Row container.
- */
-@Composable
-fun RoutineActionButtons(
-    isMainRoutine: Boolean,
-    isSaving: Boolean,
-    onToggleMain: () -> Unit,
-    onSave: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
         VoltCheckButton(
-            label = "Main Routine",
+            label = "Set Main Routine",
             checked = isMainRoutine,
-            onCheckedChange = { onToggleMain() },
-            modifier = Modifier.weight(1f),
-            enabled = !isSaving
-        )
-
-        VoltButton(
-            onClick = onSave,
-            enabled = !isSaving,
-            text = "Save",
-            modifier = Modifier.weight(1f),
+            onCheckedChange = onToggleMain,
         )
     }
 }
+
 
 // =============================================================================
 // EXPANDABLE DAY ITEM

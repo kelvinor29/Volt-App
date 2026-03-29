@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,10 +37,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
+import com.voltfitness.app.ui.components.navigation.VoltStepBottomBar
 import com.voltfitness.app.ui.navigation.Screen
 import com.voltfitness.app.ui.navigation.TopAppBarState
 import com.voltfitness.app.ui.screens.routine.components.ExpandableDayItem
-import com.voltfitness.app.ui.screens.routine.components.RoutineActionButtons
 import com.voltfitness.app.ui.screens.routine.components.RoutineHeaderFields
 import com.voltfitness.app.ui.theme.VoltSpacing
 import com.voltfitness.app.ui.theme.VoltTheme
@@ -55,7 +56,7 @@ import com.voltfitness.app.ui.theme.VoltTheme
 fun RoutineEditorScreen(
     navController: NavController,
     onTopAppBarStateChange: (TopAppBarState) -> Unit,
-    viewModel: RoutineEditorViewModel = hiltViewModel()
+    viewModel: RoutineEditorViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -99,6 +100,8 @@ fun RoutineEditorScreen(
                             )
                         },
                         onGoalChange = { viewModel.onEvent(RoutineEditorEvent.OnGoalChanged(it)) },
+                        onToggleMain = { viewModel.onEvent(RoutineEditorEvent.OnToggleMainRoutine) },
+                        isMainRoutine = uiState.isMainRoutine,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 },
@@ -133,7 +136,17 @@ fun RoutineEditorScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            VoltStepBottomBar(
+                primaryText = if (uiState.routineId == -1L) "Save" else "Update",
+                primaryIcon = Icons.Filled.Save,
+                primaryEnabled = uiState.isFormValid,
+                primaryLoading = uiState.isSaving,
+                onSecondaryClick = { navController.popBackStack() },
+                onPrimaryClick = { viewModel.onEvent(RoutineEditorEvent.OnSave) }
+            )
+        }
     ) { innerPadding ->
         RoutineEditorContent(
             uiState = uiState,
@@ -160,20 +173,6 @@ private fun RoutineEditorContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-
-        Surface(
-            color = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.fillMaxWidth(),
-            shadowElevation = 2.dp
-        ) {
-            RoutineActionButtons(
-                isMainRoutine = uiState.isMainRoutine,
-                isSaving = uiState.isSaving,
-                onToggleMain = { onEvent(RoutineEditorEvent.OnToggleMainRoutine) },
-                onSave = { onEvent(RoutineEditorEvent.OnSave) },
-                modifier = Modifier.padding(VoltSpacing.medium)
-            )
-        }
 
         LazyColumn(
             state = listState,

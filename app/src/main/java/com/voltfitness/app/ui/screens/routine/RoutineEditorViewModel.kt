@@ -52,8 +52,11 @@ data class RoutineEditorUiState(
     val expandedDayIndex: Int = 0,
     val isNewRoutine: Boolean = true,
     val isSaving: Boolean = false,
-    val isDeleting: Boolean = false
-)
+    val isDeleting: Boolean = false,
+){
+    val isFormValid: Boolean get() = routineName.isNotBlank() && description.isNotBlank() && goal.isNotBlank()
+
+}
 
 // =============================================================================
 // EVENTS

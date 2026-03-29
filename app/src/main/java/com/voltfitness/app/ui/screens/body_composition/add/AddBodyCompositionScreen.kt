@@ -35,6 +35,7 @@ import com.voltfitness.app.core.designsystem.component.VoltButton
 import com.voltfitness.app.core.designsystem.component.VoltDateSelector
 import com.voltfitness.app.core.designsystem.component.VoltErrorBanner
 import com.voltfitness.app.core.designsystem.component.VoltOutlinedButton
+import com.voltfitness.app.ui.components.navigation.VoltStepBottomBar
 import com.voltfitness.app.ui.screens.body_composition.add.components.BodyCompositionTab
 import com.voltfitness.app.ui.screens.body_composition.add.components.BodyMeasurementsTab
 import com.voltfitness.app.ui.theme.VoltTheme
@@ -77,44 +78,30 @@ fun AddBodyCompositionScreen(
         )
     }
 
+    val isLastTab = selectedTabIndex.value == tabs.lastIndex
+    val primaryText = if (isLastTab) "Save" else "Next"
+    val primaryIcon = if (isLastTab) Icons.Filled.Save else Icons.AutoMirrored.Filled.ArrowForward
+    val primaryEnabled = if (isLastTab) uiState.isFormValid else true
+
     Scaffold(
         bottomBar = {
-            Surface(
-                shadowElevation = 10.dp,
-                color = MaterialTheme.colorScheme.surface,
-            ) {
-                val isLastTab = selectedTabIndex.value == tabs.lastIndex
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, bottom = 10.dp, top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    VoltOutlinedButton(
-                        text = "Dismiss",
-                        onClick = onNavigateBack,
-                        modifier = Modifier.weight(1f),
-                    )
-                    VoltButton(
-                        text = if (isLastTab) "Save" else "Next",
-                        icon = if (isLastTab) Icons.Filled.Save
-                        else Icons.AutoMirrored.Filled.ArrowForward,
-                        onClick = {
-                            if (isLastTab) onEvent(AddBodyCompositionEvent.Save)
-                            else {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(selectedTabIndex.value + 1)
-                                }
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        enabled = if (isLastTab) uiState.isFormValid else true,
-                        isLoading = uiState.isSaving,
-                    )
+            VoltStepBottomBar(
+                primaryText = primaryText,
+                primaryIcon = primaryIcon,
+                primaryEnabled = primaryEnabled,
+                primaryLoading = uiState.isSaving,
+                onSecondaryClick = onNavigateBack,
+                onPrimaryClick = {
+                    if (isLastTab) {
+                        onEvent(AddBodyCompositionEvent.Save)
+                    } else {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(selectedTabIndex.value + 1)
+                        }
+                    }
                 }
-            }
-        },
+            )
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier

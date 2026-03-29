@@ -157,7 +157,7 @@ fun VoltNavGraph(
         ) { backStackEntry ->
             RoutineEditorScreen(
                 navController = navController,
-                onTopAppBarStateChange = { topAppBarState.value = it }
+                onTopAppBarStateChange = { topAppBarState.value = it },
             )
         }
 
@@ -198,15 +198,6 @@ fun VoltNavGraph(
         composable(route = Screen.AddBodyComposition.route) {
             val viewModel: AddBodyCompositionViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
-
-            LaunchedEffect(Unit) {
-                topAppBarState.value = TopAppBarState(
-                    title = "New Measurement",
-                    subtitle = "Enter your current metrics",
-                    showBackButton = true,
-                    onBackClick = { navController.popBackStack() },
-                )
-            }
 
             LaunchedEffect(Unit) {
                 viewModel.navigationEffect.collect { effect ->

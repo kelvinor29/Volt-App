@@ -19,7 +19,7 @@ interface RoutineDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertRoutine(routine: RoutineEntity): Long
 
-    @Query("UPDATE routines SET isActive = 0 WHERE folderId = :folderId")
+    @Query("UPDATE routines SET is_active = 0 WHERE folderId = :folderId")
     suspend fun resetMainRoutinesForFolderId(folderId: Long)
 
     @Transaction

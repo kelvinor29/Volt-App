@@ -27,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,8 +36,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
+import com.voltfitness.app.domain.model.Exercise
 import com.voltfitness.app.ui.components.navigation.VoltStepBottomBar
 import com.voltfitness.app.ui.navigation.Screen
 import com.voltfitness.app.ui.navigation.TopAppBarState
@@ -45,13 +48,7 @@ import com.voltfitness.app.ui.screens.routine.components.RoutineHeaderFields
 import com.voltfitness.app.ui.theme.VoltSpacing
 import com.voltfitness.app.ui.theme.VoltTheme
 
-/**
- * Entry point for the Routine Editor screen.
- *
- * Connects [RoutineEditorViewModel] to the stateless [RoutineEditorContent],
- * handles TopAppBar configuration, and collects one-time UI effects
- * (navigation, snackbar messages) in a lifecycle-aware manner.
- */
+
 @Composable
 fun RoutineEditorScreen(
     navController: NavController,
@@ -59,20 +56,31 @@ fun RoutineEditorScreen(
     viewModel: RoutineEditorViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    val navBackStackEntry = navController.currentBackStackEntry
+
+    val selectionResult by navBackStackEntry?.savedStateHandle
+        ?.getStateFlow<List<String>?>("exercise_selection_result", null)
+        ?.collectAsState(initial = null) ?: remember { mutableStateOf(null) }
+
+    LaunchedEffect(selectionResult) {
+        selectionResult?.let { ids ->
+            viewModel.onEvent(RoutineEditorEvent.OnExercisesSelectedForDay(ids))
+            navBackStackEntry?.savedStateHandle?.remove<List<String>>("exercise_selection_result")
+        }
+    }
+
     val snackbarHostState = remember { SnackbarHostState() }
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val listState = rememberLazyListState()
+
     val isHeaderVisible by remember {
         derivedStateOf {
             if (listState.firstVisibleItemIndex > 0) false
             else listState.firstVisibleItemScrollOffset < 150
         }
     }
-
-    val navBackStackEntry = navController.currentBackStackEntry
-    val selectedIds: List<String>? =
-        navBackStackEntry?.savedStateHandle?.get("exercise_selection_result")
 
     LaunchedEffect(
         uiState.isNewRoutine,
@@ -93,11 +101,7 @@ fun RoutineEditorScreen(
                         goal = uiState.goal,
                         onNameChange = { viewModel.onEvent(RoutineEditorEvent.OnNameChanged(it)) },
                         onDescriptionChange = {
-                            viewModel.onEvent(
-                                RoutineEditorEvent.OnDescriptionChanged(
-                                    it
-                                )
-                            )
+                            viewModel.onEvent(RoutineEditorEvent.OnDescriptionChanged(it))
                         },
                         onGoalChange = { viewModel.onEvent(RoutineEditorEvent.OnGoalChanged(it)) },
                         onToggleMain = { viewModel.onEvent(RoutineEditorEvent.OnToggleMainRoutine) },
@@ -110,14 +114,6 @@ fun RoutineEditorScreen(
         )
     }
 
-    LaunchedEffect(selectedIds) {
-        selectedIds?.let {
-            viewModel.onEvent(RoutineEditorEvent.OnExercisesSelectedForDay(it))
-            navBackStackEntry.savedStateHandle.remove<List<String>>("exercise_selection_result")
-        }
-    }
-
-    // Collect one-time effects (navigation, errors, success messages)
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.effect.collect { effect ->
@@ -173,7 +169,6 @@ private fun RoutineEditorContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
@@ -212,17 +207,12 @@ private fun RoutineEditorContent(
                     onAddExerciseClick = {
                         onNavigateToExercisePicker(uiState.routineId, day.order)
                     },
-                    onExerciseOptionsClick = { exercise ->
-                        // TODO: opciones del ejercicio
-                    }
+                    onExerciseOptionsClick = {/* TODO: EXERCISE OPTIONS */}
                 )
             }
-
-
         }
     }
 }
-
 
 @Preview(name = "Edit Mode", showBackground = true, showSystemUi = true)
 @Composable
@@ -231,14 +221,32 @@ private fun RoutineEditorEditPreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             RoutineEditorContent(
                 uiState = RoutineEditorUiState(
-                    isNewRoutine = false,
                     routineName = "Hypertrophy routine",
                     description = "Progressive overload program",
                     goal = "Hypertrophy",
                     days = listOf(
-                        RoutineDayUi(order = 1, name = "Day 1"),
+                        RoutineDayUi(
+                            order = 1, name = "Day 1",
+                            exercises = listOf(
+                                Exercise(
+                                    id = "2",
+                                    name = "Bench press",
+                                    bodyPart = "Chest",
+                                    target = "Pectorals",
+                                    equipment = "Barbell",
+                                    secondaryMuscles = listOf("Shoulder"),
+                                    instructions = listOf("Lie down on the bench"),
+                                    description = null,
+                                    difficulty = null,
+                                    category = null,
+                                    gifUrl = "",
+                                )
+                            )
+                        ),
                         RoutineDayUi(order = 2, name = "Day 2")
-                    )
+                    ),
+                    isNewRoutine = false,
+                    error = "",
                 ),
                 onEvent = {},
                 onNavigateToExercisePicker = { _, _ -> },

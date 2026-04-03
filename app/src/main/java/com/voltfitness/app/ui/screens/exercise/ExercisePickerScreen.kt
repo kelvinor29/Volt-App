@@ -75,8 +75,9 @@ fun ExercisePickerScreen(
     ) { innerPadding ->
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(horizontal = 16.dp)
-                .fillMaxSize(),
+                .padding(bottom = innerPadding.calculateBottomPadding()),
         ) {
             // Search field
             VoltTextField(
@@ -209,9 +210,45 @@ private fun CatalogChipRow(
 @Composable
 private fun ExercisePickerScreenPreview() {
     val mockExercises = listOf(
-        Exercise("1", "barbell bench press", "chest", "pectorals", "barbell", listOf("triceps"), listOf("Lie down", "Push"), null, null, null, null),
-        Exercise("2", "dumbbell lateral raise", "shoulders", "deltoids", "dumbbell", emptyList(), listOf("Lift sideways"), null, null, null, null),
-        Exercise("3", "cable pulldown", "back", "lats", "cable", listOf("biceps"), listOf("Pull down"), null, null, null, null),
+        Exercise(
+            "1",
+            "barbell bench press",
+            "chest",
+            "pectorals",
+            "barbell",
+            listOf("triceps"),
+            listOf("Lie down", "Push"),
+            null,
+            null,
+            null,
+            null
+        ),
+        Exercise(
+            "2",
+            "dumbbell lateral raise",
+            "shoulders",
+            "deltoids",
+            "dumbbell",
+            emptyList(),
+            listOf("Lift sideways"),
+            null,
+            null,
+            null,
+            null
+        ),
+        Exercise(
+            "3",
+            "cable pulldown",
+            "back",
+            "lats",
+            "cable",
+            listOf("biceps"),
+            listOf("Pull down"),
+            null,
+            null,
+            null,
+            null
+        ),
     )
     VoltTheme {
         ExercisePickerScreen(

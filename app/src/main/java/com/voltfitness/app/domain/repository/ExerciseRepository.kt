@@ -31,6 +31,9 @@ interface ExerciseRepository {
     /** Gets a single exercise by ID. */
     suspend fun getExerciseById(id: String): Exercise?
 
+    /** Gets a list of exercises by ID. */
+    suspend fun getExercisesByIds(ids: List<String>): List<Exercise>
+
     /** Fetches exercises from API and caches them locally. */
     suspend fun refreshExercisesFromRemote()
 

@@ -30,11 +30,11 @@ import com.voltfitness.app.core.common.ProfileOptions
 import com.voltfitness.app.core.designsystem.component.VoltCheckButton
 import com.voltfitness.app.core.designsystem.component.VoltDropdownSelector
 import com.voltfitness.app.core.designsystem.component.VoltTextField
-import com.voltfitness.app.domain.model.Exercise
 import com.voltfitness.app.ui.components.cards.ExerciseCard
 import com.voltfitness.app.ui.components.cards.ExerciseCardTrailing
 import com.voltfitness.app.ui.components.cards.VoltDashedPlaceholder
 import com.voltfitness.app.ui.screens.routine.RoutineDayUi
+import com.voltfitness.app.ui.screens.routine.RoutineExerciseUi
 
 // =============================================================================
 // HEADER SECTION
@@ -114,7 +114,7 @@ fun ExpandableDayItem(
     isExpanded: Boolean,
     onExpandClick: () -> Unit,
     onAddExerciseClick: () -> Unit,
-    onExerciseOptionsClick: (Exercise) -> Unit,
+    onExerciseOptionsClick: (RoutineExerciseUi) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -162,7 +162,7 @@ fun ExpandableDayItem(
             ) {
                 day.exercises.forEach { exercise ->
                     ExerciseCard(
-                        exerciseId = exercise.id,
+                        exerciseId = exercise.exerciseDbId,
                         exerciseName = exercise.name,
                         subtitle = buildEditorSubtitle(exercise),
                         trailing = ExerciseCardTrailing.OptionsMenu(
@@ -184,14 +184,6 @@ fun ExpandableDayItem(
     }
 }
 
-/**
- * Builds the subtitle string for the Picker context.
- * Each token is individually capitalized so "chest · pectorals · barbell"
- * becomes "Chest · Pectorals · Barbell" regardless of how the API returns them.
- */
-private fun buildEditorSubtitle(exercise: Exercise): String {
-    val bodyPart = exercise.bodyPart.replaceFirstChar { it.uppercase() }
-    val target = exercise.target.replaceFirstChar { it.uppercase() }
-    val equipment = exercise.equipment.replaceFirstChar { it.uppercase() }
-    return "$bodyPart · $target · $equipment"
+private fun buildEditorSubtitle(exercise: RoutineExerciseUi): String {
+    return "${exercise.sets} sets · ${exercise.repsRange} reps · ${exercise.weightRange}"
 }

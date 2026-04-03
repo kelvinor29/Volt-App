@@ -33,6 +33,7 @@ import com.voltfitness.app.ui.screens.routine.RoutineEditorScreen
 import com.voltfitness.app.ui.screens.workout.WorkoutDetailScreen
 import com.voltfitness.app.ui.session.SessionState
 import com.voltfitness.app.ui.session.SessionViewModel
+import timber.log.Timber
 
 /**
  * Navigation Graph for the VoltFitness application.
@@ -154,7 +155,7 @@ fun VoltNavGraph(
                     defaultValue = -1L
                 }
             )
-        ) { backStackEntry ->
+        ) {
             RoutineEditorScreen(
                 navController = navController,
                 onTopAppBarStateChange = { topAppBarState.value = it },
@@ -244,6 +245,7 @@ fun VoltNavGraph(
                         ?.set("exercise_selection_result", selectedIds)
                     navController.popBackStack()
                 },
+                onNavigateBack = { navController.popBackStack() },
             )
         }
 

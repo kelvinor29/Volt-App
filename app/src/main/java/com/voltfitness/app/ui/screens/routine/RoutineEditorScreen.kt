@@ -1,7 +1,6 @@
 package com.voltfitness.app.ui.screens.routine
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,13 +72,6 @@ fun RoutineEditorScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val listState = rememberLazyListState()
 
-    val isHeaderVisible by remember {
-        derivedStateOf {
-            if (listState.firstVisibleItemIndex > 0) false
-            else listState.firstVisibleItemScrollOffset < 150
-        }
-    }
-
     // ── Exercise selection result ─────────────────────────────────────────────
     val navBackStackEntry = navController.currentBackStackEntry
 
@@ -113,34 +104,14 @@ fun RoutineEditorScreen(
     }
 
     // ── TopAppBar ─────────────────────────────────────────────────────────────
-    LaunchedEffect(
-        uiState.isNewRoutine,
-        uiState.routineName,
-        uiState.description,
-        uiState.goal,
-        isHeaderVisible
-    ) {
+    LaunchedEffect(uiState.isNewRoutine) {
         onTopAppBarStateChange(
             TopAppBarState(
                 title = if (uiState.isNewRoutine) "New Routine" else "Edit Routine",
                 showBackButton = true,
                 onBackClick = { navController.popBackStack() },
-                collapsibleContent = {
-                    RoutineHeaderFields(
-                        name = uiState.routineName,
-                        description = uiState.description,
-                        goal = uiState.goal,
-                        onNameChange = { viewModel.onEvent(RoutineEditorEvent.OnNameChanged(it)) },
-                        onDescriptionChange = {
-                            viewModel.onEvent(RoutineEditorEvent.OnDescriptionChanged(it))
-                        },
-                        onGoalChange = { viewModel.onEvent(RoutineEditorEvent.OnGoalChanged(it)) },
-                        onToggleMain = { viewModel.onEvent(RoutineEditorEvent.OnToggleMainRoutine) },
-                        isMainRoutine = uiState.isMainRoutine,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-                },
-                isCollapsibleVisible = { isHeaderVisible }
+                collapsibleContent = null,
+                isCollapsibleVisible = { false }
             )
         )
     }
@@ -185,7 +156,9 @@ fun RoutineEditorScreen(
                     ?.set("day_index_for_selection", dayIndex)
                 navController.navigate(Screen.ExercisePicker.createRoute(routineId, dayOrder))
             },
-            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = innerPadding.calculateBottomPadding())
         )
     }
 }
@@ -209,50 +182,62 @@ private fun RoutineEditorContent(
     onNavigateToExercisePicker: (routineId: Long, dayIndex: Int, dayOrder: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(VoltSpacing.medium),
-            verticalArrangement = Arrangement.spacedBy(VoltSpacing.small)
-        ) {
-            item(key = "section_header") {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Routines",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    IconButton(onClick = { onEvent(RoutineEditorEvent.OnAddDay) }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add training day")
-                    }
+    LazyColumn(
+        state = listState,
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(VoltSpacing.medium),
+        verticalArrangement = Arrangement.spacedBy(VoltSpacing.small)
+    ) {
+        item(key = "routine_header_fields") {
+            RoutineHeaderFields(
+                name = uiState.routineName,
+                description = uiState.description,
+                goal = uiState.goal,
+                onNameChange = { onEvent(RoutineEditorEvent.OnNameChanged(it)) },
+                onDescriptionChange = { onEvent(RoutineEditorEvent.OnDescriptionChanged(it)) },
+                onGoalChange = { onEvent(RoutineEditorEvent.OnGoalChanged(it)) },
+                onToggleMain = { onEvent(RoutineEditorEvent.OnToggleMainRoutine) },
+                isMainRoutine = uiState.isMainRoutine,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+        }
+
+        item(key = "section_header_days") {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Training Days",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(onClick = { onEvent(RoutineEditorEvent.OnAddDay) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add training day")
                 }
             }
+        }
 
-            itemsIndexed(
-                items = uiState.days,
-                key = { index, day -> "day_${day.order}_$index" }
-            ) { index, day ->
-                ExpandableDayItem(
-                    day = day,
-                    isExpanded = uiState.expandedDayIndex == index,
-                    onExpandClick = {
-                        onEvent(RoutineEditorEvent.OnToggleDayExpanded(index))
-                    },
-                    onAddExerciseClick = {
-                        onNavigateToExercisePicker(uiState.routineId, index, day.order)
-                    },
-                    onExerciseOptionsClick = {
-                        // TODO: show exercise options (edit sets/reps, reorder, delete)
-                    }
-                )
-            }
+        itemsIndexed(
+            items = uiState.days,
+            key = { index, day -> "day_${day.order}_$index" }
+        ) { index, day ->
+            ExpandableDayItem(
+                day = day,
+                isExpanded = uiState.expandedDayIndex == index,
+                onExpandClick = {
+                    onEvent(RoutineEditorEvent.OnToggleDayExpanded(index))
+                },
+                onAddExerciseClick = {
+                    onNavigateToExercisePicker(uiState.routineId, index, day.order)
+                },
+                onExerciseOptionsClick = { /* TODO */ }
+            )
         }
     }
 }

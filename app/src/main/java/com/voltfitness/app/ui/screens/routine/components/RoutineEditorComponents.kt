@@ -3,8 +3,6 @@ package com.voltfitness.app.ui.screens.routine.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,49 +12,46 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.NoteAdd
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.TrackChanges
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.voltfitness.app.core.common.ProfileOptions
 import com.voltfitness.app.core.designsystem.component.VoltCheckButton
 import com.voltfitness.app.core.designsystem.component.VoltDropdownSelector
 import com.voltfitness.app.core.designsystem.component.VoltTextField
+import com.voltfitness.app.domain.model.Exercise
+import com.voltfitness.app.ui.components.cards.ExerciseCard
+import com.voltfitness.app.ui.components.cards.ExerciseCardTrailing
 import com.voltfitness.app.ui.components.cards.VoltDashedPlaceholder
-import com.voltfitness.app.ui.screens.exercise.components.ExerciseGifImage
 import com.voltfitness.app.ui.screens.routine.RoutineDayUi
-import com.voltfitness.app.ui.screens.routine.RoutineExerciseUi
 
 // =============================================================================
 // HEADER SECTION
 // =============================================================================
 
 /**
- * Editable text fields for the routine's name, description, and goal.
- * Displayed at the top of the editor inside a [Surface] header.
+ * Editable fields for the routine's name, description, goal, and main flag.
  *
  * @param name Current routine name.
  * @param description Current routine description.
  * @param goal Current training goal.
- * @param onNameChange Callback when the user modifies the name.
- * @param onDescriptionChange Callback when the user modifies the description.
- * @param onGoalChange Callback when the user modifies the goal.
- * @param modifier Modifier for the container Column.
+ * @param isMainRoutine Whether this is the user's active main routine.
+ * @param onNameChange Callback when the user edits the name.
+ * @param onDescriptionChange Callback when the user edits the description.
+ * @param onGoalChange Callback when the user changes the goal.
+ * @param onToggleMain Callback when the user toggles the "Set Main Routine" check.
+ * @param modifier Modifier for the container [Column].
  */
 @Composable
 fun RoutineHeaderFields(
@@ -68,31 +63,20 @@ fun RoutineHeaderFields(
     onDescriptionChange: (String) -> Unit,
     onGoalChange: (String) -> Unit,
     onToggleMain: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        VoltTextField(
-            value = name,
-            onValueChange = onNameChange,
-            label = "Routine name",
-        )
-
-        VoltTextField(
-            value = description,
-            onValueChange = onDescriptionChange,
-            label = "Description",
-        )
-
+        VoltTextField(value = name, onValueChange = onNameChange, label = "Routine name")
+        VoltTextField(value = description, onValueChange = onDescriptionChange, label = "Description")
         VoltDropdownSelector(
             label = "Training Goal",
             options = ProfileOptions.goals,
             selectedOption = goal,
-            onOptionSelected = onGoalChange
+            onOptionSelected = onGoalChange,
         )
-
         VoltCheckButton(
             label = "Set Main Routine",
             checked = isMainRoutine,
@@ -101,22 +85,28 @@ fun RoutineHeaderFields(
     }
 }
 
-
 // =============================================================================
 // EXPANDABLE DAY ITEM
 // =============================================================================
 
 /**
  * An expandable/collapsible section representing a single training day.
- * Shows the day name with an expand arrow; when expanded, displays
- * the list of exercises (if any) and an "Add exercise" placeholder.
  *
- * @param day The [RoutineDayUi] data for this day.
- * @param isExpanded Whether the day section is currently expanded.
- * @param onExpandClick Callback toggling the expanded state.
- * @param onAddExerciseClick Callback when the user wants to add an exercise.
- * @param onExerciseOptionsClick Callback for the exercise options menu.
- * @param modifier Modifier for the root Column.
+ * When expanded, it renders the day's exercise list using [ExerciseCard]
+ * (with [ExerciseCardTrailing.OptionsMenu]) and an "Add exercise" dashed
+ * placeholder at the bottom.
+ *
+ * Each [ExerciseCard] receives:
+ * - [RoutineExerciseUi.exerciseDbId] as the `exerciseId` for the GIF image,
+ *   keeping the same data source as the Exercise Picker.
+ * - [buildEditorSubtitle] for the subtitle, centralising the formatting logic.
+ *
+ * @param day The [RoutineDayUi] data for this section.
+ * @param isExpanded Whether the content is visible.
+ * @param onExpandClick Toggles the expanded state.
+ * @param onAddExerciseClick Opens the Exercise Picker for this day.
+ * @param onExerciseOptionsClick Invoked with the exercise when MoreVert is tapped.
+ * @param modifier Modifier for the root [Column].
  */
 @Composable
 fun ExpandableDayItem(
@@ -124,60 +114,60 @@ fun ExpandableDayItem(
     isExpanded: Boolean,
     onExpandClick: () -> Unit,
     onAddExerciseClick: () -> Unit,
-    onExerciseOptionsClick: (RoutineExerciseUi) -> Unit,
-    modifier: Modifier = Modifier
+    onExerciseOptionsClick: (Exercise) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        // Day header row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onExpandClick)
                 .padding(vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = Icons.Default.DateRange,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
             Spacer(Modifier.width(16.dp))
             Text(
                 text = day.name,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             Icon(
                 imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp
                 else Icons.Default.KeyboardArrowDown,
-                contentDescription = if (isExpanded) "Collapse ${day.name}"
-                else "Expand ${day.name}",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
         HorizontalDivider(
             thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outlineVariant
+            color = MaterialTheme.colorScheme.outlineVariant,
         )
 
-        // Expandable content
         AnimatedVisibility(
             visible = isExpanded,
             enter = expandVertically(),
-            exit = shrinkVertically()
+            exit = shrinkVertically(),
         ) {
             Column(
                 modifier = Modifier.padding(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                // Exercise list
                 day.exercises.forEach { exercise ->
                     ExerciseCard(
-                        exercise = exercise,
-                        onOptionsClick = { onExerciseOptionsClick(exercise) }
+                        exerciseId = exercise.id,
+                        exerciseName = exercise.name,
+                        subtitle = buildEditorSubtitle(exercise),
+                        trailing = ExerciseCardTrailing.OptionsMenu(
+                            onClick = { onExerciseOptionsClick(exercise) }
+                        )
                     )
                 }
 
@@ -187,83 +177,21 @@ fun ExpandableDayItem(
                     onClick = onAddExerciseClick,
                     modifier = modifier,
                     containerHeight = 80.dp,
-                    iconSize = 28.dp
+                    iconSize = 28.dp,
                 )
             }
         }
     }
 }
 
-// =============================================================================
-// EXERCISE CARD
-// =============================================================================
-
 /**
- * Displays a single exercise within a routine day.
- * Shows an image placeholder, exercise name, set/rep/weight summary,
- * and an options menu trigger.
- *
- * @param exercise The [RoutineExerciseUi] data to display.
- * @param onOptionsClick Callback for the three-dot options menu.
- * @param modifier Modifier for the root Row.
+ * Builds the subtitle string for the Picker context.
+ * Each token is individually capitalized so "chest · pectorals · barbell"
+ * becomes "Chest · Pectorals · Barbell" regardless of how the API returns them.
  */
-@Composable
-fun ExerciseCard(
-    exercise: RoutineExerciseUi,
-    onOptionsClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .border(
-                width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        ExerciseGifImage(
-            exerciseId = exercise.id.toString(),
-            contentDescription = exercise.name,
-            size = 60.dp,
-            resolution = 180
-        )
-
-        Spacer(Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = exercise.name,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "${exercise.sets} sets, ${exercise.repsRange} reps, ${exercise.weightRange}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
-            )
-        }
-
-        IconButton(
-            onClick = onOptionsClick,
-            modifier = Modifier.size(24.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "Exercise options",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
+private fun buildEditorSubtitle(exercise: Exercise): String {
+    val bodyPart = exercise.bodyPart.replaceFirstChar { it.uppercase() }
+    val target = exercise.target.replaceFirstChar { it.uppercase() }
+    val equipment = exercise.equipment.replaceFirstChar { it.uppercase() }
+    return "$bodyPart · $target · $equipment"
 }
-
-

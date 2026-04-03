@@ -62,12 +62,8 @@ sealed interface ExercisePickerEvent {
  */
 @HiltViewModel
 class ExercisePickerViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     private val exerciseRepository: ExerciseRepository
 ) : ViewModel() {
-
-    private val routineId: Long = savedStateHandle["routineId"] ?: 0L
-    private val dayOrder: Int = savedStateHandle["dayOrder"] ?: 1
 
     private val _uiState = MutableStateFlow(ExercisePickerUiState())
     val uiState: StateFlow<ExercisePickerUiState> = _uiState.asStateFlow()
@@ -84,37 +80,37 @@ class ExercisePickerViewModel @Inject constructor(
                 _uiState.update { it.copy(query = event.query) }
                 debouncedSearch(event.query)
             }
+
             is ExercisePickerEvent.OnFilterTabChanged -> {
                 _uiState.update { it.copy(filterTab = event.tab) }
             }
+
             is ExercisePickerEvent.OnToggleSelection -> {
                 _uiState.update { state ->
                     val newSelection = state.selectedExerciseIds.toMutableSet()
-                    if (newSelection.contains(event.exerciseId)) {
+                    if (newSelection.contains(event.exerciseId))
                         newSelection.remove(event.exerciseId)
-                    } else {
-                        newSelection.add(event.exerciseId)
-                    }
+                    else newSelection.add(event.exerciseId)
                     state.copy(selectedExerciseIds = newSelection)
                 }
             }
+
             is ExercisePickerEvent.OnBodyPartSelected -> {
                 _uiState.update { it.copy(selectedBodyPart = event.bodyPart) }
                 applyFilters()
             }
+
             is ExercisePickerEvent.OnTargetSelected -> {
                 _uiState.update { it.copy(selectedTarget = event.target) }
                 applyFilters()
             }
+
             is ExercisePickerEvent.OnEquipmentSelected -> {
                 _uiState.update { it.copy(selectedEquipment = event.equipment) }
                 applyFilters()
             }
         }
     }
-
-    /** Returns the list of selected exercise IDs for the caller screen. */
-    fun getSelectedIds(): List<String> = _uiState.value.selectedExerciseIds.toList()
 
     private fun loadData() {
         viewModelScope.launch {

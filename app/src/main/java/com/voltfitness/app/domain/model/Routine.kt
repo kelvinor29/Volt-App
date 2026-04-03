@@ -8,6 +8,6 @@ data class Routine(
     val goal: String?,
     val isActive: Boolean,
     val daysPerWeek: Int?,
-    val createdAt: Long,
+    val createdAt: Long?,
     val updatedAt: Long?
 )

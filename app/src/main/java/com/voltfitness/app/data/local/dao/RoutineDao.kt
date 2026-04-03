@@ -65,6 +65,16 @@ interface RoutineDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertRoutine(routine: RoutineEntity): Long
 
+    @Query("UPDATE routines SET isActive = 0 WHERE folderId = :folderId")
+    suspend fun resetMainRoutinesForFolderId(folderId: Long)
+
+    @Transaction
+    suspend fun upsertRoutineWithMaintenance(routine: RoutineEntity): Long {
+        if (routine.isActive)
+            resetMainRoutinesForFolderId(routine.folderId)
+        return upsertRoutine(routine)
+    }
+
     @Query("SELECT * FROM routines WHERE routineId = :id")
     suspend fun getRoutineById(id: Long): RoutineEntity?
 

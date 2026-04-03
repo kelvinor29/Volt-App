@@ -39,6 +39,9 @@ class ExerciseRepositoryImpl @Inject constructor(
     override suspend fun getExerciseById(id: String): Exercise? =
         exerciseDao.getExerciseById(id)?.toDomain()
 
+    override suspend fun getExercisesByIds(ids: List<String>): List<Exercise> =
+        exerciseDao.getExercisesByIds(ids)?.map { it.toDomain() } ?: emptyList()
+
     override suspend fun refreshExercisesFromRemote() {
         try {
             val remote = remoteDataSource.getExercises()

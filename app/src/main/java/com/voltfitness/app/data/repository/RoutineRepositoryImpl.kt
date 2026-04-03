@@ -32,8 +32,9 @@ class RoutineRepositoryImpl @Inject constructor(
     override suspend fun getRoutineById(routineId: Long): Routine? =
         routineDao.getRoutineById(routineId)?.toDomain()
 
-    override suspend fun upsertRoutine(routine: Routine): Long =
-        routineDao.upsertRoutine(routine.toEntity())
+    override suspend fun upsertRoutine(routine: Routine): Long {
+        return routineDao.upsertRoutineWithMaintenance(routine.toEntity())
+    }
 
     override suspend fun deleteRoutine(routineId: Long) =
         routineDao.deleteRoutineById(routineId)

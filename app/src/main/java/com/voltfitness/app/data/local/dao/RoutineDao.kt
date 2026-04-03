@@ -1,60 +1,14 @@
-//package com.voltfitness.app.data.local.dao
-//
-//import androidx.room.Dao
-//import androidx.room.Delete
-//import androidx.room.Insert
-//import androidx.room.OnConflictStrategy
-//import androidx.room.Query
-//import androidx.room.Transaction
-//import com.voltfitness.app.data.local.entities.RoutineDayEntity
-//import com.voltfitness.app.data.local.entities.RoutineEntity
-//import com.voltfitness.app.data.local.relations.RoutineDayFull
-//import com.voltfitness.app.data.local.relations.RoutineWithDays
-//import kotlinx.coroutines.flow.Flow
-//
-//@Dao
-//interface RoutineDao {
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun upsertRoutine(routine: RoutineEntity): Long
-//
-//    @Query("SELECT * FROM routines WHERE routineId = :id")
-//    suspend fun getRoutineById(id: Long): RoutineEntity?
-//
-//    @Transaction
-//    @Query("SELECT * FROM routines WHERE routineId = :id")
-//    fun getRoutineWithDaysFlow(id: Long): Flow<RoutineWithDays?>
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun upsertRoutineDay(day: RoutineDayEntity): Long
-//
-//    @Query("SELECT * FROM routine_days WHERE dayId = :id")
-//    suspend fun getRoutineDayById(id: Long): RoutineDayEntity?
-//
-//    @Transaction
-//    @Query("SELECT * FROM routine_days WHERE dayId = :id")
-//    fun getRoutineDayFullFlow(id: Long): Flow<RoutineDayFull?>
-//
-//    @Delete
-//    suspend fun deleteRoutine(routine: RoutineEntity)
-//
-//    @Delete
-//    suspend fun deleteRoutineDay(day: RoutineDayEntity)
-//}
-//
-
 package com.voltfitness.app.data.local.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.voltfitness.app.data.local.entities.RoutineDayEntity
 import com.voltfitness.app.data.local.entities.RoutineEntity
-import com.voltfitness.app.data.local.relations.RoutineDayFull
-import com.voltfitness.app.data.local.relations.RoutineWithDays
+import com.voltfitness.app.data.local.entities.RoutineExerciseEntity
+import com.voltfitness.app.data.local.relations.RoutineWithFullDays
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -78,12 +32,12 @@ interface RoutineDao {
     @Query("SELECT * FROM routines WHERE routineId = :id")
     suspend fun getRoutineById(id: Long): RoutineEntity?
 
+    /**
+     * Full aggregate query for detail/editor flows.
+     */
     @Transaction
-    @Query("SELECT * FROM routines WHERE routineId = :id")
-    fun getRoutineWithDaysFlow(id: Long): Flow<RoutineWithDays?>
-
-    @Delete
-    suspend fun deleteRoutine(routine: RoutineEntity)
+    @Query("SELECT * FROM routines WHERE routineId = :routineId")
+    fun getRoutineWithFullDaysFlow(routineId: Long): Flow<RoutineWithFullDays?>
 
     @Query("DELETE FROM routines WHERE routineId = :routineId")
     suspend fun deleteRoutineById(routineId: Long)
@@ -96,16 +50,29 @@ interface RoutineDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertRoutineDays(days: List<RoutineDayEntity>): List<Long>
 
-    @Query("SELECT * FROM routine_days WHERE dayId = :id")
-    suspend fun getRoutineDayById(id: Long): RoutineDayEntity?
-
-    @Transaction
-    @Query("SELECT * FROM routine_days WHERE dayId = :id")
-    fun getRoutineDayFullFlow(id: Long): Flow<RoutineDayFull?>
-
-    @Delete
-    suspend fun deleteRoutineDay(day: RoutineDayEntity)
-
     @Query("DELETE FROM routine_days WHERE routineId = :routineId")
     suspend fun deleteRoutineDaysByRoutineId(routineId: Long)
+
+    @Query(
+        """
+        DELETE FROM routine_days
+        WHERE routineId = :routineId
+        AND dayId NOT IN (:keepDayIds)
+        """
+    )
+    suspend fun deleteOrphanDays(routineId: Long, keepDayIds: List<Long>)
+
+    // ==================== ROUTINE EXERCISES ====================
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertRoutineExercises(exercises: List<RoutineExerciseEntity>)
+
+    @Query(
+        """
+        SELECT * FROM routine_exercises
+        WHERE dayId = :dayId
+        ORDER BY orderInDay ASC
+        """
+    )
+    suspend fun getExercisesByDayId(dayId: Long): List<RoutineExerciseEntity>
 }

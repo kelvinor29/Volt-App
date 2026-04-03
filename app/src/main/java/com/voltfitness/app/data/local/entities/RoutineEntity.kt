@@ -1,5 +1,6 @@
 package com.voltfitness.app.data.local.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -24,10 +25,8 @@ data class RoutineEntity(
     val name: String,
     val description: String?,
     val goal: String?,              // Hipertrofy, etc..
-    val isActive: Boolean,
-    val daysPerWeek: Int?,
-
-    @androidx.room.ColumnInfo(defaultValue = "(strftime('%s','now') * 1000)")
-    val createdAt: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "is_active") val isActive: Boolean = false,
+    @ColumnInfo(name = "days_per_week") val daysPerWeek: Int?,
+    val createdAt: Long?,
     val updatedAt: Long?
 )

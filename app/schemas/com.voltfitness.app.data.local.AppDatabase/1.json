@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "bad903fcb36a65a2e5fabfb2e4dfac93",
+    "identityHash": "7dee191bc7ea37cc057ca5b1b46769ff",
     "entities": [
       {
         "tableName": "body_composition_entries",
@@ -427,7 +427,7 @@
       },
       {
         "tableName": "routines",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`routineId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `folderId` INTEGER NOT NULL, `name` TEXT NOT NULL, `description` TEXT, `goal` TEXT, `isActive` INTEGER NOT NULL, `daysPerWeek` INTEGER, `createdAt` INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000), `updatedAt` INTEGER, FOREIGN KEY(`folderId`) REFERENCES `folders`(`folderId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`routineId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `folderId` INTEGER NOT NULL, `name` TEXT NOT NULL, `description` TEXT, `goal` TEXT, `is_active` INTEGER NOT NULL, `days_per_week` INTEGER, `createdAt` INTEGER, `updatedAt` INTEGER, FOREIGN KEY(`folderId`) REFERENCES `folders`(`folderId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "routineId",
@@ -461,13 +461,13 @@
           },
           {
             "fieldPath": "isActive",
-            "columnName": "isActive",
+            "columnName": "is_active",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
             "fieldPath": "daysPerWeek",
-            "columnName": "daysPerWeek",
+            "columnName": "days_per_week",
             "affinity": "INTEGER",
             "notNull": false
           },
@@ -475,8 +475,7 @@
             "fieldPath": "createdAt",
             "columnName": "createdAt",
             "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "(strftime('%s','now') * 1000)"
+            "notNull": false
           },
           {
             "fieldPath": "updatedAt",
@@ -518,7 +517,7 @@
       },
       {
         "tableName": "routine_exercises",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`routineExerciseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `routineId` INTEGER NOT NULL, `dayId` INTEGER NOT NULL, `exerciseId` TEXT NOT NULL, `orderInDay` INTEGER NOT NULL, `notes` TEXT, FOREIGN KEY(`routineId`) REFERENCES `routines`(`routineId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`routineExerciseId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `routineId` INTEGER NOT NULL, `dayId` INTEGER NOT NULL, `exerciseId` TEXT NOT NULL, `exercise_name` TEXT NOT NULL, `orderInDay` INTEGER NOT NULL, `sets` INTEGER NOT NULL, `repsRange` TEXT NOT NULL, `weightRange` TEXT NOT NULL, `notes` TEXT, FOREIGN KEY(`dayId`) REFERENCES `routine_days`(`dayId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "routineExerciseId",
@@ -545,9 +544,33 @@
             "notNull": true
           },
           {
+            "fieldPath": "exerciseName",
+            "columnName": "exercise_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "orderInDay",
             "columnName": "orderInDay",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sets",
+            "columnName": "sets",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "repsRange",
+            "columnName": "repsRange",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weightRange",
+            "columnName": "weightRange",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -572,18 +595,27 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_routine_exercises_routineId` ON `${TABLE_NAME}` (`routineId`)"
+          },
+          {
+            "name": "index_routine_exercises_dayId",
+            "unique": false,
+            "columnNames": [
+              "dayId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_routine_exercises_dayId` ON `${TABLE_NAME}` (`dayId`)"
           }
         ],
         "foreignKeys": [
           {
-            "table": "routines",
+            "table": "routine_days",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
-              "routineId"
+              "dayId"
             ],
             "referencedColumns": [
-              "routineId"
+              "dayId"
             ]
           }
         ]
@@ -1033,7 +1065,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bad903fcb36a65a2e5fabfb2e4dfac93')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7dee191bc7ea37cc057ca5b1b46769ff')"
     ]
   }
 }

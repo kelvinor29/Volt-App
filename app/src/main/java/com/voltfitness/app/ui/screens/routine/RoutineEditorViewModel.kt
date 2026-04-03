@@ -3,8 +3,10 @@ package com.voltfitness.app.ui.screens.routine
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.voltfitness.app.domain.model.Exercise
 import com.voltfitness.app.domain.model.Routine
 import com.voltfitness.app.domain.model.RoutineDay
+import com.voltfitness.app.domain.repository.ExerciseRepository
 import com.voltfitness.app.domain.usecase.routine.DeleteRoutineUseCase
 import com.voltfitness.app.domain.usecase.routine.GetRoutineDetailUseCase
 import com.voltfitness.app.domain.usecase.routine.SaveRoutineUseCase
@@ -22,20 +24,11 @@ import javax.inject.Inject
 // UI STATE
 // =============================================================================
 
-data class RoutineExerciseUi(
-    val id: Long = 0L,
-    val name: String = "",
-    val imageUrl: String? = null,
-    val sets: Int = 3,
-    val repsRange: String = "8-10",
-    val weightRange: String = "10-15 kg"
-)
-
 data class RoutineDayUi(
     val id: Long = 0L,
     val order: Int = 1,
     val name: String = "Day 1",
-    val exercises: List<RoutineExerciseUi> = emptyList()
+    val exercises: List<Exercise> = emptyList()
 )
 
 /**
@@ -53,9 +46,9 @@ data class RoutineEditorUiState(
     val isNewRoutine: Boolean = true,
     val isSaving: Boolean = false,
     val isDeleting: Boolean = false,
-){
+    val error: String,
+) {
     val isFormValid: Boolean get() = routineName.isNotBlank() && description.isNotBlank() && goal.isNotBlank()
-
 }
 
 // =============================================================================
@@ -95,19 +88,25 @@ sealed interface RoutineEditorEffect {
 /**
  * ViewModel managing the Routine Editor's state and CRUD operations.
  *
- * Navigation arguments are extracted from [SavedStateHandle]:
- * - "folderId" (Long): The folder where a new routine will be created.
- * - "routineId" (String): "new" for creation mode, or a numeric ID for edit mode.
+ * Navigation arguments extracted from [SavedStateHandle]:
+ * - "folderId" (Long): Folder where a new routine will be created.
+ * - "routineId" (Long): -1L for creation mode, or a numeric ID for edit mode.
  *
  * In edit mode, the existing routine data is loaded from the database
  * and populates the form fields reactively.
+ *
+ * When the user confirms an exercise selection from the Exercise Picker,
+ * [handleExercisesSelected] resolves the full [Exercise] objects from the
+ * repository so that [RoutineExerciseUi] always holds real data (name, ID)
+ * instead of placeholders.
  */
 @HiltViewModel
 class RoutineEditorViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getRoutineDetailUseCase: GetRoutineDetailUseCase,
     private val saveRoutineUseCase: SaveRoutineUseCase,
-    private val deleteRoutineUseCase: DeleteRoutineUseCase
+    private val deleteRoutineUseCase: DeleteRoutineUseCase,
+    private val exerciseRepository: ExerciseRepository
 ) : ViewModel() {
 
     private val routineId: Long = savedStateHandle["routineId"] ?: -1L
@@ -116,9 +115,10 @@ class RoutineEditorViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(
         RoutineEditorUiState(
-            isNewRoutine = isNew,
-            folderId = folderId,
             routineId = if (isNew) -1L else routineId,
+            folderId = folderId,
+            isNewRoutine = isNew,
+            error = ""
         )
     )
     val uiState: StateFlow<RoutineEditorUiState> = _uiState.asStateFlow()
@@ -128,7 +128,6 @@ class RoutineEditorViewModel @Inject constructor(
 
     init {
         if (isNew) {
-            // Start with one default day
             _uiState.update {
                 it.copy(days = listOf(RoutineDayUi(order = 1, name = "Day 1")))
             }
@@ -205,13 +204,11 @@ class RoutineEditorViewModel @Inject constructor(
 
             is RoutineEditorEvent.OnRemoveDay -> {
                 _uiState.update { state ->
-                    if (state.days.size <= 1) return@update state // Keep at least 1 day
+                    if (state.days.size <= 1) return@update state
                     val updatedDays = state.days
                         .toMutableList()
                         .apply { removeAt(event.index) }
-                        .mapIndexed { idx, day ->
-                            day.copy(order = idx + 1) // Reindex orders
-                        }
+                        .mapIndexed { idx, day -> day.copy(order = idx + 1) }
                     state.copy(
                         days = updatedDays,
                         expandedDayIndex = if (state.expandedDayIndex >= updatedDays.size)
@@ -234,28 +231,32 @@ class RoutineEditorViewModel @Inject constructor(
             is RoutineEditorEvent.OnDelete -> deleteRoutine()
 
             is RoutineEditorEvent.OnExercisesSelectedForDay -> {
-                _uiState.update { state ->
-                    val currentIndex = state.expandedDayIndex
-                    if (currentIndex !in state.days.indices) return@update state
-
-                    val currentDay = state.days[currentIndex]
-                    val newExercises = event.exerciseIds.mapIndexed { idx, id ->
-                        RoutineExerciseUi(
-                            id = idx.toLong(),
-                            name = "Exercise $id"
-                        )
-                    }
-
-                    state.copy(
-                        days = state.days.toMutableList().apply {
-                            this[currentIndex] = currentDay.copy(
-                                exercises = currentDay.exercises + newExercises
-                            )
-                        }
-                    )
+                viewModelScope.launch {
+                    addExercisesToCurrentDay(event.exerciseIds)
                 }
             }
+        }
+    }
 
+    private suspend fun addExercisesToCurrentDay(ids: List<String>) {
+        val expandedIndex = _uiState.value.expandedDayIndex
+        if (expandedIndex == -1) return
+
+        try {
+            val selectedExercises = exerciseRepository.getExercisesByIds(ids)
+
+            _uiState.update { currentState ->
+                val updatedDays = currentState.days.toMutableList()
+                val targetDay = updatedDays[expandedIndex]
+
+                updatedDays[expandedIndex] = targetDay.copy(
+                    exercises = targetDay.exercises + selectedExercises
+                )
+
+                currentState.copy(days = updatedDays)
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = "Failed to load exercises: ${e.message}") }
         }
     }
 
@@ -280,21 +281,21 @@ class RoutineEditorViewModel @Inject constructor(
                     isActive = state.isMainRoutine,
                     daysPerWeek = state.days.size,
                     createdAt = if (state.isNewRoutine) System.currentTimeMillis()
-                    else state.routineId, // Preserve original on edit
+                    else state.routineId,
                     updatedAt = System.currentTimeMillis()
                 )
 
                 val days = state.days.map { dayUi ->
                     RoutineDay(
                         id = dayUi.id,
-                        routineId = 0L, // Will be set by SaveRoutineUseCase
+                        routineId = 0L,
                         dayOrder = dayUi.order,
                         name = dayUi.name.trim()
                     )
                 }
+
                 saveRoutineUseCase(routine, days)
                 _effect.send(RoutineEditorEffect.NavigateBack)
-
             } catch (e: Exception) {
                 _effect.send(RoutineEditorEffect.ShowError("Failed to save: ${e.message}"))
             } finally {

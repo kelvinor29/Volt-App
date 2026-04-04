@@ -1,4 +1,4 @@
-package com.voltfitness.app.ui.screens.body_composition
+package com.voltfitness.app.ui.screens.bodycomposition
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,4 +1,4 @@
-package com.voltfitness.app.di
+package com.voltfitness.app.core.di
 
 import com.voltfitness.app.BuildConfig
 import com.voltfitness.app.data.remote.api.ExerciseApi

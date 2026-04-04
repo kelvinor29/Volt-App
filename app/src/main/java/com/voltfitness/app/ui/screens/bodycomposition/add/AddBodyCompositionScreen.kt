@@ -1,8 +1,6 @@
-package com.voltfitness.app.ui.screens.body_composition.add
+package com.voltfitness.app.ui.screens.bodycomposition.add
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,7 +17,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,13 +28,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.voltfitness.app.core.designsystem.component.VoltButton
 import com.voltfitness.app.core.designsystem.component.VoltDateSelector
 import com.voltfitness.app.core.designsystem.component.VoltErrorBanner
-import com.voltfitness.app.core.designsystem.component.VoltOutlinedButton
 import com.voltfitness.app.ui.components.navigation.VoltStepBottomBar
-import com.voltfitness.app.ui.screens.body_composition.add.components.BodyCompositionTab
-import com.voltfitness.app.ui.screens.body_composition.add.components.BodyMeasurementsTab
+import com.voltfitness.app.ui.screens.bodycomposition.add.components.BodyCompositionTab
+import com.voltfitness.app.ui.screens.bodycomposition.add.components.BodyMeasurementsTab
 import com.voltfitness.app.ui.theme.VoltTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate

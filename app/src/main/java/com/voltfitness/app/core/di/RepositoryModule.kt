@@ -1,4 +1,4 @@
-package com.voltfitness.app.di
+package com.voltfitness.app.core.di
 
 import com.voltfitness.app.data.repository.BodyCompositionRepositoryImpl
 import com.voltfitness.app.data.repository.ExerciseRepositoryImpl

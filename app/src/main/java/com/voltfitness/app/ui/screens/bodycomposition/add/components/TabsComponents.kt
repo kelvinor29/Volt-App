@@ -1,4 +1,4 @@
-package com.voltfitness.app.ui.screens.body_composition.add.components
+package com.voltfitness.app.ui.screens.bodycomposition.add.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,8 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.voltfitness.app.core.designsystem.component.VoltMeasurementField
-import com.voltfitness.app.ui.screens.body_composition.add.AddBodyCompositionEvent
-import com.voltfitness.app.ui.screens.body_composition.add.AddBodyCompositionUiState
+import com.voltfitness.app.ui.screens.bodycomposition.add.AddBodyCompositionEvent
+import com.voltfitness.app.ui.screens.bodycomposition.add.AddBodyCompositionUiState
 
 /**
  * Tab content for scale-based body composition metrics.

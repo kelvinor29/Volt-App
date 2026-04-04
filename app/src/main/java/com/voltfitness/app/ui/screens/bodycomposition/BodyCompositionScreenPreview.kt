@@ -1,9 +1,8 @@
-package com.voltfitness.app.ui.screens.body_composition
+package com.voltfitness.app.ui.screens.bodycomposition
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.rememberNavController
 import com.voltfitness.app.ui.theme.VoltTheme
 import java.time.LocalDate
 

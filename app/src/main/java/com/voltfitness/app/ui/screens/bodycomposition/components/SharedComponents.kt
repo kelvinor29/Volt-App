@@ -1,4 +1,4 @@
-package com.voltfitness.app.ui.screens.body_composition.components
+package com.voltfitness.app.ui.screens.bodycomposition.components
 
 
 import androidx.compose.foundation.layout.*

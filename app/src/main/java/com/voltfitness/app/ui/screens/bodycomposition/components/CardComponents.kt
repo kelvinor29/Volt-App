@@ -1,4 +1,4 @@
-package com.voltfitness.app.ui.screens.body_composition.components
+package com.voltfitness.app.ui.screens.bodycomposition.components
 
 
 import androidx.annotation.DrawableRes
@@ -13,12 +13,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.ContentScale.Companion.Crop
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.voltfitness.app.R
 
 /**
  * Reusable metric card for displaying body composition values.

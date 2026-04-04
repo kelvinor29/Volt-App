@@ -1,8 +1,8 @@
-package com.voltfitness.app.ui.screens.body_composition.components
+package com.voltfitness.app.ui.screens.bodycomposition.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.voltfitness.app.ui.screens.body_composition.BodyCompositionPreviewData
+import com.voltfitness.app.ui.screens.bodycomposition.BodyCompositionPreviewData
 import com.voltfitness.app.ui.theme.VoltTheme
 
 @Preview(showBackground = true, name = "Quick Summary Header")

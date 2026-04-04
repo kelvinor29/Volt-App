@@ -1,4 +1,4 @@
-package com.voltfitness.app.di
+package com.voltfitness.app.core.di
 
 import android.content.Context
 import android.os.Build

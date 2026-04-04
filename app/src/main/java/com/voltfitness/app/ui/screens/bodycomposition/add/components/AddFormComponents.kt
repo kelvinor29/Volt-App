@@ -1,4 +1,4 @@
-package com.voltfitness.app.ui.screens.body_composition.add.components
+package com.voltfitness.app.ui.screens.bodycomposition.add.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn

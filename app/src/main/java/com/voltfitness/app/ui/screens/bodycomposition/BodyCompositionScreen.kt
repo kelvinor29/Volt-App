@@ -1,4 +1,4 @@
-package com.voltfitness.app.ui.screens.body_composition
+package com.voltfitness.app.ui.screens.bodycomposition
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,10 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.voltfitness.app.R
-import com.voltfitness.app.ui.screens.body_composition.components.CompositionTab
-import com.voltfitness.app.ui.screens.body_composition.components.HistoryTab
-import com.voltfitness.app.ui.screens.body_composition.components.MeasurementsTab
-import com.voltfitness.app.ui.screens.body_composition.components.QuickSummaryHeader
+import com.voltfitness.app.ui.screens.bodycomposition.components.CompositionTab
+import com.voltfitness.app.ui.screens.bodycomposition.components.HistoryTab
+import com.voltfitness.app.ui.screens.bodycomposition.components.MeasurementsTab
+import com.voltfitness.app.ui.screens.bodycomposition.components.QuickSummaryHeader
 import kotlinx.coroutines.launch
 
 /**

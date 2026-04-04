@@ -17,12 +17,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.voltfitness.app.ui.screens.body_composition.BodyCompositionNavEffect
-import com.voltfitness.app.ui.screens.body_composition.BodyCompositionScreen
-import com.voltfitness.app.ui.screens.body_composition.BodyCompositionViewModel
-import com.voltfitness.app.ui.screens.body_composition.add.AddBodyCompositionNavEffect
-import com.voltfitness.app.ui.screens.body_composition.add.AddBodyCompositionScreen
-import com.voltfitness.app.ui.screens.body_composition.add.AddBodyCompositionViewModel
+import com.voltfitness.app.ui.screens.bodycomposition.BodyCompositionNavEffect
+import com.voltfitness.app.ui.screens.bodycomposition.BodyCompositionScreen
+import com.voltfitness.app.ui.screens.bodycomposition.BodyCompositionViewModel
+import com.voltfitness.app.ui.screens.bodycomposition.add.AddBodyCompositionNavEffect
+import com.voltfitness.app.ui.screens.bodycomposition.add.AddBodyCompositionScreen
+import com.voltfitness.app.ui.screens.bodycomposition.add.AddBodyCompositionViewModel
 import com.voltfitness.app.ui.screens.exercise.ExercisePickerScreen
 import com.voltfitness.app.ui.screens.exercise.ExercisePickerViewModel
 import com.voltfitness.app.ui.screens.home.HomeScreen
@@ -33,7 +33,6 @@ import com.voltfitness.app.ui.screens.routine.RoutineEditorScreen
 import com.voltfitness.app.ui.screens.workout.WorkoutDetailScreen
 import com.voltfitness.app.ui.session.SessionState
 import com.voltfitness.app.ui.session.SessionViewModel
-import timber.log.Timber
 
 /**
  * Navigation Graph for the VoltFitness application.

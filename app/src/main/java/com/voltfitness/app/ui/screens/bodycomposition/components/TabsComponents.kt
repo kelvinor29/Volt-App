@@ -1,4 +1,4 @@
-package com.voltfitness.app.ui.screens.body_composition.components
+package com.voltfitness.app.ui.screens.bodycomposition.components
 
 
 import androidx.compose.foundation.background
@@ -18,7 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.voltfitness.app.ui.screens.body_composition.BodyCompositionDisplayItem
+import com.voltfitness.app.ui.screens.bodycomposition.BodyCompositionDisplayItem
 import java.time.format.DateTimeFormatter
 import com.voltfitness.app.R
 
@@ -295,8 +295,7 @@ private fun IndexRatioRow(entry: BodyCompositionDisplayItem) {
 private fun TorsoRow(entry: BodyCompositionDisplayItem) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         MeasurementCard(
@@ -307,7 +306,9 @@ private fun TorsoRow(entry: BodyCompositionDisplayItem) {
         )
     }
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         MeasurementCard(
@@ -360,7 +361,9 @@ private fun LegsRow(entry: BodyCompositionDisplayItem) {
         )
     }
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         MeasurementCard(

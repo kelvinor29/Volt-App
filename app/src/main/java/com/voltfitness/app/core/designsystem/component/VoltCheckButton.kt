@@ -39,7 +39,7 @@ fun VoltCheckButton(
         onClick = { onCheckedChange(!checked) },
         modifier = modifier.height(48.dp),
         enabled = enabled,
-        shape = RoundedCornerShape(12.dp),
+        shape = voltFieldShape,
         colors = if (checked) {
             ButtonDefaults.outlinedButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,

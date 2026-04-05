@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.voltfitness.app.core.designsystem.component.voltFieldShape
 import com.voltfitness.app.ui.theme.VoltBackgroundDark
 import com.voltfitness.app.ui.theme.VoltElevation
 import com.voltfitness.app.ui.theme.VoltSpacing
@@ -53,7 +54,7 @@ fun VoltCard(
     val finalElevation = if (backgroundColor == Color.Transparent) 0.dp else VoltElevation.small
     val cardElevation = CardDefaults.cardElevation(defaultElevation = finalElevation)
 
-    val shape = MaterialTheme.shapes.large
+    val shape = voltFieldShape
     val borderWidth: Dp = 2.dp
     val borderColor: Color = VoltSurfaceVariant
 

@@ -28,16 +28,12 @@ import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
  * Primary action button for the Volt Fitness design system.
+ * Reuses [voltFieldShape] for visual consistency with input fields.
  *
- * Provides a high-emphasis button with an optional loading state and icon.
- * When [isLoading] is true, the button is automatically disabled and displays a progress indicator.
- *
- * @param text The label text to be displayed.
- * @param onClick Callback to be invoked when the button is clicked.
- * @param modifier Modifier to be applied to the button layout.
- * @param enabled Controls the enabled state of the button.
- * @param isLoading When true, replaces the content with a [CircularProgressIndicator].
- * @param icon Optional [ImageVector] to display before the text.
+ * @param text The label text.
+ * @param onClick Execution trigger.
+ * @param isLoading When true, displays a [CircularProgressIndicator] and disables interaction.
+ * @param icon Optional leading icon.
  */
 @Composable
 fun VoltButton(
@@ -52,7 +48,7 @@ fun VoltButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled && !isLoading,
-        shape = MaterialTheme.shapes.medium
+        shape = voltFieldShape
     ) {
         if (isLoading) {
             CircularProgressIndicator(
@@ -71,15 +67,7 @@ fun VoltButton(
 }
 
 /**
- * Secondary action button with a tonal background.
- *
- * Use for actions that require medium emphasis or as a secondary alternative to [VoltButton].
- *
- * @param text The label text to be displayed.
- * @param onClick Callback to be invoked when the button is clicked.
- * @param modifier Modifier to be applied to the button layout.
- * @param enabled Controls the enabled state of the button.
- * @param icon Optional [ImageVector] to display before the text.
+ * Medium-emphasis button with a tonal background.
  */
 @Composable
 fun VoltSecondaryButton(
@@ -93,7 +81,7 @@ fun VoltSecondaryButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
-        shape = MaterialTheme.shapes.medium
+        shape = voltFieldShape
     ) {
         icon?.let {
             Icon(imageVector = it, contentDescription = null)
@@ -105,11 +93,6 @@ fun VoltSecondaryButton(
 
 /**
  * Low-emphasis outlined button for supplementary actions.
- *
- * @param text The label text to be displayed.
- * @param onClick Callback to be invoked when the button is clicked.
- * @param modifier Modifier to be applied to the button layout.
- * @param enabled Controls the enabled state of the button.
  */
 @Composable
 fun VoltOutlinedButton(
@@ -122,11 +105,12 @@ fun VoltOutlinedButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
-        shape = MaterialTheme.shapes.medium
+        shape = voltFieldShape
     ) {
         Text(text)
     }
 }
+
 
 @Preview(name = "Button Gallery - Light", showBackground = true)
 @Preview(

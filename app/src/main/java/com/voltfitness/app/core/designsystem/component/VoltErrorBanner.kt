@@ -46,7 +46,7 @@ fun VoltErrorBanner(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer
         ),
-        shape = MaterialTheme.shapes.medium
+        shape = voltFieldShape
     ) {
         Row(
             modifier = Modifier

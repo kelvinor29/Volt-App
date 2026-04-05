@@ -83,7 +83,7 @@ fun VoltDropdownSelector(
                     type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
                     enabled = enabled
                 ),
-            shape = MaterialTheme.shapes.medium,
+            shape = voltFieldShape,
             enabled = enabled,
             colors = voltFieldColors(),
             supportingText = {

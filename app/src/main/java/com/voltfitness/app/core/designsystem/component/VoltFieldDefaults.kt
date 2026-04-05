@@ -1,12 +1,14 @@
 package com.voltfitness.app.core.designsystem.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import com.voltfitness.app.ui.theme.VoltRadius
 
 /**
  * Provides a unified color palette for [OutlinedTextField] components.
@@ -49,8 +51,8 @@ fun Modifier.voltFieldModifier(modifier: Modifier = Modifier): Modifier =
 
 val voltFieldShape: Shape
     @Composable
-    get() = MaterialTheme.shapes.medium
+    get() = RoundedCornerShape(VoltRadius.large) // Linked to Primary Cards
 
 val voltSectionShape: Shape
     @Composable
-    get() = MaterialTheme.shapes.large
+    get() = RoundedCornerShape(VoltRadius.extraLarge) // Linked to Sheets/Containers

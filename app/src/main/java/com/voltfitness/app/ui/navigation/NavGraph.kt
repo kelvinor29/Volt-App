@@ -35,20 +35,13 @@ import com.voltfitness.app.ui.session.SessionState
 import com.voltfitness.app.ui.session.SessionViewModel
 
 /**
- * Navigation Graph for the VoltFitness application.
+ * Central navigation hub for the VoltFitness application.
  *
- * The startDestination is pre-resolved by [VoltApp] based on [SessionState].
- * This graph is a pure navigation structure — no business logic lives here.
+ * This graph defines the entry points, argument parsing, and state synchronization
+ * between the screens and the global [TopAppBarState].
  *
- * Navigation side-effects from ViewModels (e.g. first-launch redirect,
- * save-success pop) are observed via [LaunchedEffect] + [SharedFlow] so
- * the Composables stay stateless.
- *
- * @param navController The controller handling the navigation stack.
- * @param topAppBarState Mutable state used to sync the TopAppBar UI.
- * @param sessionViewModel Activity-scoped ViewModel for session state updates.
- * @param modifier Layout modifier for the [NavHost] container.
- * @param startDestination Pre-resolved route: [Screen.Home] or [Screen.Register].
+ * Side-effects from ViewModels (NavigationEffects) are collected here to maintain
+ * a one-way data flow (UDF) and keep Composables stateless.
  */
 @Composable
 fun VoltNavGraph(
@@ -65,6 +58,10 @@ fun VoltNavGraph(
     ) {
 
         // ========== SPLASH / AUTH GUARD ==========
+        /**
+         * Orchestrates the initial routing based on the [SessionState].
+         * Redirects to Home if authenticated, or Register if not.
+         */
         composable(route = Screen.Splash.route) {
             val sessionState by sessionViewModel.sessionState.collectAsState()
 
@@ -75,13 +72,11 @@ fun VoltNavGraph(
                             popUpTo(Screen.Splash.route) { inclusive = true }
                         }
                     }
-
                     is SessionState.Unauthenticated -> {
                         navController.navigate(Screen.Register.route) {
                             popUpTo(Screen.Splash.route) { inclusive = true }
                         }
                     }
-
                     else -> Unit
                 }
             }
@@ -95,6 +90,10 @@ fun VoltNavGraph(
         }
 
         // ========== REGISTER SCREEN ==========
+        /**
+         * Onboarding flow for new users.
+         * On completion, signals the [SessionViewModel] and moves to Home.
+         */
         composable(route = Screen.Register.route) {
             val viewModel: RegisterViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
@@ -111,6 +110,7 @@ fun VoltNavGraph(
                             navController.navigate(Screen.Home.route) {
                                 popUpTo(Screen.Register.route) { inclusive = true }
                             }
+                            // Direct flow to setup initial body composition
                             navController.navigate(Screen.BodyComposition.route)
                         }
                     }
@@ -129,6 +129,10 @@ fun VoltNavGraph(
         }
 
         // ========== WORKOUT DETAIL SCREEN ==========
+        /**
+         * Detailed view of a workout session.
+         * Expects [workoutId] as a String path parameter.
+         */
         composable(
             route = Screen.WorkoutDetail.route,
             arguments = listOf(navArgument("workoutId") { type = NavType.StringType }),
@@ -142,6 +146,10 @@ fun VoltNavGraph(
         }
 
         // ========== ROUTINE EDITOR SCREEN ==========
+        /**
+         * Comprehensive editor for routine metadata and day structure.
+         * Supports both New (-1) and Existing routine IDs.
+         */
         composable(
             route = Screen.RoutineEditor.route,
             arguments = listOf(
@@ -190,7 +198,7 @@ fun VoltNavGraph(
                 onAddNewMeasurement = {
                     navController.navigate(Screen.AddBodyComposition.route)
                 },
-                onEntryClick = { /* TODO: navigate to detail */ },
+                onEntryClick = { /* TODO: Navigation to entry detail placeholder */ },
             )
         }
 
@@ -217,6 +225,10 @@ fun VoltNavGraph(
         }
 
         // ========== EXERCISE PICKER SCREEN ==========
+        /**
+         * Contextual picker for adding exercises to a specific routine/day.
+         * Passes selected IDs back to the previous screen using [savedStateHandle].
+         */
         composable(
             route = Screen.ExercisePicker.route,
             arguments = listOf(
@@ -239,6 +251,7 @@ fun VoltNavGraph(
                 uiState = uiState,
                 onEvent = viewModel::onEvent,
                 onConfirmSelection = { selectedIds ->
+                    // Standard approach for back-passing results in Compose Navigation
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set("exercise_selection_result", selectedIds)
@@ -250,7 +263,7 @@ fun VoltNavGraph(
 
         // ========== FUTURE SCREENS ==========
         composable(route = Screen.Settings.route) {
-            // TODO: Implement SettingsScreen
+            // Future Implementation
         }
     }
 }

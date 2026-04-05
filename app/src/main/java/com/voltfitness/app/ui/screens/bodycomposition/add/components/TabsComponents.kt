@@ -28,14 +28,17 @@ import androidx.compose.material.icons.outlined.Whatshot
 import androidx.compose.material.icons.outlined.WidthNormal
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.voltfitness.app.core.designsystem.component.VoltMeasurementField
 import com.voltfitness.app.ui.screens.bodycomposition.add.AddBodyCompositionEvent
 import com.voltfitness.app.ui.screens.bodycomposition.add.AddBodyCompositionUiState
+import com.voltfitness.app.ui.theme.VoltSpacing
+import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
- * Tab content for scale-based body composition metrics.
- * Stateless — receives state and dispatches events upward.
+ * Form content for scale-based body composition metrics.
+ *
+ * Includes mandatory fields (Height/Weight) and optional laboratory metrics.
  */
 @Composable
 fun BodyCompositionTab(
@@ -48,11 +51,11 @@ fun BodyCompositionTab(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = VoltSpacing.medium)
             .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(VoltSpacing.small)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(VoltSpacing.small))
 
         MeasurementPairRow {
             VoltMeasurementField(
@@ -75,7 +78,6 @@ fun BodyCompositionTab(
                 isError = uiState.weightKg.isNotBlank() && !uiState.isWeightValid,
             )
         }
-
 
         MeasurementPairRow {
             VoltMeasurementField(
@@ -142,14 +144,14 @@ fun BodyCompositionTab(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(VoltSpacing.medium))
     }
 }
 
-
 /**
- * Tab content for tape-based body measurements.
- * Stateless — receives state and dispatches events upward.
+ * Form content for manual tape measurements.
+ *
+ * Organized by anatomical regions for better data entry flow.
  */
 @Composable
 fun BodyMeasurementsTab(
@@ -162,13 +164,12 @@ fun BodyMeasurementsTab(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = VoltSpacing.medium)
             .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(VoltSpacing.small)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(VoltSpacing.small))
 
-        // --- Torso Measurements ---
         VoltMeasurementField(
             value = uiState.chestCm,
             onValueChange = { onEvent(AddBodyCompositionEvent.UpdateChest(it)) },
@@ -204,7 +205,6 @@ fun BodyMeasurementsTab(
             )
         }
 
-        // ── Paired: Arms ──
         MeasurementPairRow {
             VoltMeasurementField(
                 modifier = Modifier.weight(1f),
@@ -224,7 +224,6 @@ fun BodyMeasurementsTab(
             )
         }
 
-        // ── Paired: Legs ──
         MeasurementPairRow {
             VoltMeasurementField(
                 modifier = Modifier.weight(1f),
@@ -244,17 +243,66 @@ fun BodyMeasurementsTab(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(VoltSpacing.medium))
     }
 }
 
+/**
+ * Standardizes the layout for paired measurement inputs.
+ */
 @Composable
 private fun MeasurementPairRow(
     content: @Composable RowScope.() -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(VoltSpacing.small),
         content = content
     )
+}
+
+@Preview(showBackground = true, heightDp = 900)
+@Composable
+private fun BodyCompositionTab_EmptyPreview() {
+    VoltTheme {
+        BodyCompositionTab(
+            uiState = AddBodyCompositionUiState(),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, heightDp = 900)
+@Composable
+private fun BodyCompositionTab_FilledPreview() {
+    VoltTheme {
+        BodyCompositionTab(
+            uiState = AddBodyCompositionUiState(
+                heightCm = "175",
+                weightKg = "72",
+                bodyFatPercent = "18",
+                waterPercent = "55",
+                muscleMassKg = "30",
+                basalCalories = "1800",
+                metabolicAge = "28",
+                boneMassKg = "3.2",
+                visceralFatPercent = "10",
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, heightDp = 900)
+@Composable
+private fun BodyCompositionTab_ErrorPreview() {
+    VoltTheme {
+        BodyCompositionTab(
+            uiState = AddBodyCompositionUiState(
+                heightCm = "abc",
+                weightKg = "0",
+            ),
+            onEvent = {}
+        )
+    }
 }

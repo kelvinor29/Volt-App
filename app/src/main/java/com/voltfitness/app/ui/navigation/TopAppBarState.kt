@@ -3,17 +3,20 @@ package com.voltfitness.app.ui.navigation
 import androidx.compose.runtime.Composable
 
 /**
- * Represents the UI state of the application's top app bar.
+ * Represents the global configuration for the application's top navigation header.
  *
- * This data class centralizes the configuration for titles, subtitles,
- * and visibility of navigation/action icons across different screens.
+ * This state holder decouples the screen content from the [VoltTopAppBar] implementation,
+ * allowing features to define their own titles, navigation behavior, and
+ * contextual action buttons.
  *
- * @property title The main text displayed in the center/start of the bar.
- * @property subtitle Optional secondary text displayed below the title.
- * @property showBackButton Whether the navigation icon (back arrow) should be visible.
- * @property showSettingsButton Whether the action icon (settings) should be visible.
- * @property onBackClick Callback triggered when the navigation icon is pressed.
- * @property onSettingsClick Callback triggered when the settings icon is pressed.
+ * @property title Primary text header (e.g., screen name or user greeting).
+ * @property subtitle Secondary context text (e.g., total workouts or date).
+ * @property showBackButton Controls visibility of the [Icons.AutoMirrored.Filled.ArrowBack] icon.
+ * @property showSettingsButton Controls visibility of the [Icons.Filled.Settings] icon.
+ * @property onBackClick Invoked when the navigation icon is pressed.
+ * @property onSettingsClick Invoked when the settings action icon is pressed.
+ * @property collapsibleContent Slot for injecting dynamic UI elements (e.g., SearchBar) below the main bar.
+ * @property isCollapsibleVisible Lambda used to determine the current display state of the [collapsibleContent].
  */
 data class TopAppBarState(
     val title: String = "",
@@ -23,6 +26,9 @@ data class TopAppBarState(
     val onBackClick: (() -> Unit)? = null,
     val onSettingsClick: (() -> Unit)? = null,
 
+    // Slot for dynamic components like search fields or filter chips
     val collapsibleContent: (@Composable () -> Unit)? = null,
+
+    // Logic-driven visibility check for the collapsible slot
     val isCollapsibleVisible: () -> Boolean = { true },
 )

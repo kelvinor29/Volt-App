@@ -25,33 +25,32 @@ import androidx.compose.ui.unit.dp
 import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
- * High-level text input component for the Volt design system.
+ * Standard text input for the Volt design system.
  *
- * Automatically handles keyboard types based on the presence of a [suffix]
- * and centralizes styling, error messaging, and layout constraints.
+ * Automatically manages styling, accessibility, and keyboard behavior.
+ * When a [suffix] is present, it defaults to numeric input unless specified otherwise.
  *
- * @param value Current input text.
- * @param onValueChange Callback for text updates.
- * @param label Descriptive header for the field.
- * @param suffix Optional unit or label displayed at the end.
- * @param modifier Layout adjustments for the text field.
- * @param leadingIcon Optional [ImageVector] to provide visual context.
- * @param imeAction Keyboard action (e.g., [ImeAction.Next], [ImeAction.Done]).
- * @param isError Triggers error styling and shows [errorMessage].
- * @param isDecimal Only relevant if [suffix] is present; enables decimal numeric input.
- * @param errorMessage Message shown below the field when [isError] is true.
- * @param enabled Controls interaction and visual state.
- * @param readOnly Prevents manual text input while maintaining focusability.
- * @param singleLine Restricts the input to one line.
- * @param keyboardType Specific [KeyboardType] (defaults to Text or Numeric depending on suffix).
+ * @param value Current text state.
+ * @param onValueChange Text update callback.
+ * @param label Floating label text.
+ * @param suffix Optional unit or metadata (e.g., "kg", "cm").
+ * @param leadingIcon Visual context icon.
+ * @param imeAction Keyboard action button behavior.
+ * @param isError Triggers error visual state and displays [errorMessage].
+ * @param isDecimal Relevant for numeric inputs with suffix; enables floating-point numbers.
+ * @param errorMessage Feedback text shown in the supporting area when [isError] is true.
+ * @param enabled Controls interactive and visual states.
+ * @param readOnly Disables manual input but allows focus/selection.
+ * @param singleLine Constraints input to one row.
+ * @param keyboardType Explicit keyboard override.
  */
 @Composable
 fun VoltTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    suffix: String? = null,
     modifier: Modifier = Modifier,
+    suffix: String? = null,
     leadingIcon: ImageVector? = null,
     imeAction: ImeAction = ImeAction.Next,
     isError: Boolean = false,
@@ -88,16 +87,16 @@ fun VoltTextField(
                 )
             }
         },
-        suffix = suffix?.let { { Text(it) } },
-        supportingText = {
-            if (isError && errorMessage != null) {
+        suffix = suffix?.let { { Text(text = it) } },
+        supportingText = if (isError && !errorMessage.isNullOrBlank()) {
+            {
                 Text(
                     text = errorMessage,
                     modifier = Modifier.basicMarquee(),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-        },
+        } else null,
         isError = isError,
         enabled = enabled,
         readOnly = readOnly,
@@ -111,6 +110,7 @@ fun VoltTextField(
     )
 }
 
+// region Previews
 @Preview(name = "Light Mode", showBackground = true)
 @Preview(
     name = "Dark Mode",
@@ -125,7 +125,7 @@ private fun VoltTextFieldPreview() {
                 VoltTextField(
                     value = "",
                     onValueChange = {},
-                    label = "User name",
+                    label = "Username",
                     leadingIcon = Icons.Default.Person
                 )
 
@@ -143,16 +143,10 @@ private fun VoltTextFieldPreview() {
                     label = "Email",
                     leadingIcon = Icons.Default.Email,
                     isError = true,
-                    errorMessage = "The email format is invalid."
-                )
-
-                VoltTextField(
-                    value = "Can't modify this",
-                    onValueChange = {},
-                    label = "Blocked Field",
-                    enabled = false
+                    errorMessage = "Please enter a valid email address."
                 )
             }
         }
     }
 }
+// endregion

@@ -32,19 +32,18 @@ import com.voltfitness.app.ui.navigation.TopAppBarState
 import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
- * This component reacts to the [TopAppBarState] to dynamically show navigation
- * buttons, titles, and action items. All icons and text follow the theme's
- * high-contrast colors (white in dark mode).
+ * Global application header that dynamically adapts to the current [TopAppBarState].
  *
- * ### Collapse behavior
- * The [TopAppBarState.isCollapsibleVisible] lambda is read via [derivedStateOf]
- * so that only the AnimatedVisibility block re-composes when visibility changes,
- * not the entire VoltTopAppBar tree. [TopAppBarState] must be annotated with
- * [@Stable][androidx.compose.runtime.Stable] for this optimization to take effect
- * (see TopAppBarState.kt).
+ * Features include:
+ * - Reactive navigation (Back button visibility).
+ * - Contextual metadata (Subtitles for dashboards).
+ * - Animated collapsible content (Search bars or Filter chips).
  *
- * @param state The UI state containing title, subtitle, and button configurations.
- * @param modifier Modifier to be applied to the top app bar layout.
+ * Performance note: Uses [derivedStateOf] for [isVisible] to prevent full
+ * recompositions when only the collapsible state changes.
+ *
+ * @param state The reactive state container for the bar's configuration.
+ * @param modifier Layout modifiers for the top bar container.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,32 +69,19 @@ fun VoltTopAppBar(
             colors = appBarColors,
             navigationIcon = {
                 if (state.showBackButton) {
-                    IconButton(onClick = state.onBackClick ?: {}) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = { state.onBackClick?.invoke() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
                     }
                 }
             },
             title = {
-                Column {
-                    Text(
-                        text = state.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (!state.showBackButton) {
-                        state.subtitle?.let { subtitle ->
-                            Text(
-                                text = subtitle,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                }
+                AppBarTitle(
+                    title = state.title,
+                    subtitle = if (!state.showBackButton) state.subtitle else null
+                )
             },
             actions = {
                 if (state.showSettingsButton) {
@@ -109,6 +95,7 @@ fun VoltTopAppBar(
             }
         )
 
+        // Collapsible Section (e.g., Search Bar)
         state.collapsibleContent?.let { content ->
             AnimatedVisibility(
                 visible = isVisible,
@@ -124,15 +111,18 @@ fun VoltTopAppBar(
                     color = colorScheme.background,
                     shadowElevation = 4.dp
                 ) {
-                    content()
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        color = colorScheme.outlineVariant
-                    )
+                    Column {
+                        content()
+                        HorizontalDivider(
+                            thickness = 0.5.dp,
+                            color = colorScheme.outlineVariant
+                        )
+                    }
                 }
             }
         }
 
+        // Bottom border visibility logic
         if (!isVisible) {
             HorizontalDivider(
                 thickness = 0.5.dp,
@@ -142,9 +132,36 @@ fun VoltTopAppBar(
     }
 }
 
-// region Previews
+/**
+ * Internal title and subtitle layout for the top bar.
+ */
+@Composable
+private fun AppBarTitle(
+    title: String,
+    subtitle: String?
+) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        subtitle?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
 
-@Preview(name = "Home Screen Style")
+// region Previews maintained for UI state validation
+@Preview(name = "Dashboard Style")
 @Composable
 private fun VoltTopAppBarHomePreview() {
     VoltTheme {
@@ -160,6 +177,7 @@ private fun VoltTopAppBarHomePreview() {
         }
     }
 }
+// endregion
 
 @Preview(name = "Detail Screen Style")
 @Composable

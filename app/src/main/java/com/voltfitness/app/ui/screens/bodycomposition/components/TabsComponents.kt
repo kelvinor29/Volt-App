@@ -1,112 +1,138 @@
 package com.voltfitness.app.ui.screens.bodycomposition.components
 
-
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.outlined.Balance
+import androidx.compose.material.icons.outlined.BrokenImage
+import androidx.compose.material.icons.outlined.Elderly
+import androidx.compose.material.icons.outlined.FitnessCenter
+import androidx.compose.material.icons.outlined.LocalFireDepartment
+import androidx.compose.material.icons.outlined.MonitorWeight
+import androidx.compose.material.icons.outlined.Opacity
+import androidx.compose.material.icons.outlined.Speed
+import androidx.compose.material.icons.outlined.Straighten
+import androidx.compose.material.icons.outlined.WaterDrop
+import androidx.compose.material.icons.outlined.Whatshot
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.voltfitness.app.ui.screens.bodycomposition.BodyCompositionDisplayItem
-import java.time.format.DateTimeFormatter
 import com.voltfitness.app.R
+import com.voltfitness.app.core.designsystem.component.voltFieldShape
+import com.voltfitness.app.core.designsystem.component.voltSectionShape
+import com.voltfitness.app.ui.screens.bodycomposition.BodyCompositionDisplayItem
+import com.voltfitness.app.ui.theme.VoltAccentBlue
+import com.voltfitness.app.ui.theme.VoltAccentOrange
+import com.voltfitness.app.ui.theme.VoltAccentPurple
+import com.voltfitness.app.ui.theme.VoltError
+import com.voltfitness.app.ui.theme.VoltErrorDim
+import com.voltfitness.app.ui.theme.VoltInfo
+import com.voltfitness.app.ui.theme.VoltSpacing
+import com.voltfitness.app.ui.theme.VoltSuccess
+import com.voltfitness.app.ui.theme.VoltSuccessDim
+import com.voltfitness.app.ui.theme.VoltTextTertiary
+import com.voltfitness.app.ui.theme.VoltWarning
+import java.time.format.DateTimeFormatter
 
 /**
- * Composition tab content displaying all body composition metrics in a grid layout.
+ * Detailed composition tab displaying metrics like body fat, water, and muscle mass.
  */
 @Composable
 fun CompositionTab(entry: BodyCompositionDisplayItem?) {
     if (entry == null) {
-        EmptyStateMessage(
-            message = "No body composition data available.\nAdd your first measurement."
-        )
+        EmptyStateMessage(message = "No data available. Add your first measurement.")
         return
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
-            start = 16.dp,
-            top = 16.dp,
-            end = 16.dp,
-            bottom = 50.dp
+            top = VoltSpacing.medium,
+            start = VoltSpacing.medium,
+            end = VoltSpacing.medium,
+            bottom = VoltSpacing.xhuge
         ),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(VoltSpacing.medium),
+        modifier = Modifier.fillMaxSize()
     ) {
-        // Main metrics
-        item { SectionTitle(title = "Main Metrics") }
+        item { SectionTitle(title = "Primary Metrics") }
         item { MainMetricsRow(entry) }
-        item { AdvancedMetricsRow(entry) }
 
-        // Advanced data
         item {
-            Spacer(modifier = Modifier.height(4.dp))
-            SectionTitle(title = "Advanced Metrics")
+            Spacer(modifier = Modifier.height(VoltSpacing.extraSmall))
+            SectionTitle(title = "Advanced Composition")
         }
+        item { AdvancedMetricsRow(entry) }
         item { AdvancedDataRow1(entry) }
         item { AdvancedDataRow2(entry) }
 
-        // Calculated indices
         item {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(VoltSpacing.extraSmall))
             SectionTitle(title = "Calculated Indices")
         }
         item { FatLeanRow(entry) }
         item { IndexRatioRow(entry) }
-
-        item { Spacer(modifier = Modifier.height(16.dp)) } // FAB spacing
     }
 }
 
 /**
- * Body measurements tab content organized by body regions.
+ * Body measurements tab content organized by anatomical regions.
  */
 @Composable
 fun MeasurementsTab(entry: BodyCompositionDisplayItem?) {
     if (entry == null) {
-        EmptyStateMessage(
-            message = "No body measurements recorded.\nAdd your first measurement."
-        )
+        EmptyStateMessage(message = "No body measurements recorded.")
         return
     }
 
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(
+            top = VoltSpacing.medium,
+            start = VoltSpacing.medium,
+            end = VoltSpacing.medium,
+            bottom = VoltSpacing.xhuge
+        ),
+        verticalArrangement = Arrangement.spacedBy(VoltSpacing.medium),
         modifier = Modifier.fillMaxSize()
     ) {
         item { SectionTitle(title = "Torso") }
         item { TorsoRow(entry) }
 
         item {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(VoltSpacing.extraSmall))
             SectionTitle(title = "Arms")
         }
         item { ArmsRow(entry) }
 
         item {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(VoltSpacing.extraSmall))
             SectionTitle(title = "Legs")
         }
         item { LegsRow(entry) }
-
-        item { Spacer(modifier = Modifier.height(72.dp)) }
     }
 }
 
 /**
- * History tab showing timeline of past measurements.
+ * Timeline of historical measurements.
  */
 @Composable
 fun HistoryTab(
@@ -119,8 +145,13 @@ fun HistoryTab(
     }
 
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(
+            top = VoltSpacing.medium,
+            start = VoltSpacing.medium,
+            end = VoltSpacing.medium,
+            bottom = VoltSpacing.xhuge
+        ),
+        verticalArrangement = Arrangement.spacedBy(VoltSpacing.small),
         modifier = Modifier.fillMaxSize()
     ) {
         items(entries, key = { it.entryId }) { entry ->
@@ -129,7 +160,6 @@ fun HistoryTab(
                 onClick = { onEntryClick(entry.entryId) }
             )
         }
-        item { Spacer(modifier = Modifier.height(72.dp)) }
     }
 }
 
@@ -141,7 +171,7 @@ fun HistoryTab(
 private fun MainMetricsRow(entry: BodyCompositionDisplayItem) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)
     ) {
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -157,7 +187,7 @@ private fun MainMetricsRow(entry: BodyCompositionDisplayItem) {
             label = "Body Fat",
             value = entry.bodyFatPercent?.let { "%.1f".format(it) } ?: "—",
             unit = "%",
-            color = Color(0xFFE57373)
+            color = VoltError
         )
     }
 }
@@ -166,7 +196,7 @@ private fun MainMetricsRow(entry: BodyCompositionDisplayItem) {
 private fun AdvancedMetricsRow(entry: BodyCompositionDisplayItem) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)
     ) {
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -174,7 +204,7 @@ private fun AdvancedMetricsRow(entry: BodyCompositionDisplayItem) {
             label = "Muscle Mass",
             value = entry.muscleMassKg?.let { "%.1f".format(it) } ?: "—",
             unit = "kg",
-            color = Color(0xFF66BB6A)
+            color = VoltSuccess
         )
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -182,7 +212,7 @@ private fun AdvancedMetricsRow(entry: BodyCompositionDisplayItem) {
             label = "Water",
             value = entry.waterPercent?.let { "%.1f".format(it) } ?: "—",
             unit = "%",
-            color = Color(0xFF42A5F5)
+            color = VoltInfo
         )
     }
 }
@@ -191,7 +221,7 @@ private fun AdvancedMetricsRow(entry: BodyCompositionDisplayItem) {
 private fun AdvancedDataRow1(entry: BodyCompositionDisplayItem) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)
     ) {
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -199,7 +229,7 @@ private fun AdvancedDataRow1(entry: BodyCompositionDisplayItem) {
             label = "Visceral Fat",
             value = entry.visceralFatPercent?.let { "%.1f".format(it) } ?: "—",
             unit = "%",
-            color = Color(0xFFFF7043)
+            color = VoltAccentOrange
         )
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -207,7 +237,7 @@ private fun AdvancedDataRow1(entry: BodyCompositionDisplayItem) {
             label = "BMR",
             value = entry.basalCalories?.toString() ?: "—",
             unit = "kcal",
-            color = Color(0xFFAB47BC)
+            color = VoltAccentPurple
         )
     }
 }
@@ -216,7 +246,7 @@ private fun AdvancedDataRow1(entry: BodyCompositionDisplayItem) {
 private fun AdvancedDataRow2(entry: BodyCompositionDisplayItem) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)
     ) {
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -224,7 +254,7 @@ private fun AdvancedDataRow2(entry: BodyCompositionDisplayItem) {
             label = "Metabolic Age",
             value = entry.metabolicAge?.toString() ?: "—",
             unit = "years",
-            color = Color(0xFF26A69A)
+            color = VoltSuccessDim
         )
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -232,7 +262,7 @@ private fun AdvancedDataRow2(entry: BodyCompositionDisplayItem) {
             label = "Bone Mass",
             value = entry.boneMassKg?.let { "%.1f".format(it) } ?: "—",
             unit = "kg",
-            color = Color(0xFF78909C)
+            color = VoltTextTertiary
         )
     }
 }
@@ -241,7 +271,7 @@ private fun AdvancedDataRow2(entry: BodyCompositionDisplayItem) {
 private fun FatLeanRow(entry: BodyCompositionDisplayItem) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)
     ) {
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -249,7 +279,7 @@ private fun FatLeanRow(entry: BodyCompositionDisplayItem) {
             label = "Fat Mass",
             value = entry.fatMassKg?.let { "%.1f".format(it) } ?: "—",
             unit = "kg",
-            color = Color(0xFFEF5350)
+            color = VoltErrorDim
         )
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -257,7 +287,7 @@ private fun FatLeanRow(entry: BodyCompositionDisplayItem) {
             label = "Lean Mass",
             value = entry.leanMassKg?.let { "%.1f".format(it) } ?: "—",
             unit = "kg",
-            color = Color(0xFF43A047)
+            color = VoltSuccessDim
         )
     }
 }
@@ -266,7 +296,7 @@ private fun FatLeanRow(entry: BodyCompositionDisplayItem) {
 private fun IndexRatioRow(entry: BodyCompositionDisplayItem) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)
     ) {
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -274,7 +304,7 @@ private fun IndexRatioRow(entry: BodyCompositionDisplayItem) {
             label = "FFMI",
             value = entry.ffmi?.let { "%.1f".format(it) } ?: "—",
             unit = "",
-            color = Color(0xFF5C6BC0)
+            color = VoltAccentBlue
         )
         MetricCard(
             modifier = Modifier.weight(1f),
@@ -282,7 +312,7 @@ private fun IndexRatioRow(entry: BodyCompositionDisplayItem) {
             label = "Waist/Hip",
             value = entry.waistHipRatio?.let { "%.2f".format(it) } ?: "—",
             unit = "",
-            color = Color(0xFFFF8A65)
+            color = VoltWarning
         )
     }
 }
@@ -293,23 +323,16 @@ private fun IndexRatioRow(entry: BodyCompositionDisplayItem) {
 
 @Composable
 private fun TorsoRow(entry: BodyCompositionDisplayItem) {
+    MeasurementCard(
+        modifier = Modifier.fillMaxWidth(),
+        label = "Chest",
+        value = entry.chestCm,
+        iconRes = R.drawable.ic_chest
+    )
+    Spacer(Modifier.height(VoltSpacing.medium))
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        MeasurementCard(
-            modifier = Modifier.weight(1f),
-            label = "Chest",
-            value = entry.chestCm,
-            iconRes = R.drawable.ic_chest
-        )
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)
     ) {
         MeasurementCard(
             modifier = Modifier.weight(1f),
@@ -330,7 +353,7 @@ private fun TorsoRow(entry: BodyCompositionDisplayItem) {
 private fun ArmsRow(entry: BodyCompositionDisplayItem) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)
     ) {
         MeasurementCard(
             modifier = Modifier.weight(1f),
@@ -349,22 +372,16 @@ private fun ArmsRow(entry: BodyCompositionDisplayItem) {
 
 @Composable
 private fun LegsRow(entry: BodyCompositionDisplayItem) {
+    MeasurementCard(
+        modifier = Modifier.fillMaxWidth(),
+        label = "Glutes",
+        value = entry.gluteCm,
+        iconRes = R.drawable.ic_glutes
+    )
+    Spacer(Modifier.height(VoltSpacing.medium))
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        MeasurementCard(
-            modifier = Modifier.weight(1f),
-            label = "Glutes",
-            value = entry.gluteCm,
-            iconRes = R.drawable.ic_glutes
-        )
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium),
     ) {
         MeasurementCard(
             modifier = Modifier.weight(1f),
@@ -394,24 +411,24 @@ private fun HistoryEntryCard(
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = voltSectionShape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(VoltSpacing.medium),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Date badge
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(voltFieldShape)
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = VoltSpacing.medium, vertical = VoltSpacing.small)
             ) {
                 Text(
                     text = entry.date.dayOfMonth.toString(),
@@ -421,64 +438,36 @@ private fun HistoryEntryCard(
                 )
                 Text(
                     text = entry.date.format(DateTimeFormatter.ofPattern("MMM")),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(VoltSpacing.medium))
 
-            // Main metrics
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "%.1f kg".format(entry.weightKg),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)) {
                     entry.bodyFatPercent?.let {
                         Text(
                             text = "Fat: %.1f%%".format(it),
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     entry.muscleMassKg?.let {
                         Text(
                             text = "Muscle: %.1f kg".format(it),
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
-
-            // Score badge
-            entry.compositionScore?.let { score ->
-                val color = when {
-                    score >= 80f -> Color(0xFF4CAF50)
-                    score >= 60f -> Color(0xFFFFC107)
-                    else -> Color(0xFFF44336)
-                }
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = color.copy(alpha = 0.15f)
-                ) {
-                    Text(
-                        text = "%.0f".format(score),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = color
-                    )
-                }
-            }
-
-            Icon(
-                Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
         }
     }
 }

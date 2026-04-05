@@ -17,7 +17,7 @@ class CreateFolderUseCase @Inject constructor(
     suspend operator fun invoke(userId: Long, name: String, description: String? = null): Long {
         if (folderRepository.existsByName(userId, name)) return -1L
 
-        return folderRepository.insert(
+        return folderRepository.upsertFolder(
             Folder(
                 id = 0L,
                 userId = userId,

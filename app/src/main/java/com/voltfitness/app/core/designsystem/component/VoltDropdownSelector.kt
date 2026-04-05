@@ -25,6 +25,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voltfitness.app.ui.theme.VoltTheme
 
+/**
+ * A Material3-compliant dropdown selector for choosing a single value from a list.
+ *
+ * Utilizes [ExposedDropdownMenuBox] to provide a read-only text field that triggers
+ * a popup menu. Supports validation states and leading icons.
+ *
+ * @param label The descriptive header for the dropdown.
+ * @param options List of string values to be displayed in the menu.
+ * @param selectedOption The currently active selection.
+ * @param leadingIcon Optional [ImageVector] to provide visual context.
+ * @param onOptionSelected Callback triggered when an item is selected from the list.
+ * @param modifier Layout adjustments for the component.
+ * @param enabled Controls the interaction state of the dropdown.
+ * @param isError Triggers the error visual state and displays [errorMessage].
+ * @param errorMessage Descriptive text shown below the field when [isError] is true.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VoltDropdownSelector(
@@ -46,7 +62,7 @@ fun VoltDropdownSelector(
         modifier = modifier.voltFieldModifier()
     ) {
         OutlinedTextField(
-            value = selectedOption.ifBlank { "" },
+            value = selectedOption,
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },

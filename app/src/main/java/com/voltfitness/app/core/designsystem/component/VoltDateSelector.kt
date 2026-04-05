@@ -36,6 +36,22 @@ import com.voltfitness.app.ui.theme.VoltTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/**
+ * An interactive date selection component that integrates an [OutlinedTextField] with a [DatePickerDialog].
+ *
+ * This component provides a read-only text field that serves as a trigger for the Material3
+ * date picker. It handles local date formatting and displays validation error states.
+ *
+ * @param label The descriptive header for the input field.
+ * @param selectedDate The currently selected [LocalDate], or null if unassigned.
+ * @param onDateSelected Callback invoked with the confirmed [LocalDate].
+ * @param modifier Layout configuration for the component's container.
+ * @param icon Leading [ImageVector] used to represent the date input category.
+ * @param dateFormat The [DateTimeFormatter] pattern used to parse and display the date.
+ * @param placeholder Visual cue shown when [selectedDate] is null.
+ * @param isError Flag to trigger the component's error styling.
+ * @param errorMessage Descriptive text shown below the field when [isError] is true.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VoltDateSelector(
@@ -102,8 +118,8 @@ fun VoltDateSelector(
                     tint = MaterialTheme.colorScheme.primary
                 )
             },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.voltFieldModifier(modifier),
+            shape = voltFieldShape,
             isError = isError,
             supportingText = {
                 if (isError && errorMessage != null) {
@@ -114,16 +130,7 @@ fun VoltDateSelector(
                     )
                 }
             },
-            colors = OutlinedTextFieldDefaults.colors(
-                disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                disabledBorderColor = if (isError) MaterialTheme.colorScheme.error
-                else MaterialTheme.colorScheme.outline,
-                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                disabledLeadingIconColor = if (isError) MaterialTheme.colorScheme.error
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-                disabledTrailingIconColor = MaterialTheme.colorScheme.primary,
-                disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            colors = voltFieldColors(isError = isError)
         )
     }
 }

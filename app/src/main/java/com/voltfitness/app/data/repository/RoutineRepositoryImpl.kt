@@ -6,7 +6,6 @@ import com.voltfitness.app.data.mappers.toEntity
 import com.voltfitness.app.domain.model.Routine
 import com.voltfitness.app.domain.model.RoutineDay
 import com.voltfitness.app.domain.model.RoutineExercise
-import com.voltfitness.app.domain.relations.RoutineDayFullDomain
 import com.voltfitness.app.domain.relations.RoutineWithDaysDomain
 import com.voltfitness.app.domain.relations.RoutineWithFullDaysDomain
 import com.voltfitness.app.domain.repository.RoutineRepository
@@ -15,18 +14,8 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**
- * Default implementation of [RoutineRepository].
- *
- * Responsibilities:
- * - Persist routine metadata.
- * - Persist routine days.
- * - Persist routine exercises assigned to each day.
- * - Expose reactive flows for:
- *   1. Full routine detail (routine -> days -> exercises -> sets)
- *   2. Single day detail (day -> exercises -> sets)
- *
- * Mapping from Room entities/relations to domain models is delegated
- * to dedicated mapper extensions.
+ * Implementation of [RoutineRepository] managing the lifecycle of complex workout routines.
+ * Handles cascading operations and hierarchical data retrieval for routines, days, and exercises.
  */
 class RoutineRepositoryImpl @Inject constructor(
     private val routineDao: RoutineDao
@@ -35,8 +24,7 @@ class RoutineRepositoryImpl @Inject constructor(
     // ==================== ROUTINES ====================
 
     /**
-     * Observes a full routine snapshot:
-     * routine metadata + all days + all exercises + all sets.
+     * Observes a complete routine hierarchy including nested days, exercises, and sets.
      */
     override fun getRoutineWithFullDays(routineId: Long): Flow<RoutineWithFullDaysDomain?> =
         routineDao.getRoutineWithFullDaysFlow(routineId).map { relation ->
@@ -44,26 +32,29 @@ class RoutineRepositoryImpl @Inject constructor(
         }
 
     /**
-     * Retrieves a single routine entity by its ID.
+     * Retrieves basic routine metadata.
      */
     override suspend fun getRoutineById(routineId: Long): Routine? =
         routineDao.getRoutineById(routineId)?.toDomain()
 
     /**
-     * Creates or updates a routine and returns its canonical ID.
+     * Persists routine metadata and triggers necessary maintenance tasks (like timestamp updates).
+     * @return The canonical routine ID.
      */
     override suspend fun upsertRoutine(routine: Routine): Long =
         routineDao.upsertRoutineWithMaintenance(routine.toEntity())
 
     /**
-     * Deletes a routine by ID.
-     * Related days, exercises, and sets should be removed by CASCADE.
+     * Removes a routine. Dependencies are managed via database CASCADE constraints.
      */
     override suspend fun deleteRoutine(routineId: Long) =
         routineDao.deleteRoutineById(routineId)
 
     // ==================== ROUTINE DAYS ====================
 
+    /**
+     * Observes a routine and its associated days, ordered by [RoutineDay.dayOrder].
+     */
     override suspend fun getRoutineWithDays(routineId: Long): Flow<RoutineWithDaysDomain?> =
         routineDao.getRoutineWithFullDaysFlow(routineId).map { relation ->
             relation?.let { full ->
@@ -77,27 +68,26 @@ class RoutineRepositoryImpl @Inject constructor(
         }
 
     /**
-     * Creates or updates a single routine day and returns its canonical ID.
+     * Persists a single routine day.
      */
     override suspend fun upsertRoutineDay(day: RoutineDay): Long =
         routineDao.upsertRoutineDay(day.toEntity())
 
     /**
-     * Upserts a list of days and returns the canonical ID list
-     * in the same order as the input list.
+     * Persists multiple days, maintaining the input order for the returned IDs.
      */
     override suspend fun upsertRoutineDays(days: List<RoutineDay>): List<Long> =
         routineDao.upsertRoutineDays(days.map { it.toEntity() })
 
     /**
-     * Deletes days that belong to the routine but are no longer present
-     * in the editor payload.
+     * Cleans up days that are no longer part of the routine's current configuration.
+     * Used during routine editing to sync local state with user changes.
      */
     override suspend fun deleteOrphanDays(routineId: Long, keepDayIds: List<Long>) =
         routineDao.deleteOrphanDays(routineId, keepDayIds)
 
     /**
-     * Deletes all routine days for a given routine ID.
+     * Removes all days associated with a specific routine.
      */
     override suspend fun deleteRoutineDaysByRoutineId(routineId: Long) =
         routineDao.deleteRoutineDaysByRoutineId(routineId)
@@ -105,12 +95,10 @@ class RoutineRepositoryImpl @Inject constructor(
     // ==================== ROUTINE EXERCISES ====================
 
     /**
-     * Upserts all exercises assigned to routine days.
+     * Persists exercises assigned to routine days.
      *
-     * Note:
-     * If your DAO currently returns Unit, this repository can only return
-     * the existing IDs from the input models. If later you need the real
-     * generated IDs for new rows, change the DAO to return List<Long>.
+     * WARNING: Currently returns IDs from the domain model. If the domain model
+     * uses temporary IDs (e.g., 0), this will not return the database-generated IDs.
      */
     override suspend fun upsertRoutineExercises(exercises: List<RoutineExercise>): List<Long> {
         routineDao.upsertRoutineExercises(exercises.map { it.toEntity() })
@@ -118,7 +106,7 @@ class RoutineRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Returns all exercises for a given day ordered by their position in the day.
+     * Fetches all exercises for a specific day in their designated order.
      */
     override suspend fun getExercisesByDayId(dayId: Long): List<RoutineExercise> =
         routineDao.getExercisesByDayId(dayId).map { it.toDomain() }

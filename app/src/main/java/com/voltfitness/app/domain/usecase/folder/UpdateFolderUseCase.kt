@@ -11,7 +11,7 @@ class UpdateFolderUseCase @Inject constructor(
     private val folderRepository: FolderRepository
 ) {
     suspend operator fun invoke(folder: Folder) {
-        folderRepository.update(
+        folderRepository.upsertFolder(
             folder.copy(updatedAt = System.currentTimeMillis())
         )
     }

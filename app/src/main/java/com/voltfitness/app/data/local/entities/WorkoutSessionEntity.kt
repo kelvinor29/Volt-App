@@ -5,6 +5,9 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * Represents a single instance of a completed or ongoing workout.
+ */
 @Entity(
     tableName = "workout_sessions",
     foreignKeys = [
@@ -27,7 +30,11 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("routineId"), Index("dayId"), Index("userId")]
+    indices = [
+        Index("routineId"),
+        Index("dayId"),
+        Index("userId")
+    ]
 )
 data class WorkoutSessionEntity(
     @PrimaryKey(autoGenerate = true)

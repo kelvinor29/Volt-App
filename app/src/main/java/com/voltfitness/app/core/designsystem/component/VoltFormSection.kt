@@ -12,23 +12,33 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voltfitness.app.ui.theme.VoltTheme
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Surface
-import androidx.compose.ui.tooling.preview.Preview
 
+/**
+ * An expandable container for grouping related form fields or content sections.
+ *
+ * @param title Descriptive text for the section header.
+ * @param icon Leading [ImageVector] representing the section's purpose.
+ * @param isExpanded Current state of the section visibility.
+ * @param onToggle Callback triggered when the header is clicked.
+ * @param modifier Layout adjustments for the card container.
+ * @param content Composable lambda containing the section's internal elements.
+ */
 @Composable
 fun VoltFormSection(
     title: String,
@@ -39,11 +49,11 @@ fun VoltFormSection(
     content: @Composable () -> Unit
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.voltFieldModifier(modifier),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = MaterialTheme.shapes.large
+        shape = voltSectionShape
     ) {
         Column {
             Row(
@@ -71,7 +81,7 @@ fun VoltFormSection(
                 }
                 Icon(
                     imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                    contentDescription = if (isExpanded) "Collapse" else "Expand"
+                    contentDescription = if (isExpanded) "Collapse $title section" else "Expand $title section"
                 )
             }
 
@@ -104,7 +114,10 @@ fun VoltFormSection(
 @Composable
 private fun VoltFormSectionPreview() {
     VoltTheme {
-        Surface(modifier = Modifier.padding(16.dp)) {
+        Surface(
+            modifier = Modifier.padding(16.dp),
+            color = MaterialTheme.colorScheme.background
+        ) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
                 VoltFormSection(
@@ -126,34 +139,7 @@ private fun VoltFormSectionPreview() {
                         onValueChange = {},
                         label = "Primary Objective"
                     )
-                    VoltMeasurementField(
-                        value = "4",
-                        onValueChange = {},
-                        label = "Sessions per week",
-                        suffix = "days",
-                        isDecimal = false
-                    )
                 }
-            }
-        }
-    }
-}
-
-@Preview(name = "Form Section Context", showBackground = true)
-@Composable
-private fun VoltFormSectionContextPreview() {
-    VoltTheme {
-        Surface(modifier = Modifier.padding(16.dp)) {
-            VoltFormSection(
-                title = "Bio",
-                icon = Icons.Default.Person,
-                isExpanded = true,
-                onToggle = {}
-            ) {
-                Text(
-                    text = "This is a brief description of the user profile section.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
             }
         }
     }

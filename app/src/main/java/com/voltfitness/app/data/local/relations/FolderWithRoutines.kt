@@ -5,6 +5,9 @@ import androidx.room.Relation
 import com.voltfitness.app.data.local.entities.FolderEntity
 import com.voltfitness.app.data.local.entities.RoutineEntity
 
+/**
+ * Represents a one-to-many relationship between a folder and its contained routines.
+ */
 data class FolderWithRoutines(
     @Embedded
     val folder: FolderEntity,

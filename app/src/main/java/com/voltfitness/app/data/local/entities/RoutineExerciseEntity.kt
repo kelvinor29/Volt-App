@@ -7,10 +7,10 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
- * Local entity representing an exercise assigned to a specific routine day.
+ * Mapping between a routine day and a specific exercise.
  *
- * [exerciseName] is intentionally stored here to avoid depending on a join
- * with the exercise catalog every time the routine detail/editor is loaded.
+ * [exerciseName] is denormalized here to allow quick rendering of routine lists
+ * without heavy JOIN operations on the exercise catalog.
  */
 @Entity(
     tableName = "routine_exercises",
@@ -33,8 +33,10 @@ data class RoutineExerciseEntity(
     val routineId: Long,
     val dayId: Long,
     val exerciseId: String,
+
     @ColumnInfo(name = "exercise_name")
     val exerciseName: String,
+
     val orderInDay: Int,
     val sets: Int,
     val repsRange: String,

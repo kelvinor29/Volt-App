@@ -3,7 +3,6 @@ package com.voltfitness.app.core.designsystem.component
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -25,6 +24,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voltfitness.app.ui.theme.VoltTheme
 
+/**
+ * High-level text input component for the Volt design system.
+ *
+ * Automatically handles keyboard types based on the presence of a [suffix]
+ * and centralizes styling, error messaging, and layout constraints.
+ *
+ * @param value Current input text.
+ * @param onValueChange Callback for text updates.
+ * @param label Descriptive header for the field.
+ * @param suffix Optional unit or label displayed at the end.
+ * @param modifier Layout adjustments for the text field.
+ * @param leadingIcon Optional [ImageVector] to provide visual context.
+ * @param imeAction Keyboard action (e.g., [ImeAction.Next], [ImeAction.Done]).
+ * @param isError Triggers error styling and shows [errorMessage].
+ * @param isDecimal Only relevant if [suffix] is present; enables decimal numeric input.
+ * @param errorMessage Message shown below the field when [isError] is true.
+ * @param enabled Controls interaction and visual state.
+ * @param readOnly Prevents manual text input while maintaining focusability.
+ * @param singleLine Restricts the input to one line.
+ * @param keyboardType Specific [KeyboardType] (defaults to Text or Numeric depending on suffix).
+ */
 @Composable
 fun VoltTextField(
     value: String,
@@ -59,14 +79,12 @@ fun VoltTextField(
                 overflow = TextOverflow.Ellipsis
             )
         },
-        modifier = modifier.voltFieldModifier(),
+        modifier = Modifier.voltFieldModifier(modifier),
         leadingIcon = leadingIcon?.let {
             {
                 Icon(
                     imageVector = it,
-                    contentDescription = null,
-                    tint = if (isError) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.primary
+                    contentDescription = null
                 )
             }
         },
@@ -75,7 +93,6 @@ fun VoltTextField(
             if (isError && errorMessage != null) {
                 Text(
                     text = errorMessage,
-                    color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.basicMarquee(),
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -89,8 +106,8 @@ fun VoltTextField(
             keyboardType = computedKeyboardType,
             imeAction = imeAction
         ),
-        shape = MaterialTheme.shapes.medium,
-        colors = voltFieldColors()
+        shape = voltFieldShape,
+        colors = voltFieldColors(isError = isError)
     )
 }
 
@@ -105,7 +122,6 @@ private fun VoltTextFieldPreview() {
     VoltTheme {
         Surface(modifier = Modifier.padding(16.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-
                 VoltTextField(
                     value = "",
                     onValueChange = {},
@@ -138,20 +154,5 @@ private fun VoltTextFieldPreview() {
                 )
             }
         }
-    }
-}
-
-@Preview(name = "Error", showBackground = true)
-@Composable
-private fun VoltTextFieldErrorPreview() {
-    VoltTheme {
-        VoltTextField(
-            modifier = Modifier.padding(16.dp),
-            value = "Incorrect value",
-            onValueChange = {},
-            label = "Input error",
-            isError = true,
-            errorMessage = "This field is required."
-        )
     }
 }

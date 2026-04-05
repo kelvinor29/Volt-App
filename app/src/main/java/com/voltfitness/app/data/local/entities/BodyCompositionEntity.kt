@@ -1,10 +1,17 @@
 package com.voltfitness.app.data.local.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * Historical record of a user's physical metrics and body composition.
+ *
+ * Persists both raw measurements (height, weight) and derived metrics (BMI, FFMI)
+ * for progress tracking over time.
+ */
 @Entity(
     tableName = "body_composition_entries",
     foreignKeys = [
@@ -15,15 +22,18 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("userId"), Index("dateEpochDay")]
+    indices = [
+        Index("userId"),
+        Index("dateEpochDay")
+    ]
 )
 data class BodyCompositionEntity(
     @PrimaryKey(autoGenerate = true)
     val entryId: Long = 0,
     val userId: Long,
-    val dateEpochDay: Long,       // LocalDate.toEpochDay()
+    val dateEpochDay: Long,
 
-    // Body composition data
+    // Core Metrics
     val heightCm: Float,
     val weightKg: Float,
     val bodyFatPercent: Float?,
@@ -34,7 +44,7 @@ data class BodyCompositionEntity(
     val metabolicAge: Int?,
     val boneMassKg: Float?,
 
-    // Body measurements
+    // Circumferences
     val chestCm: Float?,
     val waistCm: Float?,
     val hipCm: Float?,
@@ -44,14 +54,13 @@ data class BodyCompositionEntity(
     val leftLegCm: Float?,
     val rightLegCm: Float?,
 
-    // Calculated data
-    val fatMassKg: Float?,          // Weight x (BFP / 100)
-    val leanMassKg: Float?,         // Weight - Fat mass
-    val ffmi: Float?,               // FFM / height_m2
-    val waistHipRatio: Float?,      // Waist / Hip
+    // Calculated Health Markers
+    val fatMassKg: Float?,
+    val leanMassKg: Float?,
+    val ffmi: Float?,
+    val waistHipRatio: Float?,
     val compositionScore: Float?,
 
-    @androidx.room.ColumnInfo(defaultValue = "(strftime('%s','now') * 1000)")
-    val createdAt: Long = System.currentTimeMillis(),
+    @ColumnInfo(defaultValue = "(strftime('%s','now') * 1000)")
+    val createdAt: Long = System.currentTimeMillis()
 )
-

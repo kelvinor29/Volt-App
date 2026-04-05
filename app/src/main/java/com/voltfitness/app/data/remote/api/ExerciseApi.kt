@@ -6,21 +6,31 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
- * Retrofit interface for the ExerciseDB API on RapidAPI.
- * Authentication is handled via OkHttp interceptor in [NetworkModule].
+ * Interface defining the endpoints for the ExerciseDB API via RapidAPI.
+ * Authentication and base URL configuration are managed by the OkHttp interceptor.
  *
- * @see <a href="https://edb-docs.up.railway.app">ExerciseDB Docs</a>
+ * @see <a href="https://edb-docs.up.railway.app">ExerciseDB Documentation</a>
  */
 interface ExerciseApi {
 
-    /** Fetch all exercises. Set limit=0 for the full list (requires PRO plan). */
+    /**
+     * Retrieves a list of all available exercises.
+     *
+     * @param limit Maximum number of results to return. Use 0 for full list (if supported by API plan).
+     * @param offset Number of results to skip for pagination.
+     */
     @GET("exercises")
     suspend fun getExercises(
         @Query("limit") limit: Int = 0,
         @Query("offset") offset: Int = 0
     ): List<RemoteExerciseDto>
 
-    /** Search exercises by name (partial match, server-side). */
+    /**
+     * Performs a server-side search for exercises by name using partial matching.
+     *
+     * @param name The exercise name or keyword to search for.
+     * @param limit Maximum number of results to return.
+     */
     @GET("exercises/name/{name}")
     suspend fun searchByName(
         @Path("name") name: String,
@@ -29,33 +39,57 @@ interface ExerciseApi {
 
     // ==================== CATALOG ENDPOINTS ====================
 
-    /** Returns all available body parts (e.g., "chest", "back", "legs"). */
+    /**
+     * Fetches all unique body part categories available in the database.
+     * Examples: "chest", "back", "cardio".
+     */
     @GET("exercises/bodyPartList")
     suspend fun getBodyPartList(): List<String>
 
-    /** Returns all available target muscles (e.g., "biceps", "quads"). */
+    /**
+     * Fetches all unique target muscle groups.
+     * Examples: "abs", "biceps", "glutes".
+     */
     @GET("exercises/targetList")
     suspend fun getTargetList(): List<String>
 
-    /** Returns all available equipment types (e.g., "dumbbell", "barbell"). */
+    /**
+     * Fetches all available equipment types.
+     * Examples: "dumbbell", "kettlebell", "body weight".
+     */
     @GET("exercises/equipmentList")
     suspend fun getEquipmentList(): List<String>
 
-    /** Fetch exercises filtered by body part. */
+    /**
+     * Filters exercises based on a specific body part.
+     *
+     * @param bodyPart The exact category name retrieved from [getBodyPartList].
+     * @param limit Maximum number of results to return.
+     */
     @GET("exercises/bodyPart/{bodyPart}")
     suspend fun getExercisesByBodyPart(
         @Path("bodyPart") bodyPart: String,
         @Query("limit") limit: Int = 0
     ): List<RemoteExerciseDto>
 
-    /** Fetch exercises filtered by target muscle. */
+    /**
+     * Filters exercises based on a specific target muscle.
+     *
+     * @param target The exact muscle name retrieved from [getTargetList].
+     * @param limit Maximum number of results to return.
+     */
     @GET("exercises/target/{target}")
     suspend fun getExercisesByTarget(
         @Path("target") target: String,
         @Query("limit") limit: Int = 0
     ): List<RemoteExerciseDto>
 
-    /** Fetch exercises filtered by equipment. */
+    /**
+     * Filters exercises based on a specific equipment type.
+     *
+     * @param equipment The exact equipment name retrieved from [getEquipmentList].
+     * @param limit Maximum number of results to return.
+     */
     @GET("exercises/equipment/{equipment}")
     suspend fun getExercisesByEquipment(
         @Path("equipment") equipment: String,

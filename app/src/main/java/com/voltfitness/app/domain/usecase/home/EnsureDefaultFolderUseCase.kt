@@ -26,7 +26,7 @@ class EnsureDefaultFolderUseCase @Inject constructor(
     suspend operator fun invoke(userId: Long) {
         val exists = folderRepository.existsByName(userId, DEFAULT_FOLDER_NAME)
         if (!exists) {
-            folderRepository.insert(
+            folderRepository.upsertFolder(
                 Folder(
                     id = 0L,
                     userId = userId,

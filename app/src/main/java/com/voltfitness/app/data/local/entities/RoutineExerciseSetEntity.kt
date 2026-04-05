@@ -5,6 +5,9 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * Prescribed targets for a specific set within a routine exercise.
+ */
 @Entity(
     tableName = "routine_exercises_sets",
     foreignKeys = [

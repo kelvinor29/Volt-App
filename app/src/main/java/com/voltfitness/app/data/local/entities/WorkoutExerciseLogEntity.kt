@@ -5,6 +5,10 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * Data log for a single set performed during a workout session.
+ * Tracks both the plan (target) and the execution (performed).
+ */
 @Entity(
     tableName = "workout_exercise_logs",
     foreignKeys = [
@@ -15,7 +19,11 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("sessionId"), Index("exerciseId"), Index("routineExerciseId")]
+    indices = [
+        Index("sessionId"),
+        Index("exerciseId"),
+        Index("routineExerciseId")
+    ]
 )
 data class WorkoutExerciseLogEntity(
     @PrimaryKey(autoGenerate = true)
@@ -31,5 +39,5 @@ data class WorkoutExerciseLogEntity(
     val performedReps: Int?,
     val performedWeightKg: Float?,
     val performedRpe: Float?,
-    val isCompleted: Boolean
+    val isCompleted: Boolean = false
 )

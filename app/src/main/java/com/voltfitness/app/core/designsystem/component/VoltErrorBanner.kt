@@ -1,5 +1,7 @@
 package com.voltfitness.app.core.designsystem.component
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,17 +15,26 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voltfitness.app.ui.theme.VoltTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Surface
-import androidx.compose.ui.tooling.preview.Preview
 
+/**
+ * A high-visibility alert banner for communicating critical errors or system failures.
+ *
+ * Designed to be placed at the top of a screen or within a scrollable container.
+ * Uses the theme's error container colors to ensure the message is prominent
+ * and distinguishable from standard UI elements.
+ *
+ * @param message The descriptive error text to be displayed.
+ * @param onDismiss Callback triggered when the user acknowledges or closes the banner.
+ * @param modifier Layout adjustments for the banner container.
+ */
 @Composable
 fun VoltErrorBanner(
     message: String,
@@ -44,7 +55,7 @@ fun VoltErrorBanner(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                Icons.Filled.Warning,
+                imageVector = Icons.Filled.Warning,
                 contentDescription = "Error",
                 tint = MaterialTheme.colorScheme.error
             )
@@ -57,7 +68,7 @@ fun VoltErrorBanner(
             )
             IconButton(onClick = onDismiss) {
                 Icon(
-                    Icons.Filled.Close,
+                    imageVector = Icons.Filled.Close,
                     contentDescription = "Dismiss error"
                 )
             }
@@ -76,20 +87,16 @@ private fun VoltErrorBannerPreview() {
     VoltTheme {
         Surface(modifier = Modifier.padding(16.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-
-                // Standard Short Error
                 VoltErrorBanner(
                     message = "Failed to sync your workout data.",
                     onDismiss = {}
                 )
 
-                // Long Error Message (Testing Text Wrap)
                 VoltErrorBanner(
                     message = "A connection timeout occurred while attempting to reach the ExerciseDB server. Please verify your internet settings and try again.",
                     onDismiss = {}
                 )
 
-                // Simple Authentication Error
                 VoltErrorBanner(
                     message = "Invalid credentials. Please sign in again.",
                     onDismiss = {}

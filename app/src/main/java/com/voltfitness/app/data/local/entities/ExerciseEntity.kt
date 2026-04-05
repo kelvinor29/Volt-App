@@ -4,8 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Room entity representing a cached exercise from the ExerciseDB API.
- * Includes all fields from the API response for offline-first access.
+ * Local representation of a fitness exercise.
+ *
+ * Synchronized with the ExerciseDB API to support full offline capabilities
+ * including exercise search and instruction reading.
  */
 @Entity(tableName = "exercises")
 data class ExerciseEntity(

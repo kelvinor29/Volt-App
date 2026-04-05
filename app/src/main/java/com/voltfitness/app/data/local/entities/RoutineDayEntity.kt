@@ -5,6 +5,9 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * Represents a specific training day within a routine (e.g., "Leg Day").
+ */
 @Entity(
     tableName = "routine_days",
     foreignKeys = [
@@ -21,7 +24,7 @@ data class RoutineDayEntity(
     @PrimaryKey(autoGenerate = true)
     val dayId: Long = 0,
     val routineId: Long,
-    val dayOrder: Int,              // 1, 2, 3...
-    val name: String,               // "Day 1 - Chest & Triceps
-    val focusBodyParts: String?     // CSV/JSON: "Chest, Triceps"
+    val dayOrder: Int,
+    val name: String,
+    val focusBodyParts: String? // Comma-separated or JSON string for quick UI display
 )

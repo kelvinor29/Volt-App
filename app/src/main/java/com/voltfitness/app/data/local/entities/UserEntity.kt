@@ -1,8 +1,12 @@
 package com.voltfitness.app.data.local.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+/**
+ * Central user profile and settings entity.
+ */
 @Entity(tableName = "users")
 data class UserEntity(
     @PrimaryKey(autoGenerate = true)
@@ -10,13 +14,13 @@ data class UserEntity(
     val name: String,
     val email: String?,
     val gender: String?,
-    val birthDate: Long?,            // Timestamp
-    val activityLevel: String?,      // "sedentary","moderate","high"
-    val goal: String?,               // "Hypertrophy","Fat loss", etc.
-    val experienceLevel: String?,    // "beginner","intermediate","advanced"
+    val birthDate: Long?,           // Epoch timestamp
+    val activityLevel: String?,     // Aligned with ProfileOptions.ActivityLevel
+    val goal: String?,              // Aligned with ProfileOptions.FitnessGoal
+    val experienceLevel: String?,   // Aligned with ProfileOptions.ExperienceLevel
     val gymName: String?,
 
-    @androidx.room.ColumnInfo(defaultValue = "(strftime('%s','now') * 1000)")
+    @ColumnInfo(defaultValue = "(strftime('%s','now') * 1000)")
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long?
+    val updatedAt: Long? = null
 )

@@ -4,10 +4,11 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import com.voltfitness.app.data.local.entities.RoutineDayEntity
 import com.voltfitness.app.data.local.entities.RoutineEntity
+import com.voltfitness.app.data.local.entities.RoutineExerciseEntity
 
 /**
- * Full Room aggregate for a routine:
- * routine metadata -> days -> exercises with sets.
+ * Aggregate data class that represents a complete routine hierarchy,
+ * including its days and nested exercises with their sets.
  */
 data class RoutineWithFullDays(
     @Embedded val routine: RoutineEntity,
@@ -20,12 +21,12 @@ data class RoutineWithFullDays(
 )
 
 /**
- * Room relation representing one day and all its exercises.
+ * Represents a specific day within a routine and its associated exercises.
  */
 data class RoutineDayWithExercises(
     @Embedded val day: RoutineDayEntity,
     @Relation(
-        entity = com.voltfitness.app.data.local.entities.RoutineExerciseEntity::class,
+        entity = RoutineExerciseEntity::class,
         parentColumn = "dayId",
         entityColumn = "dayId"
     )

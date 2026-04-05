@@ -6,7 +6,7 @@ import com.voltfitness.app.data.local.entities.RoutineExerciseEntity
 import com.voltfitness.app.data.local.entities.RoutineExerciseSetEntity
 
 /**
- * Room relation representing one routine exercise with all its planned sets.
+ * Represents an exercise within a routine along with its collection of planned sets.
  */
 data class RoutineExerciseWithSets(
     @Embedded val exercise: RoutineExerciseEntity,

@@ -26,11 +26,8 @@ interface FolderRepository {
     /** Checks if a folder with the given name already exists for a user. */
     suspend fun existsByName(userId: Long, name: String): Boolean
 
-    /** Inserts a new folder (ignores on conflict). Returns the generated ID. */
-    suspend fun insert(folder: Folder): Long
-
-    /** Updates an existing folder's fields. */
-    suspend fun update(folder: Folder)
+    /** Upsert a folder (ignores on conflict). Returns the generated ID. */
+    suspend fun upsertFolder(folder: Folder): Long
 
     /** Deletes a folder and all its routines (via CASCADE). */
     suspend fun delete(folder: Folder)

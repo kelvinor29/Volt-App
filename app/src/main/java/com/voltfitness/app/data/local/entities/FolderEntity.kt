@@ -1,10 +1,14 @@
 package com.voltfitness.app.data.local.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * Logical container for organizing [RoutineEntity] objects.
+ */
 @Entity(
     tableName = "folders",
     foreignKeys = [
@@ -25,7 +29,7 @@ data class FolderEntity(
     val description: String?,
     val colorHex: String?,
 
-    @androidx.room.ColumnInfo(defaultValue = "(strftime('%s','now') * 1000)")
+    @ColumnInfo(defaultValue = "(strftime('%s','now') * 1000)")
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long?
+    val updatedAt: Long? = null
 )

@@ -15,6 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
+/**
+ * A selectable button component that integrates a [Checkbox] with a text label.
+ *
+ * Provides a larger touch target for selection actions. The background color
+ * automatically switches to [MaterialTheme.colorScheme.primaryContainer] when selected.
+ *
+ * @param label The text description to display.
+ * @param checked Whether the button is currently in the selected state.
+ * @param onCheckedChange Callback triggered when the button is clicked, providing the toggled value.
+ * @param modifier Layout adjustments for the button container.
+ * @param enabled Controls the enabled state of both the button and the internal checkbox.
+ */
 @Composable
 fun VoltCheckButton(
     label: String,

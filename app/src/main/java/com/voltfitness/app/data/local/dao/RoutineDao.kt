@@ -1,10 +1,6 @@
 package com.voltfitness.app.data.local.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
 import com.voltfitness.app.data.local.entities.RoutineDayEntity
 import com.voltfitness.app.data.local.entities.RoutineEntity
 import com.voltfitness.app.data.local.entities.RoutineExerciseEntity
@@ -14,58 +10,66 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface RoutineDao {
 
-    // ==================== ROUTINES ====================
-
+    // TODO: Improve update/insert strategy for routines.
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertRoutine(routine: RoutineEntity): Long
 
+    /**
+     * Deactivates all routines in the specified folder.
+     */
     @Query("UPDATE routines SET is_active = 0 WHERE folderId = :folderId")
-    suspend fun resetMainRoutinesForFolderId(folderId: Long)
+    suspend fun deactivateAllRoutinesInFolder(folderId: Long)
 
+    /**
+     * Persists a routine and ensures it is the only active one in its folder if [routine.isActive] is true.
+     */
     @Transaction
     suspend fun upsertRoutineWithMaintenance(routine: RoutineEntity): Long {
-        if (routine.isActive)
-            resetMainRoutinesForFolderId(routine.folderId)
+        if (routine.isActive) {
+            deactivateAllRoutinesInFolder(routine.folderId)
+        }
         return upsertRoutine(routine)
     }
 
+    /**
+     * Retrieves a single routine by ID.
+     */
     @Query("SELECT * FROM routines WHERE routineId = :id")
     suspend fun getRoutineById(id: Long): RoutineEntity?
 
     /**
-     * Full aggregate query for detail/editor flows.
+     * Retrieves a single routine with its full days and exercises, by ID.
      */
     @Transaction
     @Query("SELECT * FROM routines WHERE routineId = :routineId")
     fun getRoutineWithFullDaysFlow(routineId: Long): Flow<RoutineWithFullDays?>
 
-    @Query("DELETE FROM routines WHERE routineId = :routineId")
-    suspend fun deleteRoutineById(routineId: Long)
-
-    // ==================== ROUTINE DAYS ====================
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertRoutineDay(day: RoutineDayEntity): Long
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertRoutineDays(days: List<RoutineDayEntity>): List<Long>
-
+    /**
+     * Delete days associated with a routine, by ID.
+     */
     @Query("DELETE FROM routine_days WHERE routineId = :routineId")
     suspend fun deleteRoutineDaysByRoutineId(routineId: Long)
 
-    @Query(
-        """
-        DELETE FROM routine_days
-        WHERE routineId = :routineId
-        AND dayId NOT IN (:keepDayIds)
-        """
-    )
+    /**
+     * Removes days that are no longer part of the routine to prevent orphan records.
+     */
+    @Query("DELETE FROM routine_days WHERE routineId = :routineId AND dayId NOT IN (:keepDayIds)")
     suspend fun deleteOrphanDays(routineId: Long, keepDayIds: List<Long>)
 
-    // ==================== ROUTINE EXERCISES ====================
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertRoutineExercises(exercises: List<RoutineExerciseEntity>)
+
+    /**
+     * Delete a routine by ID.
+     */
+    @Query("DELETE FROM routines WHERE routineId = :routineId")
+    suspend fun deleteRoutineById(routineId: Long)
+
+    @Upsert
+    suspend fun upsertRoutineDay(day: RoutineDayEntity): Long
+
+    @Upsert
+    suspend fun upsertRoutineDays(days: List<RoutineDayEntity>): List<Long>
 
     @Query(
         """

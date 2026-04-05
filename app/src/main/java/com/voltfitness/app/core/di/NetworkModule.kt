@@ -2,25 +2,51 @@ package com.voltfitness.app.core.di
 
 import com.voltfitness.app.BuildConfig
 import com.voltfitness.app.data.remote.api.ExerciseApi
-import com.voltfitness.app.data.remote.source.ExerciseRemoteDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import javax.inject.Singleton
 
+/**
+ * Hilt module for providing network-related dependencies.
+ *
+ * Configures the communication layer with RapidAPI using Kotlinx Serialization.
+ * Optimized for resilience against external API schema changes.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
     private const val BASE_URL = "https://exercisedb.p.rapidapi.com/"
     private const val RAPID_API_HOST = "exercisedb.p.rapidapi.com"
+    private const val CONTENT_TYPE = "application/json"
 
+    /**
+     * Provides a configured [Json] instance for robust deserialization.
+     *
+     * Configuration:
+     * - [ignoreUnknownKeys]: Prevents crashes when the API adds new fields.
+     * - [coerceInputValues]: Provides safety for null/missing non-nullable types.
+     */
+    @Provides
+    @Singleton
+    fun provideJson(): Json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+        isLenient = true
+    }
+
+    /**
+     * Configures [OkHttpClient] with authentication and logging.
+     */
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
@@ -32,34 +58,33 @@ object NetworkModule {
             chain.proceed(request)
         }
 
-        val builder = OkHttpClient.Builder()
+        return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
-
-        // Only log in debug builds
-        if (BuildConfig.DEBUG) {
-            builder.addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            })
-        }
-
-        return builder.build()
+            .apply {
+                if (BuildConfig.DEBUG) {
+                    addInterceptor(HttpLoggingInterceptor().apply {
+                        level = HttpLoggingInterceptor.Level.BODY
+                    })
+                }
+            }
+            .build()
     }
 
-
+    /**
+     * Provides the [ExerciseApi] service using Kotlinx Serialization converter.
+     */
     @Provides
     @Singleton
-    fun provideExerciseApi(okHttpClient: OkHttpClient): ExerciseApi {
+    fun provideExerciseApi(
+        okHttpClient: OkHttpClient,
+        json: Json
+    ): ExerciseApi {
+        val contentType = CONTENT_TYPE.toMediaType()
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(json.asConverterFactory(contentType))
             .build()
             .create(ExerciseApi::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideExerciseRemoteDataSource(api: ExerciseApi): ExerciseRemoteDataSource {
-        return ExerciseRemoteDataSource(api)
     }
 }

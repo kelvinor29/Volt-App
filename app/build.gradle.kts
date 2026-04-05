@@ -114,7 +114,7 @@ dependencies {
 
     // ========== RETROFIT ==========
     implementation(libs.retrofit.core)
-    implementation(libs.retrofit.converter.gson)
+    implementation(libs.retrofit.converter.kotlinx)
     implementation(libs.okhttp.logging)
 
     // ========== DATABASE (Room) ==========
@@ -140,7 +140,6 @@ dependencies {
     implementation(libs.timber)
 
     // ========== SERIALIZATION ==========
-    implementation(libs.gson)
     implementation(libs.kotlinx.serialization.json)
 
     // ========== TESTING ==========

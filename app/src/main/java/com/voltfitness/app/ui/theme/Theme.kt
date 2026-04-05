@@ -1,79 +1,90 @@
 package com.voltfitness.app.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import android.app.Activity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 /**
- * VOLT THEME
+ * Volt Fitness Dark Color Scheme configuration.
+ *
+ * Maps brand-specific tokens to standard Material 3 semantic roles.
+ * Designed for high-contrast OLED displays with a focus on deep backgrounds.
  */
-
-// ========== COLOR SCHEME ==========
 private val VoltDarkColorScheme = darkColorScheme(
-    // Primary colors (Cyan)
     primary = VoltCyan,
     onPrimary = Color.White,
     primaryContainer = VoltCyanDark,
-    onPrimaryContainer = VoltCyanLight,
+    onPrimaryContainer = VoltTextPrimary,
 
-    // Secondary colors (Superficie elevada)
     secondary = VoltSurfaceVariant,
     onSecondary = VoltTextPrimary,
     secondaryContainer = VoltSurfaceDark,
     onSecondaryContainer = VoltTextSecondary,
 
-    // Tertiary colors (Accent)
     tertiary = VoltAccentBlue,
     onTertiary = Color.White,
     tertiaryContainer = VoltAccentPurple,
     onTertiaryContainer = Color.White,
 
-    // Background
     background = VoltBackgroundDark,
     onBackground = VoltTextPrimary,
 
-    // Surface (Cards, panels)
     surface = VoltSurfaceDark,
     onSurface = VoltTextPrimary,
     surfaceVariant = VoltSurfaceVariant,
     onSurfaceVariant = VoltTextSecondary,
 
-    // Surface Tint
     surfaceTint = VoltCyan,
 
-    // Outline
     outline = VoltBorderColor,
     outlineVariant = VoltDivider,
 
-    // Inverse colors (para snackbars, etc.)
     inverseSurface = VoltTextPrimary,
     inverseOnSurface = VoltBackgroundDark,
     inversePrimary = VoltCyanDark,
 
-    // Scrim (overlay de modales)
     scrim = VoltScrim,
 
-    // Error
     error = VoltError,
     onError = Color.White,
     errorContainer = VoltErrorDim,
     onErrorContainer = Color.White
 )
 
-// ========== MAIN THEME COMPOSABLE ==========
+/**
+ * Root theme composable for the Volt Fitness application.
+ *
+ * Configures [MaterialTheme] with brand colors, typography, and shapes.
+ * Forces Dark Theme regardless of system settings to maintain brand identity.
+ *
+ * @param content The UI hierarchy to be themed.
+ */
 @Composable
 fun VoltTheme(
-    darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    // Forzar dark theme siempre (ignorar system theme)
     val colorScheme = VoltDarkColorScheme
+    val view = LocalView.current
+
+    // Update status bar appearance to match brand background
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.background.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+        }
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,
         typography = VoltTypography,
+        shapes = VoltShapes, // Centralized in Shape.kt
         content = content
     )
 }

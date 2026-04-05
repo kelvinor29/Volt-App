@@ -9,25 +9,21 @@ import androidx.compose.ui.unit.sp
 import com.voltfitness.app.R
 
 /**
- * VOLT TYPOGRAPHY SYSTEM
- * Fallback: System default
+ * Volt Fitness Typography System.
+ * Uses the Inter font family as the primary brand typeface.
  */
 
-// ========== FONT FAMILIES ==========
-
- val InterFontFamily = FontFamily(
-     Font(R.font.inter_regular, FontWeight.Normal),      // 400
-     Font(R.font.inter_medium, FontWeight.Medium),               // 500
-     Font(R.font.inter_semibold, FontWeight.SemiBold),          // 600
-     Font(R.font.inter_bold, FontWeight.Bold)                  // 700
- )
+val InterFontFamily = FontFamily(
+    Font(R.font.inter_regular, FontWeight.Normal),
+    Font(R.font.inter_medium, FontWeight.Medium),
+    Font(R.font.inter_semibold, FontWeight.SemiBold),
+    Font(R.font.inter_bold, FontWeight.Bold)
+)
 
 val VoltFontFamily = InterFontFamily
 
-// ========== TYPOGRAPHY SCALE ==========
-
 val VoltTypography = Typography(
-    // ========== DISPLAY (Títulos grandes) ==========
+    // ========== DISPLAY (Hero text/Large metrics) ==========
     displayLarge = TextStyle(
         fontFamily = VoltFontFamily,
         fontWeight = FontWeight.Bold,
@@ -50,7 +46,7 @@ val VoltTypography = Typography(
         letterSpacing = 0.sp
     ),
 
-    // ========== HEADLINE (Títulos secciones) ==========
+    // ========== HEADLINE (Section headers) ==========
     headlineLarge = TextStyle(
         fontFamily = VoltFontFamily,
         fontWeight = FontWeight.SemiBold,
@@ -73,7 +69,7 @@ val VoltTypography = Typography(
         letterSpacing = 0.sp
     ),
 
-    // ========== TITLE (Títulos componentes) ==========
+    // ========== TITLE (Component labels) ==========
     titleLarge = TextStyle(
         fontFamily = VoltFontFamily,
         fontWeight = FontWeight.SemiBold,
@@ -96,7 +92,7 @@ val VoltTypography = Typography(
         letterSpacing = 0.1.sp
     ),
 
-    // ========== BODY (Texto párrafos) ==========
+    // ========== BODY (Paragraphs/Content) ==========
     bodyLarge = TextStyle(
         fontFamily = VoltFontFamily,
         fontWeight = FontWeight.Normal,
@@ -119,7 +115,7 @@ val VoltTypography = Typography(
         letterSpacing = 0.4.sp
     ),
 
-    // ========== LABEL (Botones, etiquetas) ==========
+    // ========== LABEL (Actions/Buttons) ==========
     labelLarge = TextStyle(
         fontFamily = VoltFontFamily,
         fontWeight = FontWeight.Medium,

@@ -18,15 +18,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel for [BodyCompositionScreen].
+ * Orchestrates data for the [BodyCompositionScreen].
  *
- * Single responsibility: loading and exposing the user's body composition
- * history. It also emits a one-shot [navigationEffect] to redirect first-time
- * users to [AddBodyCompositionScreen] without leaking navigation logic into the
- * Composable.
- *
- * The redirect fires only once — guarded by [redirectHandled] — so rotating
- * the device or recomposing never triggers a duplicate navigation.
+ * Responsibilities:
+ * - Reactive loading of user profile and historical body metrics.
+ * - Automatic redirection to onboarding ([NavigateToAdd]) for first-time users.
+ * - Transformation of domain entities into UI-optimized display models.
  */
 @HiltViewModel
 class BodyCompositionViewModel @Inject constructor(
@@ -38,23 +35,26 @@ class BodyCompositionViewModel @Inject constructor(
     val uiState: StateFlow<BodyCompositionUiState> = _uiState.asStateFlow()
 
     /**
-     * One-shot navigation events consumed by the NavGraph host.
-     * Using [MutableSharedFlow] with replay = 0 ensures the event is
-     * delivered exactly once even across recompositions.
+     * One-shot navigation events consumed as side-effects by the UI layer.
+     * Uses a [SharedFlow] with no replay to prevent event re-triggering on configuration changes.
      */
     private val _navigationEffect = MutableSharedFlow<BodyCompositionNavEffect>(replay = 0)
     val navigationEffect: SharedFlow<BodyCompositionNavEffect> = _navigationEffect.asSharedFlow()
 
-    /** Prevents the first-launch redirect from firing more than once. */
+    /** Guard to ensure the "no-data" redirect logic only executes once per session. */
     private var redirectHandled = false
 
     init {
-        observeData()
+        observeBodyCompositionData()
     }
 
-    // ─── Data Loading ───────────────────────────────────────────────────────
+    // ─── Data Orchestration ─────────────────────────────────────────────────
 
-    private fun observeData() {
+    /**
+     * Connects to domain repositories to establish a reactive data stream.
+     * Combines user metadata with composition history.
+     */
+    private fun observeBodyCompositionData() {
         viewModelScope.launch {
             val userId = userRepository.getCurrentUserId()
             if (userId == null) {
@@ -64,11 +64,12 @@ class BodyCompositionViewModel @Inject constructor(
 
             val user = userRepository.getUserById(userId)
 
+            // Combine history stream with the existence check for first-launch logic
             combine(
                 bodyCompositionRepository.getRecentEntries(userId, limit = 50),
                 bodyCompositionRepository.hasEntries(userId),
             ) { entries, hasEntries ->
-                Pair(entries, hasEntries)
+                entries to hasEntries
             }.collect { (entries, hasEntries) ->
                 val displayItems = entries.map { it.toDisplayItem() }
 
@@ -83,17 +84,26 @@ class BodyCompositionViewModel @Inject constructor(
                     )
                 }
 
-                // Emit redirect only once, and only after we are sure there are no entries.
-                if (!hasEntries && !redirectHandled) {
-                    redirectHandled = true
-                    _navigationEffect.emit(BodyCompositionNavEffect.NavigateToAdd)
-                }
+                handleFirstLaunchRedirect(hasEntries)
             }
         }
     }
 
-    // ─── Mapping ────────────────────────────────────────────────────────────
+    /**
+     * Triggers navigation to the entry form if the user profile is empty.
+     */
+    private suspend fun handleFirstLaunchRedirect(hasEntries: Boolean) {
+        if (!hasEntries && !redirectHandled) {
+            redirectHandled = true
+            _navigationEffect.emit(BodyCompositionNavEffect.NavigateToAdd)
+        }
+    }
 
+    // ─── Internal Mappers ───────────────────────────────────────────────────
+
+    /**
+     * Local transformation from Domain Entity to UI Display Model.
+     */
     private fun BodyCompositionEntry.toDisplayItem() = BodyCompositionDisplayItem(
         entryId = entryId,
         date = date,
@@ -122,9 +132,9 @@ class BodyCompositionViewModel @Inject constructor(
 }
 
 /**
- * One-shot navigation effects emitted by [BodyCompositionViewModel].
+ * Defines unique navigation intents for the Body Composition flow.
  */
 sealed interface BodyCompositionNavEffect {
-    /** Redirect the user to the Add screen because they have no entries yet. */
+    /** Signals that the user must be redirected to the measurement form. */
     data object NavigateToAdd : BodyCompositionNavEffect
 }

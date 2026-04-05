@@ -1,34 +1,49 @@
 package com.voltfitness.app.ui.screens.bodycomposition.components
 
-
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.MonitorWeight
 import androidx.compose.material.icons.outlined.WaterDrop
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.voltfitness.app.core.designsystem.component.voltSectionShape
+import com.voltfitness.app.ui.theme.VoltError
+import com.voltfitness.app.ui.theme.VoltIconSize
+import com.voltfitness.app.ui.theme.VoltSpacing
+import com.voltfitness.app.ui.theme.VoltSuccess
+import com.voltfitness.app.ui.theme.VoltTheme
+import com.voltfitness.app.ui.theme.VoltWarning
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+private val SummaryDateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+
 /**
- * Quick summary header card displaying user info, latest measurement stats, and composition score.
+ * Featured header card for the body composition dashboard.
  *
- * @param userName Display name of the user
- * @param weight Latest body weight in kg
- * @param bodyFat Latest body fat percentage
- * @param muscleMass Latest muscle mass in kg
- * @param score Composition score (40-120 scale)
- * @param lastDate Date of the latest measurement
+ * Displays core metrics (Weight, Fat, Muscle) and the overall composition score.
  */
 @Composable
 fun QuickSummaryHeader(
@@ -37,92 +52,109 @@ fun QuickSummaryHeader(
     bodyFat: Float?,
     muscleMass: Float?,
     score: Float?,
-    lastDate: LocalDate
+    lastDate: LocalDate,
+    modifier: Modifier = Modifier
 ) {
-    val dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
-
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(20.dp),
+            .padding(VoltSpacing.medium),
+        shape = voltSectionShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Column(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(VoltSpacing.medium)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = userName,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Latest measurement: ${lastDate.format(dateFormatter)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
+            HeaderTopRow(userName, lastDate, score)
 
-                // Score circular indicator
-                score?.let {
-                    ScoreIndicator(score = it)
-                }
-            }
+            Spacer(modifier = Modifier.height(VoltSpacing.medium))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                QuickStatItem(
-                    icon = Icons.Outlined.MonitorWeight,
-                    value = "%.1f".format(weight),
-                    unit = "kg",
-                    label = "Weight"
-                )
-                bodyFat?.let {
-                    QuickStatItem(
-                        icon = Icons.Outlined.WaterDrop,
-                        value = "%.1f".format(it),
-                        unit = "%",
-                        label = "Fat"
-                    )
-                }
-                muscleMass?.let {
-                    QuickStatItem(
-                        icon = Icons.Outlined.FitnessCenter,
-                        value = "%.1f".format(it),
-                        unit = "kg",
-                        label = "Muscle"
-                    )
-                }
-            }
+            MetricsRow(weight, bodyFat, muscleMass)
         }
     }
 }
 
 /**
- * Circular score indicator with color-coded status.
- *
- * @param score Raw score value (40-120)
+ * Internal layout for the header's identity and score indicator.
+ */
+@Composable
+private fun HeaderTopRow(
+    userName: String,
+    lastDate: LocalDate,
+    score: Float?
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(
+                text = userName,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Latest measurement: ${lastDate.format(SummaryDateFormatter)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        score?.let { ScoreIndicator(score = it) }
+    }
+}
+
+/**
+ * Internal layout for the core metric items.
+ */
+@Composable
+private fun MetricsRow(
+    weight: Float,
+    bodyFat: Float?,
+    muscleMass: Float?
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        QuickStatItem(
+            icon = Icons.Outlined.MonitorWeight,
+            value = "%.1f".format(weight),
+            unit = "kg",
+            label = "Weight"
+        )
+        bodyFat?.let {
+            QuickStatItem(
+                icon = Icons.Outlined.WaterDrop,
+                value = "%.1f".format(it),
+                unit = "%",
+                label = "Fat"
+            )
+        }
+        muscleMass?.let {
+            QuickStatItem(
+                icon = Icons.Outlined.FitnessCenter,
+                value = "%.1f".format(it),
+                unit = "kg",
+                label = "Muscle"
+            )
+        }
+    }
+}
+
+/**
+ * Color-coded circular score indicator.
  */
 @Composable
 private fun ScoreIndicator(score: Float) {
     val color = when {
-        score >= 80f -> Color(0xFF4CAF50) // Green - Excellent
-        score >= 60f -> Color(0xFFFFC107) // Yellow - Good
-        score >= 40f -> Color(0xFFFF9800) // Orange - Fair
-        else -> Color(0xFFF44336)         // Red - Poor
+        score >= 80f -> VoltSuccess
+        score >= 60f -> VoltWarning
+        else -> VoltError
     }
 
     Box(
@@ -142,16 +174,11 @@ private fun ScoreIndicator(score: Float) {
 }
 
 /**
- * Compact statistic item for quick summary display.
- *
- * @param icon Icon representing the metric
- * @param value Formatted numeric value
- * @param unit Measurement unit
- * @param label Metric name
+ * Compact metric display item for header summaries.
  */
 @Composable
-fun QuickStatItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+private fun QuickStatItem(
+    icon: ImageVector,
     value: String,
     unit: String,
     label: String
@@ -160,10 +187,10 @@ fun QuickStatItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
-            modifier = Modifier.size(20.dp)
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(VoltIconSize.small)
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(VoltSpacing.extraSmall))
         Row(verticalAlignment = Alignment.Bottom) {
             Text(
                 text = value,
@@ -173,15 +200,48 @@ fun QuickStatItem(
             )
             Text(
                 text = unit,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 2.dp, bottom = 2.dp)
             )
         }
         Text(
             text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
+
+// region Previews
+
+@Preview(showBackground = true, backgroundColor = 0xFF1A1A1A)
+@Composable
+private fun QuickSummaryHeaderPreview() {
+    VoltTheme {
+        QuickSummaryHeader(
+            userName = "Kelvin",
+            weight = 82.5f,
+            bodyFat = 18.2f,
+            muscleMass = 38.4f,
+            score = 88f,
+            lastDate = LocalDate.now()
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF1A1A1A)
+@Composable
+private fun QuickSummaryHeaderIncompletePreview() {
+    VoltTheme {
+        QuickSummaryHeader(
+            userName = "New User",
+            weight = 70.0f,
+            bodyFat = null,
+            muscleMass = null,
+            score = null,
+            lastDate = LocalDate.now()
+        )
+    }
+}
+// endregion

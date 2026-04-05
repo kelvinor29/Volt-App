@@ -1,10 +1,17 @@
 package com.voltfitness.app.ui.screens.bodycomposition
 
-
 import java.time.LocalDate
 
 /**
- * UI state for the BodyCompositionScreen, holding loading state, user info, and composition data.
+ * UI state for the Body Composition screen.
+ *
+ * Aggregates loading status, user profile metadata, and historical
+ * measurement data for reactive UI updates.
+ *
+ * @property isLoading Indicates if a data fetch is currently in progress.
+ * @property userName Display name for personalizing the dashboard.
+ * @property latestEntry The most recent measurement, prioritized for the summary card.
+ * @property historyEntries Chronological list of previous measurements for charts and history.
  */
 data class BodyCompositionUiState(
     val isLoading: Boolean = true,
@@ -16,14 +23,16 @@ data class BodyCompositionUiState(
 )
 
 /**
- * Display model for body composition entries, used in UI components.
- * Contains all metrics from BodyCompositionEntry plus formatting convenience.
+ * A UI-specific representation of a body composition measurement.
+ *
+ * Unlike domain models, this item is optimized for display, potentially
+ * containing pre-formatted strings or calculated UI metrics.
  */
 data class BodyCompositionDisplayItem(
     val entryId: Long = 0,
     val date: LocalDate = LocalDate.now(),
 
-    // Body composition data
+    // --- Core Composition Metrics ---
     val weightKg: Float = 0f,
     val bodyFatPercent: Float? = null,
     val waterPercent: Float? = null,
@@ -33,7 +42,7 @@ data class BodyCompositionDisplayItem(
     val metabolicAge: Int? = null,
     val boneMassKg: Float? = null,
 
-    // Body measurements
+    // --- Anthropometric Measurements ---
     val chestCm: Float? = null,
     val waistCm: Float? = null,
     val hipCm: Float? = null,
@@ -43,7 +52,7 @@ data class BodyCompositionDisplayItem(
     val leftLegCm: Float? = null,
     val rightLegCm: Float? = null,
 
-    // Calculated metrics
+    // --- Derived Health Indices ---
     val fatMassKg: Float? = null,
     val leanMassKg: Float? = null,
     val ffmi: Float? = null,
@@ -51,12 +60,13 @@ data class BodyCompositionDisplayItem(
     val compositionScore: Float? = null
 )
 
-
 /**
- * Fake data providers for previews of BodyComposition UI.
+ * Mock data provider for Compose Previews.
+ * Centralizes sample data to ensure visual consistency across preview components.
  */
 object BodyCompositionPreviewData {
 
+    /** Sample individual measurement. */
     val sampleEntry = BodyCompositionDisplayItem(
         entryId = 1L,
         date = LocalDate.now().minusDays(1),
@@ -83,6 +93,7 @@ object BodyCompositionPreviewData {
         compositionScore = 88f
     )
 
+    /** Sample list for history/list component previews. */
     val sampleHistory = listOf(
         sampleEntry,
         sampleEntry.copy(
@@ -100,5 +111,4 @@ object BodyCompositionPreviewData {
             compositionScore = 80f
         )
     )
-
 }

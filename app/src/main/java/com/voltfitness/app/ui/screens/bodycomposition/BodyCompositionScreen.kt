@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.voltfitness.app.R
+import com.voltfitness.app.core.designsystem.component.voltFieldShape
 import com.voltfitness.app.ui.screens.bodycomposition.components.CompositionTab
 import com.voltfitness.app.ui.screens.bodycomposition.components.HistoryTab
 import com.voltfitness.app.ui.screens.bodycomposition.components.MeasurementsTab
@@ -35,17 +36,19 @@ import com.voltfitness.app.ui.screens.bodycomposition.components.QuickSummaryHea
 import kotlinx.coroutines.launch
 
 /**
- * Main Body Composition screen displaying user metrics, measurements, and history.
+ * Main Body Composition hub that aggregates health metrics into a tabbed interface.
  *
- * This Composable is fully stateless — it only renders [uiState] and
- * forwards user intents via callbacks. Navigation side-effects
- * (e.g. the first-launch redirect) are handled upstream in the NavGraph,
- * which observes [BodyCompositionViewModel.navigationEffect].
+ * This screen is stateless; it consumes [uiState] and emits events via callbacks.
+ * It leverages [voltFieldShape] for selection components to maintain design consistency.
  *
- * @param uiState Current UI state from [BodyCompositionViewModel].
- * @param onAddNewMeasurement Callback to navigate to the Add screen.
- * @param onEntryClick Callback when a history entry is tapped.
- * @param modifier Optional layout modifier.
+ * Layout structure:
+ * 1. [QuickSummaryHeader]: Highlights key metrics (Weight, Body Fat, Muscle).
+ * 2. [PrimaryTabRow]: Navigation between Composition, Measurements, and History.
+ * 3. [HorizontalPager]: Swipable content area for each category.
+ *
+ * @param uiState Reactive UI state containing user data and history.
+ * @param onAddNewMeasurement Action trigger for the new entry form.
+ * @param onEntryClick Action trigger for viewing specific historical record details.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +75,7 @@ fun BodyCompositionScreen(
                 onClick = onAddNewMeasurement,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
                 text = { Text(stringResource(R.string.new_measurement)) },
+                shape = voltFieldShape
             )
         },
     ) { innerPadding ->
@@ -83,7 +87,10 @@ fun BodyCompositionScreen(
                     .padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
             }
             return@Scaffold
         }
@@ -91,8 +98,8 @@ fun BodyCompositionScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = innerPadding.calculateBottomPadding()),
         ) {
+            // Displays the most recent summary data at the top
             uiState.latestEntry?.let { entry ->
                 QuickSummaryHeader(
                     userName = uiState.userName,
@@ -104,15 +111,19 @@ fun BodyCompositionScreen(
                 )
             }
 
+            // Tab navigation synchronized with the Pager
             PrimaryTabRow(
                 selectedTabIndex = selectedTabIndex.value,
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.primary,
-                divider = { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant) },
+                divider = {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                },
             ) {
                 tabs.forEachIndexed { index, title ->
+                    val isSelected = selectedTabIndex.value == index
                     Tab(
-                        selected = selectedTabIndex.value == index,
+                        selected = isSelected,
                         onClick = {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(index)
@@ -121,14 +132,15 @@ fun BodyCompositionScreen(
                         text = {
                             Text(
                                 text = title,
-                                fontWeight = if (selectedTabIndex.value == index)
-                                    FontWeight.Bold else FontWeight.Normal,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                             )
                         },
                     )
                 }
             }
 
+            // Content area with swipe gesture support
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier

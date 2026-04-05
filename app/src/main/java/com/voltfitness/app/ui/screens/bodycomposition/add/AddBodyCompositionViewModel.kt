@@ -18,6 +18,12 @@ import java.time.LocalDate
 import java.time.Period
 import javax.inject.Inject
 
+/**
+ * ViewModel orchestrating the data entry for new body composition records.
+ *
+ * Manages form state, validates mandatory inputs, and coordinates with the
+ * domain layer for data persistence.
+ */
 @HiltViewModel
 class AddBodyCompositionViewModel @Inject constructor(
     private val saveBodyCompositionEntry: SaveBodyCompositionEntryUseCase,
@@ -30,6 +36,7 @@ class AddBodyCompositionViewModel @Inject constructor(
     private val _navigationEffect = MutableSharedFlow<AddBodyCompositionNavEffect>()
     val navigationEffect: SharedFlow<AddBodyCompositionNavEffect> = _navigationEffect.asSharedFlow()
 
+    // Internal cache for user profile metadata required by the use case
     private var cachedUserId: Long? = null
     private var cachedGender: String? = null
     private var cachedBirthDate: LocalDate? = null
@@ -38,69 +45,38 @@ class AddBodyCompositionViewModel @Inject constructor(
         prefetchUserData()
     }
 
+    /**
+     * Centralized intent handler for all UI events.
+     */
     fun onEvent(event: AddBodyCompositionEvent) {
         when (event) {
-            is AddBodyCompositionEvent.UpdateHeight ->
-                updateState { copy(heightCm = event.value) }
-
-            is AddBodyCompositionEvent.UpdateWeight ->
-                updateState { copy(weightKg = event.value) }
-
-            is AddBodyCompositionEvent.UpdateBodyFat ->
-                updateState { copy(bodyFatPercent = event.value) }
-
-            is AddBodyCompositionEvent.UpdateWater ->
-                updateState { copy(waterPercent = event.value) }
-
-            is AddBodyCompositionEvent.UpdateMuscleMass ->
-                updateState { copy(muscleMassKg = event.value) }
-
-            is AddBodyCompositionEvent.UpdateVisceralFat ->
-                updateState { copy(visceralFatPercent = event.value) }
-
-            is AddBodyCompositionEvent.UpdateBasalCalories ->
-                updateState { copy(basalCalories = event.value) }
-
-            is AddBodyCompositionEvent.UpdateMetabolicAge ->
-                updateState { copy(metabolicAge = event.value) }
-
-            is AddBodyCompositionEvent.UpdateBoneMass ->
-                updateState { copy(boneMassKg = event.value) }
-
-            is AddBodyCompositionEvent.UpdateChest ->
-                updateState { copy(chestCm = event.value) }
-
-            is AddBodyCompositionEvent.UpdateWaist ->
-                updateState { copy(waistCm = event.value) }
-
-            is AddBodyCompositionEvent.UpdateHip ->
-                updateState { copy(hipCm = event.value) }
-
-            is AddBodyCompositionEvent.UpdateGlute ->
-                updateState { copy(gluteCm = event.value) }
-
-            is AddBodyCompositionEvent.UpdateLeftArm ->
-                updateState { copy(leftArmCm = event.value) }
-
-            is AddBodyCompositionEvent.UpdateRightArm ->
-                updateState { copy(rightArmCm = event.value) }
-
-            is AddBodyCompositionEvent.UpdateLeftLeg ->
-                updateState { copy(leftLegCm = event.value) }
-
-            is AddBodyCompositionEvent.UpdateRightLeg ->
-                updateState { copy(rightLegCm = event.value) }
-
-            is AddBodyCompositionEvent.UpdateDate ->
-                updateState { copy(date = event.date) }
-
-            AddBodyCompositionEvent.DismissError ->
-                updateState { copy(errorMessage = null) }
-
+            is AddBodyCompositionEvent.UpdateHeight -> updateState { copy(heightCm = event.value) }
+            is AddBodyCompositionEvent.UpdateWeight -> updateState { copy(weightKg = event.value) }
+            is AddBodyCompositionEvent.UpdateBodyFat -> updateState { copy(bodyFatPercent = event.value) }
+            is AddBodyCompositionEvent.UpdateWater -> updateState { copy(waterPercent = event.value) }
+            is AddBodyCompositionEvent.UpdateMuscleMass -> updateState { copy(muscleMassKg = event.value) }
+            is AddBodyCompositionEvent.UpdateVisceralFat -> updateState { copy(visceralFatPercent = event.value) }
+            is AddBodyCompositionEvent.UpdateBasalCalories -> updateState { copy(basalCalories = event.value) }
+            is AddBodyCompositionEvent.UpdateMetabolicAge -> updateState { copy(metabolicAge = event.value) }
+            is AddBodyCompositionEvent.UpdateBoneMass -> updateState { copy(boneMassKg = event.value) }
+            is AddBodyCompositionEvent.UpdateChest -> updateState { copy(chestCm = event.value) }
+            is AddBodyCompositionEvent.UpdateWaist -> updateState { copy(waistCm = event.value) }
+            is AddBodyCompositionEvent.UpdateHip -> updateState { copy(hipCm = event.value) }
+            is AddBodyCompositionEvent.UpdateGlute -> updateState { copy(gluteCm = event.value) }
+            is AddBodyCompositionEvent.UpdateLeftArm -> updateState { copy(leftArmCm = event.value) }
+            is AddBodyCompositionEvent.UpdateRightArm -> updateState { copy(rightArmCm = event.value) }
+            is AddBodyCompositionEvent.UpdateLeftLeg -> updateState { copy(leftLegCm = event.value) }
+            is AddBodyCompositionEvent.UpdateRightLeg -> updateState { copy(rightLegCm = event.value) }
+            is AddBodyCompositionEvent.UpdateDate -> updateState { copy(date = event.date) }
+            AddBodyCompositionEvent.DismissError -> updateState { copy(errorMessage = null) }
             AddBodyCompositionEvent.Save -> save()
         }
     }
 
+    /**
+     * Fetches user profile data from the repository to enable background calculations
+     * (e.g., age-based formulas) during the save operation.
+     */
     private fun prefetchUserData() {
         viewModelScope.launch {
             val userId = userRepository.getCurrentUserId() ?: return@launch
@@ -114,6 +90,10 @@ class AddBodyCompositionViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Triggers the persistence flow. Maps the UI state strings into a
+     * domain-friendly raw input object.
+     */
     private fun save() {
         val form = uiState.value
 
@@ -159,6 +139,9 @@ class AddBodyCompositionViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Maps form state strings to the numeric types required by the UseCase.
+     */
     private fun buildRawInput(
         form: AddBodyCompositionUiState,
         userId: Long,
@@ -170,10 +153,10 @@ class AddBodyCompositionViewModel @Inject constructor(
         return RawBodyCompositionInput(
             userId = userId,
             date = form.date,
-            heightCm = form.heightCm.toFloat(),
+            heightCm = form.heightCm.toFloatOrNull() ?: 0f,
             gender = gender,
             age = age,
-            weightKg = form.weightKg.toFloat(),
+            weightKg = form.weightKg.toFloatOrNull() ?: 0f,
             bodyFatPercent = form.bodyFatPercent.toFloatOrNull(),
             waterPercent = form.waterPercent.toFloatOrNull(),
             muscleMassKg = form.muscleMassKg.toFloatOrNull(),
@@ -192,6 +175,9 @@ class AddBodyCompositionViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Aggregates cached user data into a convenient internal model.
+     */
     private fun getCachedProfileData(): CachedProfileData? {
         val userId = cachedUserId ?: return null
         val gender = cachedGender ?: return null
@@ -204,6 +190,9 @@ class AddBodyCompositionViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Generic helper for thread-safe UI state updates.
+     */
     private fun updateState(transform: AddBodyCompositionUiState.() -> AddBodyCompositionUiState) {
         _uiState.update(transform)
     }
@@ -212,6 +201,9 @@ class AddBodyCompositionViewModel @Inject constructor(
         updateState { copy(errorMessage = message) }
     }
 
+    /**
+     * Private holder for profile context required during persistence.
+     */
     private data class CachedProfileData(
         val userId: Long,
         val gender: String,
@@ -221,11 +213,4 @@ class AddBodyCompositionViewModel @Inject constructor(
     private companion object {
         const val MILLIS_PER_DAY = 86_400_000L
     }
-}
-
-/**
- * One-shot navigation effects emitted by [AddBodyCompositionViewModel].
- */
-sealed interface AddBodyCompositionNavEffect {
-    data object SavedSuccessfully : AddBodyCompositionNavEffect
 }

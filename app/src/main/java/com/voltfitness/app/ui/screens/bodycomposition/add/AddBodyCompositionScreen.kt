@@ -27,12 +27,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.voltfitness.app.core.designsystem.component.VoltDateSelector
 import com.voltfitness.app.core.designsystem.component.VoltErrorBanner
 import com.voltfitness.app.ui.components.navigation.VoltStepBottomBar
 import com.voltfitness.app.ui.screens.bodycomposition.add.components.BodyCompositionTab
 import com.voltfitness.app.ui.screens.bodycomposition.add.components.BodyMeasurementsTab
+import com.voltfitness.app.ui.theme.VoltSpacing
 import com.voltfitness.app.ui.theme.VoltTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -40,20 +40,15 @@ import java.time.LocalDate
 /**
  * Screen for recording a body composition snapshot.
  *
- * Uses [PrimaryTabRow] + [HorizontalPager] to split inputs into
- * "Body Composition" (scale metrics) and "Body Measurements" (tape metrics).
+ * Uses a tabbed [HorizontalPager] to separate "Body Composition" (scale metrics)
+ * from "Body Measurements" (tape metrics).
  *
- * This Composable is fully stateless — it renders [uiState] and forwards
- * intents via [onEvent]. Navigation (back/save success) is handled by the
- * NavGraph, which observes [AddBodyCompositionViewModel.navigationEffect].
+ * This Composable is stateless; it renders [uiState] and forwards intents via [onEvent].
+ * Flow navigation is managed by the parent NavGraph.
  *
- * Tab state lives in Compose via [PagerState] — NOT in the ViewModel.
- * All form data persists in the ViewModel's StateFlow, so switching
- * tabs never loses user input.
- *
- * @param uiState Current form state from [AddBodyCompositionViewModel].
- * @param onEvent Dispatches form events to the ViewModel.
- * @param onNavigateBack Callback to pop this screen off the navigation stack.
+ * @param uiState Current form state including validation and saving status.
+ * @param onEvent Dispatches user intents to the ViewModel.
+ * @param onNavigateBack Callback for the secondary "Dismiss" action.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,6 +68,7 @@ fun AddBodyCompositionScreen(
         )
     }
 
+    // Contextual logic for the multi-step bottom bar
     val isLastTab = selectedTabIndex.value == tabs.lastIndex
     val primaryText = if (isLastTab) "Save" else "Next"
     val primaryIcon = if (isLastTab) Icons.Filled.Save else Icons.AutoMirrored.Filled.ArrowForward
@@ -103,22 +99,28 @@ fun AddBodyCompositionScreen(
                 .fillMaxSize()
                 .padding(bottom = innerPadding.calculateBottomPadding()),
         ) {
+            // Error handling at the top of the form
             uiState.errorMessage?.let { error ->
                 VoltErrorBanner(
                     message = error,
                     onDismiss = { onEvent(AddBodyCompositionEvent.DismissError) },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(
+                        horizontal = VoltSpacing.medium,
+                        vertical = VoltSpacing.small
+                    ),
                 )
             }
 
+            // Global measurement date selector
             VoltDateSelector(
                 label = "Date of measurement",
                 selectedDate = uiState.date,
                 onDateSelected = { onEvent(AddBodyCompositionEvent.UpdateDate(it)) },
                 icon = Icons.Outlined.CalendarMonth,
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = VoltSpacing.medium),
             )
 
+            // Step indicator/Navigation tabs
             PrimaryTabRow(
                 selectedTabIndex = selectedTabIndex.value,
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -126,8 +128,9 @@ fun AddBodyCompositionScreen(
                 divider = { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant) },
             ) {
                 tabs.forEachIndexed { index, tab ->
+                    val isSelected = selectedTabIndex.value == index
                     Tab(
-                        selected = selectedTabIndex.value == index,
+                        selected = isSelected,
                         onClick = {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(index)
@@ -136,14 +139,15 @@ fun AddBodyCompositionScreen(
                         text = {
                             Text(
                                 text = tab.title,
-                                fontWeight = if (selectedTabIndex.value == index)
-                                    FontWeight.Bold else FontWeight.Normal,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                             )
                         },
                     )
                 }
             }
 
+            // Form Content
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
@@ -160,12 +164,17 @@ fun AddBodyCompositionScreen(
     }
 }
 
+/**
+ * Metadata for form navigation steps.
+ */
 private data class TabItem(
     val title: String,
     val icon: ImageVector,
 )
 
-@Preview(name = "Add Screen - Form Empty", showSystemUi = true)
+// region Previews
+
+@Preview(name = "Form - Initial State", showSystemUi = true)
 @Composable
 private fun AddBodyCompositionEmptyPreview() {
     VoltTheme {
@@ -177,14 +186,14 @@ private fun AddBodyCompositionEmptyPreview() {
     }
 }
 
-@Preview(name = "Add Screen - Saving", showSystemUi = true)
+@Preview(name = "Form - Saving state", showSystemUi = true)
 @Composable
 private fun AddBodyCompositionSavingPreview() {
     VoltTheme {
         AddBodyCompositionScreen(
             uiState = AddBodyCompositionUiState(
-                weightKg = "75",
-                heightCm = "175",
+                weightKg = "75.5",
+                heightCm = "180",
                 isSaving = true,
             ),
             onEvent = {},
@@ -193,16 +202,18 @@ private fun AddBodyCompositionSavingPreview() {
     }
 }
 
-@Preview(name = "Add Screen - Error", showSystemUi = true)
+@Preview(name = "Form - Error displayed", showSystemUi = true)
 @Composable
 private fun AddBodyCompositionErrorPreview() {
     VoltTheme {
         AddBodyCompositionScreen(
             uiState = AddBodyCompositionUiState(
-                errorMessage = "Connection timeout. Please check your internet.",
+                errorMessage = "Database constraint violation. Please try again.",
             ),
             onEvent = {},
             onNavigateBack = {},
         )
     }
 }
+
+// endregion

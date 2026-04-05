@@ -3,21 +3,20 @@ package com.voltfitness.app.ui.screens.bodycomposition.add
 import java.time.LocalDate
 
 /**
- * UI state for the AddBodyCompositionScreen form.
- * Holds raw string inputs for body metrics and tape measurements.
+ * UI state for the body composition entry form.
  *
- * Profile data (name, gender, etc.) is NOT managed here —
- * it lives in the ProfileScreen / ProfileViewModel.
+ * Uses [String] for numeric inputs to ensure smooth text editing and decimal handling
+ * in Compose. Validation logic is encapsulated within computed properties.
  */
 data class AddBodyCompositionUiState(
     val date: LocalDate = LocalDate.now(),
 
-    // Form control
+    // --- Form Control ---
     val isSaving: Boolean = false,
     val saveSuccess: Boolean = false,
     val errorMessage: String? = null,
 
-    // ── Body Composition (scale metrics) ──
+    // --- Body Composition (Scale Metrics) ---
     val heightCm: String = "",
     val weightKg: String = "",
     val bodyFatPercent: String = "",
@@ -28,7 +27,7 @@ data class AddBodyCompositionUiState(
     val metabolicAge: String = "",
     val boneMassKg: String = "",
 
-    // ── Body Measurements (tape metrics) ──
+    // --- Body Measurements (Tape Metrics) ---
     val chestCm: String = "",
     val waistCm: String = "",
     val hipCm: String = "",
@@ -38,16 +37,22 @@ data class AddBodyCompositionUiState(
     val leftLegCm: String = "",
     val rightLegCm: String = ""
 ) {
+    /** Validates that weight is a positive numeric value. */
     val isWeightValid: Boolean
-        get() = weightKg.isNotBlank() &&
-                weightKg.toFloatOrNull() != null &&
-                (weightKg.toFloatOrNull() ?: 0f) > 0f
+        get() = weightKg.isNotBlank() && (weightKg.toFloatOrNull() ?: 0f) > 0f
 
+    /** Validates that height is a positive numeric value. */
     val isHeightValid: Boolean
-        get() = heightCm.isNotBlank() &&
-                heightCm.toFloatOrNull() != null &&
-                (heightCm.toFloatOrNull() ?: 0f) > 0f
+        get() = heightCm.isNotBlank() && (heightCm.toFloatOrNull() ?: 0f) > 0f
 
-    /** True when mandatory fields are valid and ready to save. */
+    /** Mandatory field compliance check. */
     val isFormValid: Boolean get() = isWeightValid && isHeightValid
+}
+
+/**
+ * One-shot navigation and UI side-effects for the Add Body Composition flow.
+ */
+sealed interface AddBodyCompositionNavEffect {
+    /** Signals a successful persistence operation. */
+    data object SavedSuccessfully : AddBodyCompositionNavEffect
 }

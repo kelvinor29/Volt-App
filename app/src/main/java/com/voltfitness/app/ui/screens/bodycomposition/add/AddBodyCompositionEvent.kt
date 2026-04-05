@@ -3,11 +3,16 @@ package com.voltfitness.app.ui.screens.bodycomposition.add
 import java.time.LocalDate
 
 /**
- * Intent-based events for AddBodyCompositionScreen.
- * Only body-metric and measurement events remain.
+ * Represents user intents and input events for the Body Composition entry form.
+ *
+ * This sealed interface defines all possible interactions, from numeric metric
+ * updates to form lifecycle actions like saving or dismissing errors.
  */
 sealed interface AddBodyCompositionEvent {
-    // ── Body Composition ──
+
+    // ─── Scale-Based Metrics ───
+    // These events correspond to data typically retrieved from a body composition scale.
+
     data class UpdateHeight(val value: String) : AddBodyCompositionEvent
     data class UpdateWeight(val value: String) : AddBodyCompositionEvent
     data class UpdateBodyFat(val value: String) : AddBodyCompositionEvent
@@ -18,7 +23,9 @@ sealed interface AddBodyCompositionEvent {
     data class UpdateMetabolicAge(val value: String) : AddBodyCompositionEvent
     data class UpdateBoneMass(val value: String) : AddBodyCompositionEvent
 
-    // ── Body Measurements ──
+    // ─── Manual Tape Measurements ───
+    // These events correspond to anthropometric measurements taken manually.
+
     data class UpdateChest(val value: String) : AddBodyCompositionEvent
     data class UpdateWaist(val value: String) : AddBodyCompositionEvent
     data class UpdateHip(val value: String) : AddBodyCompositionEvent
@@ -28,8 +35,14 @@ sealed interface AddBodyCompositionEvent {
     data class UpdateLeftLeg(val value: String) : AddBodyCompositionEvent
     data class UpdateRightLeg(val value: String) : AddBodyCompositionEvent
 
-    // ── General ──
+    // ─── Form Lifecycle & General ───
+
+    /** Updates the reference date for the current entry. */
     data class UpdateDate(val date: LocalDate) : AddBodyCompositionEvent
+
+    /** Signals the intent to persist the current form data. */
     data object Save : AddBodyCompositionEvent
+
+    /** Resets the error state in the UI. */
     data object DismissError : AddBodyCompositionEvent
 }

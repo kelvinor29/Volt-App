@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voltfitness.app.ui.components.VoltCard
 import com.voltfitness.app.ui.theme.VoltGradientStart
+import com.voltfitness.app.ui.theme.VoltSpacing
 import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
@@ -59,7 +60,7 @@ fun RoutineCard(
 ) {
     VoltCard(
         onClick = onCardClick,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         RoutineCardContent(
             routine = routine,
@@ -88,7 +89,7 @@ private fun RoutineCardContent(
 
     Column(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(VoltSpacing.medium)
             .fillMaxWidth()
     ) {
         Row(

@@ -4,11 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
@@ -25,54 +23,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.voltfitness.app.core.designsystem.component.voltFieldModifier
+import com.voltfitness.app.core.designsystem.component.voltFieldShape
 import com.voltfitness.app.ui.screens.exercise.components.ExerciseGifImage
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.tooling.preview.Preview
+import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
- * Defines the trailing action area of an [ExerciseCard].
- *
- * Keeping the trailing slot as a sealed type instead of a generic composable
- * lambda lets callers express intent clearly and prevents misuse.
+ * Defines the contract for trailing actions within an [ExerciseCard].
+ * Using a sealed interface prevents illegal UI states and simplifies caller intent.
  */
 sealed interface ExerciseCardTrailing {
-
-    /**
-     * A check/info icon toggle used in the Exercise Picker.
-     *
-     * @param isSelected Whether the exercise is currently selected.
-     */
+    /** Toggle state for selection lists. */
     data class SelectionToggle(val isSelected: Boolean) : ExerciseCardTrailing
-
-    /**
-     * A three-dot menu icon used in the Routine Editor.
-     *
-     * @param onClick Invoked when the user taps the options button.
-     */
+    /** Interactive menu for management actions. */
     data class OptionsMenu(val onClick: () -> Unit) : ExerciseCardTrailing
 }
 
 /**
- * Shared exercise row card used in both [ExercisePickerScreen] and
- * [RoutineEditorComponents].
+ * Highly reusable exercise row component used across Picker and Editor contexts.
  *
- * The card layout is always:
- *   [GIF thumbnail] — [Name + subtitle text] — [Trailing action]
+ * Features a stateless design that accepts pre-formatted strings to avoid
+ * coupling with specific domain models.
  *
- * The only visual differences between the two contexts are:
- * - The **subtitle** text (bodyPart/target in Picker; sets/reps/weight in Editor)
- * - The **trailing** widget ([ExerciseCardTrailing])
- * - The card **surface elevation** (selected state in Picker)
- *
- * Both contexts pass pre-formatted strings to keep this composable
- * fully stateless and reusable without coupling it to either domain model.
- *
- * @param exerciseId    ExerciseDB ID used to load the animated GIF.
- * @param exerciseName  Display name shown in bold on the first line.
- * @param subtitle      Second line of text (already formatted by the caller).
- * @param trailing      The action widget rendered at the end of the row.
- * @param onClick       Optional card-level click (used in Picker to toggle selection).
- * @param tonalElevation Surface tonal elevation (bump for selected state in Picker).
- * @param gifSize       Size of the [ExerciseGifImage] thumbnail.
- * @param modifier      Modifier for the root [Surface].
+ * @param exerciseId Unique ID for remote GIF loading.
+ * @param exerciseName Primary label.
+ * @param subtitle Contextual metadata (e.g., body part or set summary).
+ * @param trailing Specific [ExerciseCardTrailing] implementation.
+ * @param onClick Optional card-level interaction.
  */
 @Composable
 fun ExerciseCard(
@@ -87,16 +66,14 @@ fun ExerciseCard(
 ) {
     Surface(
         modifier = modifier
-            .fillMaxWidth()
+            .voltFieldModifier()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(12.dp),
+        shape = voltFieldShape,
         tonalElevation = tonalElevation,
         color = MaterialTheme.colorScheme.surface,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ExerciseGifImage(
@@ -132,6 +109,9 @@ fun ExerciseCard(
     }
 }
 
+/**
+ * Internal slot switcher for trailing actions.
+ */
 @Composable
 private fun ExerciseCardTrailingSlot(trailing: ExerciseCardTrailing) {
     when (trailing) {
@@ -139,12 +119,11 @@ private fun ExerciseCardTrailingSlot(trailing: ExerciseCardTrailing) {
             Icon(
                 imageVector = if (trailing.isSelected) Icons.Default.CheckCircle
                 else Icons.Default.Info,
-                contentDescription = if (trailing.isSelected) "Selected" else "Details",
+                contentDescription = null,
                 tint = if (trailing.isSelected) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-
         is ExerciseCardTrailing.OptionsMenu -> {
             IconButton(
                 onClick = trailing.onClick,
@@ -152,10 +131,64 @@ private fun ExerciseCardTrailingSlot(trailing: ExerciseCardTrailing) {
             ) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Exercise options",
+                    contentDescription = "Options",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Exercise Card States")
+@Composable
+fun PreviewExerciseCardStates() {
+    VoltTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // State 1: Selection Toggle (Unselected)
+            ExerciseCard(
+                exerciseId = "1",
+                exerciseName = "bench press",
+                subtitle = "Chest • Barbell",
+                trailing = ExerciseCardTrailing.SelectionToggle(isSelected = false),
+                onClick = { }
+            )
+
+            // State 2: Selection Toggle (Selected)
+            ExerciseCard(
+                exerciseId = "2",
+                exerciseName = "deadlift",
+                subtitle = "Back • Barbell",
+                trailing = ExerciseCardTrailing.SelectionToggle(isSelected = true),
+                onClick = { }
+            )
+
+            // State 3: Options Menu
+            ExerciseCard(
+                exerciseId = "3",
+                exerciseName = "pull ups",
+                subtitle = "Bodyweight • 3 sets x 12 reps",
+                trailing = ExerciseCardTrailing.OptionsMenu(onClick = { }),
+                onClick = { }
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Dark Mode", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PreviewExerciseCardDark() {
+    VoltTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            ExerciseCard(
+                exerciseId = "4",
+                exerciseName = "squats",
+                subtitle = "Legs • Quadriceps",
+                trailing = ExerciseCardTrailing.OptionsMenu(onClick = { }),
+                onClick = { }
+            )
         }
     }
 }

@@ -1,17 +1,18 @@
 package com.voltfitness.app.ui.components.lists
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,20 +22,18 @@ import com.voltfitness.app.ui.components.cards.AddRoutineCard
 import com.voltfitness.app.ui.components.cards.RoutineCard
 import com.voltfitness.app.ui.components.cards.RoutineSummary
 import com.voltfitness.app.ui.screens.home.RoutineFolder
-import com.voltfitness.app.ui.theme.VoltTextPrimary
-import com.voltfitness.app.ui.theme.VoltTextSecondary
+import com.voltfitness.app.ui.theme.VoltSpacing
 import com.voltfitness.app.ui.theme.VoltTheme
+import kotlin.math.max
 
 /**
- * An Organism component that groups the main section title and a collection
- * of horizontal routine lists (folders).
+ * High-level section that organizes workout routines into named folders.
  *
- * @param folders The list of [RoutineFolder] data objects to be rendered.
- * @param onRoutineClick Callback triggered when a specific routine card is pressed.
- * @param onOptionsClick Callback triggered when the options icon on a routine card is pressed.
- * @param onAddRoutineClick Callback triggered when the "Add new Routine" card is pressed,
- *                          passing the folder ID where the new routine should be created.
- * @param modifier The modifier to be applied to the section layout.
+ * @param folders Hierarchical data structure containing routines grouped by category.
+ * @param onRoutineClick Triggered when a routine card is selected.
+ * @param onOptionsClick Triggered when the routine's context menu is requested.
+ * @param onAddRoutineClick Triggered by the placeholder card to create a routine in a specific folder.
+ * @param modifier Outer layout constraints.
  */
 @Composable
 fun RoutineSection(
@@ -46,14 +45,14 @@ fun RoutineSection(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(VoltSpacing.small)
     ) {
         Text(
             text = "Routines",
             style = MaterialTheme.typography.titleLarge,
-            color = VoltTextPrimary,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = VoltSpacing.medium)
         )
 
         folders.forEach { folder ->
@@ -70,9 +69,8 @@ fun RoutineSection(
 }
 
 /**
- * A Molecule component that represents a single folder category.
- * Displays a category header, a horizontal list of routine cards,
- * and an [AddRoutineCard] as the last item for creating new routines.
+ * A horizontal scrollable container representing a routine folder.
+ * Includes a dashed placeholder at the end of the list for creation actions.
  */
 @Composable
 private fun RoutineHorizontalList(
@@ -83,106 +81,107 @@ private fun RoutineHorizontalList(
     onOptionsClick: (RoutineSummary) -> Unit,
     onAddRoutineClick: (folderId: Long) -> Unit,
 ) {
+    val density = LocalDensity.current
+    var maxCardHeightPx by remember { mutableIntStateOf(0) }
+
+    val cardHeight = with(density) {
+        if (maxCardHeightPx > 0) maxCardHeightPx.toDp() else 0.dp
+    }
+
+    val baseModifier = Modifier.width(300.dp)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp)
+            .padding(vertical = VoltSpacing.small)
     ) {
-        // Category Header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Max)
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_gym_folder),
-                contentDescription = null,
-                tint = VoltTextSecondary,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = title,
-                color = VoltTextSecondary,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
+        FolderHeader(title = title)
 
-        // Horizontal Scrollable List
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Max)
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(
+                horizontal = VoltSpacing.medium,
+                vertical = VoltSpacing.small
+            ),
+            horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)
         ) {
-            routines.forEach { routine ->
+            items(items = routines, key = { it.id }) { routine ->
                 RoutineCard(
                     routine = routine,
                     onCardClick = { onRoutineClick(routine) },
                     onOptionsClick = { onOptionsClick(routine) },
-                    modifier = Modifier
-                        .width(300.dp)
-                        .fillMaxHeight()
+                    modifier = baseModifier
+                        .then(if (cardHeight > 0.dp) Modifier.height(cardHeight) else Modifier)
+                        .onSizeChanged { size ->
+                            maxCardHeightPx = max(maxCardHeightPx, size.height)
+                        }
                 )
             }
 
-            AddRoutineCard(
-                onClick = { onAddRoutineClick(folderId) },
-                modifier = Modifier
-                    .width(300.dp)
-                    .fillMaxHeight()
-            )
+            item(key = "add_routine_$folderId") {
+                AddRoutineCard(
+                    onClick = { onAddRoutineClick(folderId) },
+                    modifier = baseModifier
+                        .then(if (cardHeight > 0.dp) Modifier.height(cardHeight) else Modifier)
+                        .onSizeChanged { size ->
+                            maxCardHeightPx = max(maxCardHeightPx, size.height)
+                        }
+                )
+            }
         }
     }
 }
 
+/**
+ * Internal header for folder categories.
+ */
+@Composable
+private fun FolderHeader(title: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = VoltSpacing.medium),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_gym_folder),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(VoltSpacing.small))
+        Text(
+            text = title,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
 
 // region Previews
-
-@Preview(name = "Routine Section Preview", showBackground = true, backgroundColor = 0xFF121212)
+@Preview(showBackground = true)
 @Composable
 private fun RoutineSectionPreview() {
-    // Mock data to populate the preview
     val mockFolders = listOf(
         RoutineFolder(
             id = 1,
             name = "My Daily Routines",
             routines = listOf(
                 RoutineSummary(1, "Basic Routine", 8, "Chest, Shoulders, Triceps", true),
-                RoutineSummary(2, "Recommended ", 7, "Back, Biceps", false),
             )
-        ),
-        RoutineFolder(
-            id = 2,
-            name = "Specialized Training",
-            routines = listOf(
-                RoutineSummary(4, "PPL", 6, "Total body strength", false),
-                RoutineSummary(5, "HIIT Blast", 12, "High intensity cardio", false)
-            )
-        ),
+        )
     )
 
     VoltTheme {
-        // Using Surface to ensure the background color from the theme is applied
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.background
-        ) {
+        Surface(color = MaterialTheme.colorScheme.background) {
             RoutineSection(
                 folders = mockFolders,
-                onRoutineClick = { routine -> println("Clicked: ${routine.name}") },
-                onOptionsClick = { routine -> println("Options for: ${routine.name}") },
-                modifier = Modifier.padding(vertical = 16.dp),
-                onAddRoutineClick = { folderId -> println("Add new routine for folder: $folderId") }
+                onRoutineClick = {},
+                onOptionsClick = {},
+                onAddRoutineClick = {},
+                modifier = Modifier.padding(vertical = VoltSpacing.medium)
             )
         }
     }
 }
-
-// endregion

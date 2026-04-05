@@ -13,17 +13,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voltfitness.app.R
+import com.voltfitness.app.core.designsystem.component.VoltButton // Reusing existing component
+import com.voltfitness.app.core.designsystem.component.voltSectionShape
 import com.voltfitness.app.ui.components.VoltCard
 import com.voltfitness.app.ui.theme.VoltSpacing
 import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
- * Data representation for an exercise summary.
+ * Domain-specific summary for exercise or routine highlighting.
  *
- * @property id Unique identifier.
- * @property name Title of the exercise or muscle group.
- * @property description Secondary information (e.g., Level or Equipment).
- * @property intensity Visual metric like calories or effort level.
+ * @property id Identifier for navigation or selection.
+ * @property name Primary title (e.g., "Full Body Blast").
+ * @property description Metadata summary (e.g., "Intermediate • 45 min").
+ * @property intensity Visual metric value (e.g., "500 kcal").
  */
 data class ExerciseSummary(
     val id: Long,
@@ -33,11 +35,10 @@ data class ExerciseSummary(
 )
 
 /**
- * Main exercise card component for dashboard and workout lists.
+ * Featured exercise card used in dashboards to promote or resume workouts.
  *
- * @param exercise The [ExerciseSummary] data model.
- * @param onStartClick Action triggered by the "Start" button.
- * @param modifier Layout modifier.
+ * @param exercise The [ExerciseSummary] state.
+ * @param onStartClick Execution trigger for the workout session.
  */
 @Composable
 fun MainExerciseCard(
@@ -46,7 +47,7 @@ fun MainExerciseCard(
     modifier: Modifier = Modifier
 ) {
     VoltCard(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
@@ -55,35 +56,20 @@ fun MainExerciseCard(
         ) {
             ExerciseHeader(exercise)
 
-            Spacer(modifier = Modifier.height(VoltSpacing.small))
+            Spacer(modifier = Modifier.height(VoltSpacing.medium))
 
-            Button(
+            VoltButton(
+                text = "Start Workout",
                 onClick = onStartClick,
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                contentPadding = PaddingValues(vertical = 12.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Start Workout",
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
+                icon = Icons.Default.PlayArrow,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
 
 /**
- * Internal header for the exercise card containing title, description, and intensity.
+ * Internal layout for the card header, separating title metadata from intensity metrics.
  */
 @Composable
 private fun ExerciseHeader(exercise: ExerciseSummary) {
@@ -110,35 +96,44 @@ private fun ExerciseHeader(exercise: ExerciseSummary) {
             )
         }
 
-        // Intensity Indicator
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_fire_flame),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = exercise.intensity,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        IntensityIndicator(value = exercise.intensity)
     }
 }
 
-@Preview(name = "Main Exercise Card States")
+/**
+ * Small visual badge for calorie or effort level metrics.
+ */
+@Composable
+private fun IntensityIndicator(value: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_fire_flame),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Preview(showBackground = true)
 @Composable
 private fun MainExerciseCardPreview() {
-    val exercise =
-        ExerciseSummary(1, "Chest + Triceps", "Intermediate - Basic Routine", "450 kcal")
+    val exercise = ExerciseSummary(
+        id = 1,
+        name = "Chest + Triceps",
+        description = "Intermediate - Basic Routine",
+        intensity = "450 kcal"
+    )
 
     VoltTheme {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                MainExerciseCard(exercise = exercise, onStartClick = {})
-            }
+        Box(modifier = Modifier.padding(16.dp)) {
+            MainExerciseCard(exercise = exercise, onStartClick = {})
         }
     }
 }

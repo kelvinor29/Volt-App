@@ -9,8 +9,6 @@ import com.voltfitness.app.data.local.dao.FolderDao
 import com.voltfitness.app.data.local.dao.RoutineDao
 import com.voltfitness.app.data.local.dao.UserDao
 import com.voltfitness.app.data.local.dao.WorkoutDao
-import com.voltfitness.app.data.repository.BodyCompositionRepositoryImpl
-import com.voltfitness.app.domain.repository.BodyCompositionRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,10 +16,22 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+private const val DATABASE_NAME = "volt.db"
+
+/**
+ * Hilt module for providing Room database and DAO dependencies.
+ *
+ * Configures the centralized [AppDatabase] and exposes its DAOs to the dependency graph.
+ * All providers are scoped to the [SingletonComponent] to ensure a single database instance.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
+    /**
+     * Initializes the Room database instance using the application context.
+     * Fallback destructive migration is disabled to prevent accidental data loss in production.
+     */
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -30,9 +40,8 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "volt.db"
-        ).fallbackToDestructiveMigration()
-            .build()
+            DATABASE_NAME
+        ).build()
     }
 
     @Provides
@@ -52,5 +61,4 @@ object DatabaseModule {
 
     @Provides
     fun provideBodyCompositionDao(db: AppDatabase): BodyCompositionDao = db.bodyCompositionDao()
-
 }

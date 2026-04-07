@@ -31,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -46,20 +45,16 @@ import com.voltfitness.app.ui.theme.VoltSpacing
 import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
- * Entry point for the Routine Editor screen.
+ * Main entry point for the Routine Editor.
  *
- * Connects [RoutineEditorViewModel] to the stateless [RoutineEditorContent],
- * handles TopAppBar configuration, and collects one-time UI effects
- * (navigation, snackbar messages) in a lifecycle-aware manner.
+ * This screen coordinates a complex state flow including:
+ * 1. Metadata management for routines (Name, Goal, etc.).
+ * 2. Hierarchical day/exercise organization.
+ * 3. Result collection from [ExercisePicker] via [SavedStateHandle].
  *
- * ## Exercise selection result
- * When the user returns from the Exercise Picker, the result arrives via
- * [SavedStateHandle] as two keys:
- * - `"exercise_selection_result"` — `List<String>` of ExerciseDB IDs.
- * - `"day_index_for_selection"`  — `Int` index of the target day.
- *
- * Both are observed as [StateFlow]s so the result is never missed on
- * configuration change or process death.
+ * @param navController Navigation controller for screen transitions.
+ * @param onTopAppBarStateChange Synchronizes the header with the global scaffold.
+ * @param viewModel Business logic orchestrator for the editor.
  */
 @Composable
 fun RoutineEditorScreen(
@@ -72,7 +67,7 @@ fun RoutineEditorScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val listState = rememberLazyListState()
 
-    // ── Exercise selection result ─────────────────────────────────────────────
+    // ─── Result Collection from Exercise Picker ───
     val navBackStackEntry = navController.currentBackStackEntry
 
     val selectionResult by (
@@ -99,36 +94,30 @@ fun RoutineEditorScreen(
                 dayIndex = dayIndex
             )
         )
+        // Consume the results once processed to avoid re-triggering on rotation
         navBackStackEntry?.savedStateHandle?.remove<List<String>>("exercise_selection_result")
         navBackStackEntry?.savedStateHandle?.remove<Int>("day_index_for_selection")
     }
 
-    // ── TopAppBar ─────────────────────────────────────────────────────────────
+    // ─── Global UI State Sync ───
     LaunchedEffect(uiState.isNewRoutine) {
         onTopAppBarStateChange(
             TopAppBarState(
                 title = if (uiState.isNewRoutine) "New Routine" else "Edit Routine",
                 showBackButton = true,
-                onBackClick = { navController.popBackStack() },
-                collapsibleContent = null,
-                isCollapsibleVisible = { false }
+                onBackClick = { navController.popBackStack() }
             )
         )
     }
 
-    // ── One-time effects ──────────────────────────────────────────────────────
+    // ─── Side-Effect Collection ───
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.effect.collect { effect ->
                 when (effect) {
-                    is RoutineEditorEffect.NavigateBack ->
-                        navController.popBackStack()
-
-                    is RoutineEditorEffect.ShowError ->
-                        snackbarHostState.showSnackbar(effect.message)
-
-                    is RoutineEditorEffect.ShowSuccess ->
-                        snackbarHostState.showSnackbar(effect.message)
+                    is RoutineEditorEffect.NavigateBack -> navController.popBackStack()
+                    is RoutineEditorEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+                    is RoutineEditorEffect.ShowSuccess -> snackbarHostState.showSnackbar(effect.message)
                 }
             }
         }
@@ -138,7 +127,7 @@ fun RoutineEditorScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             VoltStepBottomBar(
-                primaryText = if (uiState.routineId == -1L) "Save" else "Update",
+                primaryText = if (uiState.isNewRoutine) "Save" else "Update",
                 primaryIcon = Icons.Filled.Save,
                 primaryEnabled = uiState.isFormValid,
                 primaryLoading = uiState.isSaving,
@@ -152,8 +141,7 @@ fun RoutineEditorScreen(
             onEvent = viewModel::onEvent,
             listState = listState,
             onNavigateToExercisePicker = { routineId, dayIndex, dayOrder ->
-                navController.currentBackStackEntry?.savedStateHandle
-                    ?.set("day_index_for_selection", dayIndex)
+                navBackStackEntry?.savedStateHandle?.set("day_index_for_selection", dayIndex)
                 navController.navigate(Screen.ExercisePicker.createRoute(routineId, dayOrder))
             },
             modifier = Modifier
@@ -163,16 +151,11 @@ fun RoutineEditorScreen(
     }
 }
 
-// =============================================================================
-// STATELESS CONTENT
-// =============================================================================
-
 /**
- * Stateless content composable — receives all data via [uiState] and
- * communicates user actions back via [onEvent].
+ * Stateless content layer for the Routine Editor.
  *
- * @param onNavigateToExercisePicker Provides the routineId, the **day index**
- * (for the SavedStateHandle round-trip), and the dayOrder (for the route arg).
+ * Encapsulates the visual structure using a [LazyColumn] to handle potentially
+ * large exercise lists.
  */
 @Composable
 private fun RoutineEditorContent(
@@ -184,10 +167,11 @@ private fun RoutineEditorContent(
 ) {
     LazyColumn(
         state = listState,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         contentPadding = PaddingValues(VoltSpacing.medium),
         verticalArrangement = Arrangement.spacedBy(VoltSpacing.small)
     ) {
+        // --- Routine Global Metadata ---
         item(key = "routine_header_fields") {
             RoutineHeaderFields(
                 name = uiState.routineName,
@@ -200,29 +184,36 @@ private fun RoutineEditorContent(
                 isMainRoutine = uiState.isMainRoutine,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                    .padding(bottom = VoltSpacing.medium)
             )
         }
 
+        // --- Training Days Section Header ---
         item(key = "section_header_days") {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .padding(top = VoltSpacing.small),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Training Days",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 IconButton(onClick = { onEvent(RoutineEditorEvent.OnAddDay) }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add training day")
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add training day",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
             }
         }
 
+        // --- Hierarchical Days/Exercises List ---
         itemsIndexed(
             items = uiState.days,
             key = { index, day -> "day_${day.order}_$index" }
@@ -230,13 +221,11 @@ private fun RoutineEditorContent(
             ExpandableDayItem(
                 day = day,
                 isExpanded = uiState.expandedDayIndex == index,
-                onExpandClick = {
-                    onEvent(RoutineEditorEvent.OnToggleDayExpanded(index))
-                },
+                onExpandClick = { onEvent(RoutineEditorEvent.OnToggleDayExpanded(index)) },
                 onAddExerciseClick = {
                     onNavigateToExercisePicker(uiState.routineId, index, day.order)
                 },
-                onExerciseOptionsClick = { /* TODO */ }
+                onExerciseOptionsClick = { /* TODO: Implementation for exercise actions (Delete/Reorder) */ }
             )
         }
     }

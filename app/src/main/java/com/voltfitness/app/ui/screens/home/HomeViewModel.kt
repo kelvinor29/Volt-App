@@ -12,12 +12,7 @@ import com.voltfitness.app.domain.usecase.home.GetUserFoldersWithRoutinesUseCase
 import com.voltfitness.app.domain.usecase.user.EvaluateProgressUseCase
 import com.voltfitness.app.domain.usecase.user.GetCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -26,11 +21,12 @@ import javax.inject.Inject
 /**
  * ViewModel for the Home screen dashboard.
  *
- * Observes the current user and their two most recent body composition entries,
- * then delegates progress evaluation to [EvaluateProgressUseCase]. The resulting
- * [HomeUiState] contains pre-formatted strings consumed directly by [WeightCard].
+ * Coordinates multiple data streams:
+ * 1. Authenticated user profile.
+ * 2. Body composition progress via [EvaluateProgressUseCase].
+ * 3. User folders and routine collections.
  *
- * Navigation is handled by the UI layer — this ViewModel exposes no navigation events.
+ * Ensures the database is seeded and a default folder exists upon initialization.
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -47,32 +43,36 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        observeDashboardData()
-        viewModelScope.launch {
-            val userId = userRepository.getCurrentUserId()
+        initializeDashboard()
+    }
 
+    /**
+     * Orchestrates the initial setup: seeding data and starting primary observations.
+     */
+    private fun initializeDashboard() {
+        viewModelScope.launch {
+            // Ensure base data exists
+            seedDatabaseUseCase()
+
+            val userId = userRepository.getCurrentUserId()
             if (userId == null) {
                 _uiState.update { it.copy(isLoading = false) }
                 return@launch
             }
 
-            seedDatabaseUseCase()
+            // Maintenance: Ensure user has at least one folder
+            ensureDefaultFolderUseCase(userId)
 
-//            ensureDefaultFolderUseCase(userId = userId)
-
-            getUserFoldersWithRoutinesUseCase(userId = userId)
-                .collect { folders ->
-                    _uiState.update { it.copy(folders = folders) }
-                }
+            // Start reactive observations
+            observeUserAndCompositions()
+            observeFolders(userId)
         }
     }
 
-
     /**
-     * Observes the current user and, once available, starts observing
-     * their recent body composition entries for the weight card.
+     * Observes the current user and triggers composition tracking upon profile availability.
      */
-    private fun observeDashboardData() {
+    private fun observeUserAndCompositions() {
         viewModelScope.launch {
             getCurrentUserUseCase()
                 .filterNotNull()
@@ -84,22 +84,33 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Collects the two most recent body composition entries and updates
-     * the weight card state accordingly.
+     * Collects routine folders for the specific user.
+     */
+    private fun observeFolders(userId: Long) {
+        viewModelScope.launch {
+            getUserFoldersWithRoutinesUseCase(userId)
+                .collect { folders ->
+                    _uiState.update { it.copy(folders = folders) }
+                }
+        }
+    }
+
+    /**
+     * Monitors recent body metrics to calculate progress trends.
      */
     private fun observeBodyCompositions(user: User) {
         viewModelScope.launch {
             getRecentBodyCompositionsUseCase(user.id, limit = 2)
                 .collect { entries ->
-                    if (!entries.isEmpty()) handleCompositionProgress(entries, user)
+                    if (entries.isNotEmpty()) {
+                        handleCompositionProgress(entries, user)
+                    }
                 }
         }
     }
 
-
     /**
-     * Evaluates progress between the latest and previous entries,
-     * formatting the results for [WeightCard] display.
+     * Transforms raw database entries into formatted UI strings for the dashboard cards.
      */
     private fun handleCompositionProgress(
         entries: List<BodyCompositionEntry>,
@@ -127,10 +138,7 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Converts a [LocalDate] into a human-readable relative time label.
-     *
-     * Examples: "Updated today", "Updated yesterday", "Updated 3 days ago",
-     * "Updated 2 weeks ago", "Updated 1 month ago".
+     * Formats a [LocalDate] into a user-friendly relative duration string.
      */
     private fun formatRelativeDate(date: LocalDate): String {
         val daysAgo = ChronoUnit.DAYS.between(date, LocalDate.now())

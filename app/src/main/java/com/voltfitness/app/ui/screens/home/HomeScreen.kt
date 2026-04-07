@@ -1,6 +1,5 @@
 package com.voltfitness.app.ui.screens.home
 
-import WeightCard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,11 +12,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.voltfitness.app.ui.components.cards.ExerciseSummary
 import com.voltfitness.app.ui.components.cards.RoutineSummary
+import com.voltfitness.app.ui.components.cards.WeightCard
 import com.voltfitness.app.ui.components.lists.MainExerciseList
 import com.voltfitness.app.ui.components.lists.RoutineSection
 import com.voltfitness.app.ui.navigation.Screen
@@ -25,8 +24,7 @@ import com.voltfitness.app.ui.navigation.TopAppBarState
 import com.voltfitness.app.ui.theme.VoltSpacing
 
 /**
- * Lightweight UI model for grouping routines under a named folder.
- * Maps from [FolderWithRoutinesDomain] for display in [RoutineSection].
+ * UI model representing a routine folder for display purposes.
  */
 data class RoutineFolder(
     val id: Long,
@@ -35,15 +33,11 @@ data class RoutineFolder(
 )
 
 /**
- * Home screen displaying the user dashboard: weight status,
- * suggested workouts, and routine folders.
+ * Primary dashboard screen. Orchestrates weight tracking, suggested workouts,
+ * and routine organization.
  *
- * All navigation is handled here in the UI layer via [navController].
- * The [viewModel] only exposes state — no navigation events.
- *
- * @param navController Navigation controller for screen transitions.
- * @param onTopAppBarStateChange Callback to sync the top app bar with this screen.
- * @param viewModel Hilt-injected [HomeViewModel].
+ * @param navController Controller for cross-screen transitions.
+ * @param onTopAppBarStateChange Syncs dashboard identity with the global scaffold.
  */
 @Composable
 fun HomeScreen(
@@ -54,7 +48,7 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Configure the top app bar whenever the user name changes.
+    // Sync TopAppBar state based on user profile availability
     LaunchedEffect(uiState.user?.name) {
         onTopAppBarStateChange(
             TopAppBarState(
@@ -71,23 +65,21 @@ fun HomeScreen(
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(bottom = 24.dp)
+        verticalArrangement = Arrangement.spacedBy(VoltSpacing.medium),
+        contentPadding = PaddingValues(bottom = VoltSpacing.large)
     ) {
-        // Weight card + suggested workouts
+        // Summary Header: Weight status and recommended exercises
         item {
             UserDashboardHeader(
                 uiState = uiState,
                 onWeightClick = { navController.navigate(Screen.BodyComposition.route) },
                 onExerciseClick = { exercise ->
-                    navController.navigate(
-                        Screen.WorkoutDetail.createRoute(exercise.id)
-                    )
+                    navController.navigate(Screen.WorkoutDetail.createRoute(exercise.id))
                 }
             )
         }
 
-        // Routine folders
+        // Routine Collections: Mapped from domain relations to UI models
         item {
             RoutineSection(
                 folders = uiState.folders.map { domain ->
@@ -106,23 +98,20 @@ fun HomeScreen(
                     )
                 },
                 onRoutineClick = { routine ->
-                    navController.navigate(
-                        Screen.RoutineEditor.createRoute(routineId = routine.id)
-                    )
+                    navController.navigate(Screen.RoutineEditor.createRoute(routineId = routine.id))
                 },
-                onOptionsClick = { /* TODO: Routine options menu */ },
+                onOptionsClick = { /* TODO: Implementation for routine management menu */ },
                 onAddRoutineClick = { folderId ->
-                    navController.navigate(
-                        Screen.RoutineEditor.createRoute(folderId = folderId)
-                    )
+                    navController.navigate(Screen.RoutineEditor.createRoute(folderId = folderId))
                 }
             )
-        }    }
+        }
+    }
 }
 
 /**
- * Header section combining the [WeightCard] with the suggested workout list.
- * Extracted as a private composable for readability.
+ * Composite header for the dashboard.
+ * Groups the [WeightCard] with the [MainExerciseList] using semantic spacing.
  */
 @Composable
 private fun UserDashboardHeader(
@@ -133,7 +122,7 @@ private fun UserDashboardHeader(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(VoltSpacing.small)
     ) {
         WeightCard(
             uiState = uiState,

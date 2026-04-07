@@ -1,6 +1,5 @@
 package com.voltfitness.app.ui.screens.home
 
-import WeightCard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,6 +15,7 @@ import com.voltfitness.app.domain.model.ProgressStatus
 import com.voltfitness.app.domain.model.User
 import com.voltfitness.app.ui.components.cards.ExerciseSummary
 import com.voltfitness.app.ui.components.cards.RoutineSummary
+import com.voltfitness.app.ui.components.cards.WeightCard
 import com.voltfitness.app.ui.components.lists.MainExerciseList
 import com.voltfitness.app.ui.components.lists.RoutineSection
 import com.voltfitness.app.ui.theme.VoltSpacing

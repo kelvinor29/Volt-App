@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voltfitness.app.domain.model.BodyCompositionEntry
 import com.voltfitness.app.domain.model.User
+import com.voltfitness.app.domain.repository.RoutineRepository
 import com.voltfitness.app.domain.repository.UserRepository
 import com.voltfitness.app.domain.usecase.body_composition.GetRecentBodyCompositionsUseCase
 import com.voltfitness.app.domain.usecase.exercise.SeedDatabaseUseCase
@@ -36,9 +37,11 @@ class HomeViewModel @Inject constructor(
     private val getUserFoldersWithRoutinesUseCase: GetUserFoldersWithRoutinesUseCase,
     private val ensureDefaultFolderUseCase: EnsureDefaultFolderUseCase,
     private val seedDatabaseUseCase: SeedDatabaseUseCase,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val routineRepository: RoutineRepository,
 ) : ViewModel() {
 
+    // TODO: Chage uiState to combine all data streams (Reactive MVMM, unidirectional data flow)
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
@@ -65,6 +68,7 @@ class HomeViewModel @Inject constructor(
 
             // Start reactive observations
             observeUserAndCompositions()
+            initializeDashboard()
             observeFolders(userId)
         }
     }
@@ -109,6 +113,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+
+    /**
+     * Observes the active routine days and updates the UI state accordingly.
+     */
+    private fun observeActiveRoutineDays() {
+        viewModelScope.launch {
+            activeDaysFlow.collect { days ->
+                _uiState.update { it.copy(activeRoutineDays = days) }
+            }
+        }
+    }
+
     /**
      * Transforms raw database entries into formatted UI strings for the dashboard cards.
      */
@@ -136,6 +152,24 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
+
+    /**
+     * Merges the active-routine-days stream into the main [uiState] using [combine].
+     * This avoids a second StateFlow and keeps the UI driven by a single source of truth.
+     */
+    private val activeDaysFlow: Flow<List<ActiveRoutineDayUi>> =
+        routineRepository.getActiveRoutineDays()
+            .map { entities ->
+                entities.map { entity ->
+                    ActiveRoutineDayUi(
+                        dayId = entity.dayId,
+                        dayOrder = entity.dayOrder,
+                        name = entity.name,
+                        focusBodyParts = entity.focusBodyParts.orEmpty()
+                    )
+                }
+            }
+            .catch { emit(emptyList()) }
 
     /**
      * Formats a [LocalDate] into a user-friendly relative duration string.

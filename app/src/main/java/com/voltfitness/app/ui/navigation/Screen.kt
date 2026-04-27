@@ -16,21 +16,11 @@ sealed class Screen(val route: String) {
     /** Onboarding and user profile registration. */
     data object Register : Screen("register")
 
-    // ========== MAIN DASHBOARD (BOTTOM NAV) ==========
+    // ========== MAIN DASHBOARD ==========
 
     /** Primary dashboard with user weight and active routines. */
     data object Home : Screen("home")
 
-    /**
-     * Active training session.
-     * @param routineTitle Friendly name of the routine to be displayed.
-     */
-    data object Train : Screen("train/{routineTitle}") {
-        fun createRoute(routineTitle: String) = "train/$routineTitle"
-    }
-
-    /** Historical workout data and analytics. */
-    data object History : Screen("history")
 
     /** App preferences and user profile management. */
     data object Settings : Screen("settings")
@@ -79,6 +69,14 @@ sealed class Screen(val route: String) {
         fun createRoute(exerciseName: String) = "exercise_detail/$exerciseName"
     }
 
+    // ========== ROUTINE DAYS ==========
+    /**
+     * Workout Session and its exercises.
+     */
+    data object WorkoutSession : Screen("workout_session/{dayId}"){
+        fun createRoute(dayId: Long) = "workout_session/$dayId"
+    }
+
     // ========== TODO: FUTURE NAVIGATION UTILITIES ==========
 
     companion object {
@@ -87,8 +85,6 @@ sealed class Screen(val route: String) {
          */
         fun getMainScreens() = listOf(
             Home,
-            Train,
-            History,
             Settings
         )
     }

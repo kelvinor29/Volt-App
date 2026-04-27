@@ -36,10 +36,6 @@ import com.voltfitness.app.ui.components.cards.VoltDashedPlaceholder
 import com.voltfitness.app.ui.screens.routine.RoutineDayUi
 import com.voltfitness.app.ui.screens.routine.RoutineExerciseUi
 
-// =============================================================================
-// HEADER SECTION
-// =============================================================================
-
 /**
  * Editable fields for the routine's name, description, goal, and main flag.
  *
@@ -84,10 +80,6 @@ fun RoutineHeaderFields(
         )
     }
 }
-
-// =============================================================================
-// EXPANDABLE DAY ITEM
-// =============================================================================
 
 /**
  * An expandable/collapsible section representing a single training day.

@@ -235,7 +235,7 @@ private fun RoutineEditorContent(
 // PREVIEWS
 // =============================================================================
 
-@Preview(name = "Edit Mode", showBackground = true, showSystemUi = true)
+@Preview(name = "Edit Mode")
 @Composable
 private fun RoutineEditorEditPreview() {
     VoltTheme {

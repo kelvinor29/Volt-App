@@ -21,6 +21,23 @@ interface RoutineDao {
     suspend fun deactivateAllRoutinesInFolder(folderId: Long)
 
     /**
+     * Retrieves all training days belonging to the currently active routine.
+     * Uses a JOIN so no second query is needed from the ViewModel layer.
+     *
+     * @return A continuous [Flow] that emits whenever the active routine or its days change.
+     */
+    @Query(
+        """
+    SELECT rd.*
+    FROM routine_days rd
+    INNER JOIN routines r ON r.routineId = rd.routineId
+    WHERE r.is_active = 1
+    ORDER BY rd.dayOrder ASC
+    """
+    )
+    fun getActivRoutineDays(): Flow<List<RoutineDayEntity>>
+
+    /**
      * Persists a routine and ensures it is the only active one in its folder if [routine.isActive] is true.
      */
     @Transaction

@@ -21,6 +21,7 @@ import com.voltfitness.app.ui.components.lists.MainExerciseList
 import com.voltfitness.app.ui.components.lists.RoutineSection
 import com.voltfitness.app.ui.navigation.Screen
 import com.voltfitness.app.ui.navigation.TopAppBarState
+import com.voltfitness.app.ui.screens.home.components.list.ActiveRoutineDayList
 import com.voltfitness.app.ui.theme.VoltSpacing
 
 /**
@@ -75,6 +76,15 @@ fun HomeScreen(
                 onWeightClick = { navController.navigate(Screen.BodyComposition.route) },
                 onExerciseClick = { exercise ->
                     navController.navigate(Screen.WorkoutDetail.createRoute(exercise.id))
+                }
+            )
+        }
+
+        item {
+            ActiveRoutineDayList(
+                days = uiState.activeRoutineDays,
+                onStartWorkout = { dayId ->
+                    Screen.WorkoutSession.createRoute(dayId)
                 }
             )
         }

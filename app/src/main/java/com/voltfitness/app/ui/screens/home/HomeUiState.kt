@@ -37,5 +37,23 @@ data class HomeUiState(
 
     // --- Dashboard Sections ---
     val suggestedWorkouts: List<ExerciseSummary> = emptyList(),
-    val folders: List<FolderWithRoutinesDomain> = emptyList()
+    val folders: List<FolderWithRoutinesDomain> = emptyList(),
+
+    // --- Active Routine Days ---
+    val activeRoutineDays: List<ActiveRoutineDayUi> = emptyList()
+)
+
+/**
+ * Lightweight UI model representing a single training day of the active routine.
+ *
+ * @param dayId        Unique identifier for navigation / click callbacks.
+ * @param dayOrder     1-based day number displayed on the card header.
+ * @param name         Human-readable name of the day (e.g. "Leg Day").
+ * @param focusBodyParts Comma-separated muscle groups shown as the card subtitle.
+ */
+data class ActiveRoutineDayUi(
+    val dayId: Long,
+    val dayOrder: Int,
+    val name: String,
+    val focusBodyParts: String
 )

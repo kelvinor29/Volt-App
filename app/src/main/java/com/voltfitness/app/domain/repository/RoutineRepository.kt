@@ -1,5 +1,6 @@
 package com.voltfitness.app.domain.repository
 
+import com.voltfitness.app.data.local.entities.RoutineDayEntity
 import com.voltfitness.app.domain.model.Routine
 import com.voltfitness.app.domain.model.RoutineDay
 import com.voltfitness.app.domain.model.RoutineExercise
@@ -20,6 +21,8 @@ interface RoutineRepository {
 
     /** Observes a routine with all its training days and exercises. **/
     fun getRoutineWithFullDays(routineId: Long): Flow<RoutineWithFullDaysDomain?>
+
+    fun getActiveRoutineDays(): Flow<List<RoutineDayEntity>>
 
     /** Retrieves a single routine by ID (one-shot). */
     suspend fun getRoutineById(routineId: Long): Routine?

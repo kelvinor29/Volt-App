@@ -1,6 +1,7 @@
 package com.voltfitness.app.data.repository
 
 import com.voltfitness.app.data.local.dao.RoutineDao
+import com.voltfitness.app.data.local.entities.RoutineDayEntity
 import com.voltfitness.app.data.mappers.toDomain
 import com.voltfitness.app.data.mappers.toEntity
 import com.voltfitness.app.domain.model.Routine
@@ -30,6 +31,13 @@ class RoutineRepositoryImpl @Inject constructor(
         routineDao.getRoutineWithFullDaysFlow(routineId).map { relation ->
             relation?.toDomain()
         }
+
+    /**
+     * Provides a reactive stream of training days for the currently active routine.
+     * Maps the Room entity to the domain/UI model for clean layer separation.
+     */
+    override fun getActiveRoutineDays(): Flow<List<RoutineDayEntity>> =
+        routineDao.getActivRoutineDays()
 
     /**
      * Retrieves basic routine metadata.

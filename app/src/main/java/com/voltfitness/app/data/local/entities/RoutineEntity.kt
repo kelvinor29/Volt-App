@@ -27,7 +27,7 @@ data class RoutineEntity(
     val folderId: Long,
     val name: String,
     val description: String?,
-    val goal: String?,                  // Should align with ProfileOptions.FitnessGoal.label
+    val goal: String?,                  // TODO: align with ProfileOptions
 
     @ColumnInfo(name = "is_active")
     val isActive: Boolean = false,

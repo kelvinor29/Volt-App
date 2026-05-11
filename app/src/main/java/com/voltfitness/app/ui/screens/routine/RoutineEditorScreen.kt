@@ -63,11 +63,12 @@ fun RoutineEditorScreen(
     viewModel: RoutineEditorViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isFormValid by viewModel.isFormValid.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val lifecycleOwner = LocalLifecycleOwner.current
     val listState = rememberLazyListState()
 
-    // ─── Result Collection from Exercise Picker ───
+    // --- Result Collection from Exercise Picker ---
     val navBackStackEntry = navController.currentBackStackEntry
 
     val selectionResult by (
@@ -99,7 +100,7 @@ fun RoutineEditorScreen(
         navBackStackEntry?.savedStateHandle?.remove<Int>("day_index_for_selection")
     }
 
-    // ─── Global UI State Sync ───
+    // --- Global UI State Sync ---
     LaunchedEffect(uiState.isNewRoutine) {
         onTopAppBarStateChange(
             TopAppBarState(
@@ -110,7 +111,7 @@ fun RoutineEditorScreen(
         )
     }
 
-    // ─── Side-Effect Collection ───
+    // --- Side-Effect Collection ---
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.effect.collect { effect ->
@@ -129,7 +130,7 @@ fun RoutineEditorScreen(
             VoltStepBottomBar(
                 primaryText = if (uiState.isNewRoutine) "Save" else "Update",
                 primaryIcon = Icons.Filled.Save,
-                primaryEnabled = uiState.isFormValid,
+                primaryEnabled = isFormValid,
                 primaryLoading = uiState.isSaving,
                 onSecondaryClick = { navController.popBackStack() },
                 onPrimaryClick = { viewModel.onEvent(RoutineEditorEvent.OnSave) }
@@ -216,7 +217,7 @@ private fun RoutineEditorContent(
         // --- Hierarchical Days/Exercises List ---
         itemsIndexed(
             items = uiState.days,
-            key = { index, day -> "day_${day.order}_$index" }
+            key = { _, day -> day.id.takeIf { it != 0L } ?: day.order }
         ) { index, day ->
             ExpandableDayItem(
                 day = day,

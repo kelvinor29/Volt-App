@@ -6,19 +6,54 @@ import com.voltfitness.app.data.local.entities.RoutineEntity
 import com.voltfitness.app.data.local.entities.RoutineExerciseEntity
 import com.voltfitness.app.data.local.relations.RoutineWithFullDays
 import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
+import kotlin.math.log
 
 @Dao
 interface RoutineDao {
 
-    // TODO: Improve update/insert strategy for routines.
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertRoutine(routine: RoutineEntity): Long
 
+    @Transaction
+    suspend fun saveFullRoutineAtomic(
+        routine: RoutineEntity,
+        daysWithExercises: List<Pair<RoutineDayEntity, List<RoutineExerciseEntity>>>
+    ): Long {
+        val upsertResult = upsertRoutine(routine)
+        val routineId = if (upsertResult == -1L) routine.routineId else upsertResult
+
+        if (routine.isActive) deactivateAllRoutines(routineId)
+
+        val generatedDayIds = mutableListOf<Long>()
+
+        daysWithExercises.forEach { (day, exercises) ->
+            val dayUpsertResult = upsertRoutineDay(day.copy(routineId = routineId))
+            val dayId = if (dayUpsertResult == -1L) day.dayId else dayUpsertResult
+
+            generatedDayIds.add(dayId)
+
+            if (exercises.isNotEmpty()) {
+                val exercisesWithCorrectIds = exercises.map {
+                    it.copy(
+                        routineId = routineId,
+                        dayId = dayId
+                    )
+                }
+                upsertRoutineExercises(exercisesWithCorrectIds)
+            }
+        }
+
+        deleteOrphanDays(routineId, generatedDayIds)
+
+        return routineId
+    }
+
     /**
-     * Deactivates all routines in the specified folder.
+     * Deactivates all routines.
      */
-    @Query("UPDATE routines SET is_active = 0 WHERE folderId = :folderId")
-    suspend fun deactivateAllRoutinesInFolder(folderId: Long)
+    @Query("UPDATE routines SET is_active = 0 WHERE routineId != :excludedId")
+    suspend fun deactivateAllRoutines(excludedId: Long)
 
     /**
      * Retrieves all training days belonging to the currently active routine.
@@ -36,17 +71,6 @@ interface RoutineDao {
     """
     )
     fun getActivRoutineDays(): Flow<List<RoutineDayEntity>>
-
-    /**
-     * Persists a routine and ensures it is the only active one in its folder if [routine.isActive] is true.
-     */
-    @Transaction
-    suspend fun upsertRoutineWithMaintenance(routine: RoutineEntity): Long {
-        if (routine.isActive) {
-            deactivateAllRoutinesInFolder(routine.folderId)
-        }
-        return upsertRoutine(routine)
-    }
 
     /**
      * Retrieves a single routine by ID.

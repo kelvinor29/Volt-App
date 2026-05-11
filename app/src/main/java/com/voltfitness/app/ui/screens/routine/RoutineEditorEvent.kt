@@ -49,11 +49,7 @@ data class RoutineEditorUiState(
     val isDeleting: Boolean = false,
     val error: String? = null,
     val createdAt: Long? = null,
-) {
-    /** Validates that mandatory routine metadata is present. */
-    val isFormValid: Boolean
-        get() = routineName.isNotBlank() && description.isNotBlank() && goal.isNotBlank()
-}
+)
 
 /**
  * User interactions and commands for the Routine Editor.

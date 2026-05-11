@@ -57,18 +57,13 @@ class HomeViewModel @Inject constructor(
             // Ensure base data exists
             seedDatabaseUseCase()
 
-            val userId = userRepository.getCurrentUserId()
-            if (userId == null) {
-                _uiState.update { it.copy(isLoading = false) }
-                return@launch
-            }
+            val userId = userRepository.getCurrentUserId() ?: return@launch
 
             // Maintenance: Ensure user has at least one folder
             ensureDefaultFolderUseCase(userId)
 
             // Start reactive observations
             observeUserAndCompositions()
-            initializeDashboard()
             observeFolders(userId)
         }
     }

@@ -10,12 +10,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.voltfitness.app.core.designsystem.component.voltFieldShape
-import com.voltfitness.app.core.designsystem.component.voltSectionShape
+import com.voltfitness.app.R
 import com.voltfitness.app.domain.model.ProgressStatus
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.components.VoltCard
 import com.voltfitness.app.ui.screens.home.HomeUiState
 import com.voltfitness.app.ui.theme.VoltSpacing
@@ -74,12 +75,12 @@ fun WeightCard(
 private fun WeightInfoSection(
     weight: String,
     unit: String,
-    lastUpdated: String,
+    lastUpdated: UiText,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Text(
-            text = "Current Weight",
+            text = stringResource(R.string.current_weight),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Medium
@@ -100,9 +101,9 @@ private fun WeightInfoSection(
             )
         }
 
-        if (lastUpdated.isNotEmpty()) {
+        if (lastUpdated.asString().isNotEmpty()) {
             Text(
-                text = lastUpdated,
+                text = lastUpdated.asString(),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
@@ -112,8 +113,8 @@ private fun WeightInfoSection(
 
 @Composable
 private fun ProgressSection(
-    primaryText: String,
-    secondaryText: String?,
+    primaryText: UiText,
+    secondaryText: UiText?,
     resources: ProgressResources
 ) {
     Column(
@@ -138,7 +139,7 @@ private fun ProgressSection(
                     )
                 }
                 Text(
-                    text = primaryText,
+                    text = primaryText.asString(),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = resources.contentColor
@@ -148,7 +149,7 @@ private fun ProgressSection(
 
         secondaryText?.let {
             Text(
-                text = it,
+                text = it.asString(),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -200,9 +201,9 @@ private fun WeightCardPositivePreview() {
                     currentWeight = "75.5",
                     weightUnit = "kg",
                     progressStatus = ProgressStatus.POSITIVE,
-                    primaryChangeText = "-0.5 kg",
-                    secondaryChangeText = "Nice job!",
-                    lastWeightUpdated = "Feb 11, 2026"
+                    primaryChangeText = "-0.5 kg" as UiText,
+                    secondaryChangeText = "Nice job!" as UiText,
+                    lastWeightUpdated = "Feb 11, 2026" as UiText
                 )
             )
         }
@@ -219,9 +220,9 @@ private fun WeightCardNegativePreview() {
                     currentWeight = "82.3",
                     weightUnit = "kg",
                     progressStatus = ProgressStatus.NEGATIVE,
-                    primaryChangeText = "+1.2 kg",
-                    secondaryChangeText = "Keep pushing",
-                    lastWeightUpdated = "Yesterday"
+                    primaryChangeText = "+1.2 kg" as UiText,
+                    secondaryChangeText = "Keep pushing" as UiText,
+                    lastWeightUpdated = "Yesterday" as UiText
                 )
             )
         }

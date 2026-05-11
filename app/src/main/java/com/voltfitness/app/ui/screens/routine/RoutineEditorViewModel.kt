@@ -1,8 +1,11 @@
 package com.voltfitness.app.ui.screens.routine
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.voltfitness.app.R
 import com.voltfitness.app.domain.model.Routine
 import com.voltfitness.app.domain.model.RoutineDay
 import com.voltfitness.app.domain.model.RoutineExercise
@@ -10,6 +13,7 @@ import com.voltfitness.app.domain.repository.ExerciseRepository
 import com.voltfitness.app.domain.usecase.routine.DeleteRoutineUseCase
 import com.voltfitness.app.domain.usecase.routine.GetRoutineDetailUseCase
 import com.voltfitness.app.domain.usecase.routine.SaveRoutineUseCase
+import com.voltfitness.app.ui.common.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -93,7 +97,14 @@ class RoutineEditorViewModel @Inject constructor(
 
         if (isNew) {
             _uiState.update {
-                it.copy(days = listOf(RoutineDayUi(order = 1, name = "Day 1")))
+                it.copy(
+                    days = listOf(
+                        RoutineDayUi(
+                            order = 1,
+                            name = UiText.StringResource(R.string.day_1)
+                        )
+                    )
+                )
             }
         } else {
             loadExistingRoutine(routineId)
@@ -122,7 +133,7 @@ class RoutineEditorViewModel @Inject constructor(
                     RoutineDayUi(
                         id = dayFull.day.id,
                         order = dayFull.day.dayOrder,
-                        name = dayFull.day.name,
+                        name = UiText.DynamicString(dayFull.day.name),
                         exercises = dayFull.exercises.map { exerciseWithSets ->
                             val re = exerciseWithSets.routineExercise
                             RoutineExerciseUi(
@@ -136,7 +147,7 @@ class RoutineEditorViewModel @Inject constructor(
                         }
                     )
                 }.ifEmpty {
-                    listOf(RoutineDayUi(order = 1, name = "Day 1"))
+                    listOf(RoutineDayUi(order = 1, name = UiText.StringResource(R.string.day_1)))
                 }
 
                 _uiState.update { state ->
@@ -153,8 +164,12 @@ class RoutineEditorViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Error loading routine $routineId")
-                _effect.send(RoutineEditorEffect.ShowError("Could not load routine details"))
+                Timber.e(e, "Failed to load selected exercises")
+                _effect.send(
+                    RoutineEditorEffect.ShowError(
+                        UiText.StringResource(R.string.failed_to_add_exercises, e.message ?: "")
+                    )
+                )
             }
         }
     }
@@ -187,7 +202,7 @@ class RoutineEditorViewModel @Inject constructor(
                     state.copy(
                         days = state.days + RoutineDayUi(
                             order = newOrder,
-                            name = "Day $newOrder"
+                            name = UiText.StringResource(R.string.day, newOrder)
                         ),
                         expandedDayIndex = state.days.size
                     )
@@ -211,7 +226,9 @@ class RoutineEditorViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         days = state.days.toMutableList().apply {
-                            this[event.index] = this[event.index].copy(name = event.name)
+                            this[event.index] = this[event.index].copy(
+                                name = UiText.DynamicString(event.name)
+                            )
                         }
                     )
                 }
@@ -271,7 +288,7 @@ class RoutineEditorViewModel @Inject constructor(
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to load selected exercises")
-            _effect.send(RoutineEditorEffect.ShowError("Failed to add exercises: ${e.message}"))
+            _effect.send(RoutineEditorEffect.ShowError(UiText.StringResource(R.string.failed_to_add_exercises)))
         }
     }
 
@@ -286,7 +303,7 @@ class RoutineEditorViewModel @Inject constructor(
         val state = _uiState.value
         if (state.routineName.isBlank()) {
             viewModelScope.launch {
-                _effect.send(RoutineEditorEffect.ShowError("Routine name cannot be empty"))
+                _effect.send(RoutineEditorEffect.ShowError(UiText.StringResource(R.string.routine_name_cannot_be_empty)))
             }
             return
         }
@@ -311,7 +328,7 @@ class RoutineEditorViewModel @Inject constructor(
                         id = dayUi.id,
                         routineId = if (state.isNewRoutine) 0L else state.routineId,
                         dayOrder = dayUi.order,
-                        name = dayUi.name.trim()
+                        name = dayUi.name.asRawString()
                     )
                     val exercises = dayUi.exercises.mapIndexed { index, exUi ->
                         RoutineExercise(
@@ -334,7 +351,11 @@ class RoutineEditorViewModel @Inject constructor(
                 _effect.send(RoutineEditorEffect.NavigateBack)
             } catch (e: Exception) {
                 Timber.e(e, "Error saving routine")
-                _effect.send(RoutineEditorEffect.ShowError("Failed to save: ${e.message}"))
+                _effect.send(
+                    RoutineEditorEffect.ShowError(
+                        UiText.StringResource(R.string.failed_to_save, e.message ?: "")
+                    )
+                )
             } finally {
                 _uiState.update { it.copy(isSaving = false) }
             }
@@ -352,10 +373,27 @@ class RoutineEditorViewModel @Inject constructor(
                 deleteRoutineUseCase(state.routineId)
                 _effect.send(RoutineEditorEffect.NavigateBack)
             } catch (e: Exception) {
-                _effect.send(RoutineEditorEffect.ShowError("Failed to delete: ${e.message}"))
+                _effect.send(
+                    RoutineEditorEffect.ShowError(
+                        UiText.StringResource(
+                            resId = R.string.failed_to_delete,
+                            args = listOf(
+                                e.message ?: UiText.StringResource(R.string.unknown_error)
+                            )
+                        )
+                    )
+                )
             } finally {
                 _uiState.update { it.copy(isDeleting = false) }
             }
+        }
+    }
+
+    private fun UiText.asRawString(): String {
+        return when (this) {
+            is UiText.DynamicString -> value
+            is UiText.Empty -> ""
+            is UiText.StringResource -> "Day"
         }
     }
 }

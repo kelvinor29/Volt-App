@@ -2,9 +2,11 @@ package com.voltfitness.app.ui.screens.bodycomposition.add
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.voltfitness.app.R
 import com.voltfitness.app.domain.repository.UserRepository
 import com.voltfitness.app.domain.usecase.body_composition.RawBodyCompositionInput
 import com.voltfitness.app.domain.usecase.body_composition.SaveBodyCompositionEntryUseCase
+import com.voltfitness.app.ui.common.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -98,7 +100,7 @@ class AddBodyCompositionViewModel @Inject constructor(
         val form = uiState.value
 
         if (!form.isFormValid) {
-            showError("Height and weight are required.")
+            showError(UiText.StringResource(R.string.error_height_weight_required))
             return
         }
 
@@ -110,7 +112,7 @@ class AddBodyCompositionViewModel @Inject constructor(
                 updateState {
                     copy(
                         isSaving = false,
-                        errorMessage = "Profile incomplete. Please update your profile first."
+                        errorMessage = UiText.StringResource(R.string.error_profile_incomplete)
                     )
                 }
                 return@launch
@@ -132,7 +134,7 @@ class AddBodyCompositionViewModel @Inject constructor(
                     updateState {
                         copy(
                             isSaving = false,
-                            errorMessage = "Error saving: ${error.message}"
+                            errorMessage = UiText.DynamicString(error.message ?: "Unknown error")
                         )
                     }
                 }
@@ -197,7 +199,7 @@ class AddBodyCompositionViewModel @Inject constructor(
         _uiState.update(transform)
     }
 
-    private fun showError(message: String) {
+    private fun showError(message: UiText.StringResource) {
         updateState { copy(errorMessage = message) }
     }
 

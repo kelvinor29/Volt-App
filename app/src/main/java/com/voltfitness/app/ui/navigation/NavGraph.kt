@@ -11,12 +11,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.voltfitness.app.ui.common.UiText
+import com.voltfitness.app.R
 import com.voltfitness.app.ui.screens.bodycomposition.BodyCompositionNavEffect
 import com.voltfitness.app.ui.screens.bodycomposition.BodyCompositionScreen
 import com.voltfitness.app.ui.screens.bodycomposition.BodyCompositionViewModel
@@ -99,7 +102,7 @@ fun VoltNavGraph(
             val uiState by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
-                topAppBarState.value = TopAppBarState(title = "", showBackButton = false)
+                topAppBarState.value = TopAppBarState(title = UiText.Empty, showBackButton = false)
             }
 
             LaunchedEffect(Unit) {
@@ -174,10 +177,12 @@ fun VoltNavGraph(
             val viewModel: BodyCompositionViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
 
+            val subtitleTopBar = stringResource(R.string.body_composition_subtitle)
+
             LaunchedEffect(Unit) {
                 topAppBarState.value = TopAppBarState(
-                    title = "Body Composition",
-                    subtitle = "Track your physical progress",
+                    title = UiText.StringResource(R.string.body_composition_title),
+                    subtitle = subtitleTopBar,
                     showBackButton = true,
                     onBackClick = { navController.popBackStack() },
                 )
@@ -241,7 +246,7 @@ fun VoltNavGraph(
 
             LaunchedEffect(Unit) {
                 topAppBarState.value = TopAppBarState(
-                    title = "Add exercise",
+                    title = UiText.StringResource(R.string.add_exercise),
                     showBackButton = true,
                     onBackClick = { navController.popBackStack() },
                 )

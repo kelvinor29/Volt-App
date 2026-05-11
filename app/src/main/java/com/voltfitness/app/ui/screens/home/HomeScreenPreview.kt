@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voltfitness.app.domain.model.ProgressStatus
 import com.voltfitness.app.domain.model.User
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.components.cards.ExerciseSummary
 import com.voltfitness.app.ui.components.cards.RoutineSummary
 import com.voltfitness.app.ui.components.cards.WeightCard
@@ -79,9 +80,9 @@ private fun HomeDashboardPreview() {
         isLoading = false,
         user = previewUser,
         currentWeight = "82.5",
-        lastWeightUpdated = "Updated today",
-        primaryChangeText = "Score +2.1",
-        secondaryChangeText = "Fat -0.8% | Muscle +0.4 kg",
+        lastWeightUpdated = "Updated today" as UiText,
+        primaryChangeText = "Score +2.1" as UiText,
+        secondaryChangeText = "Fat -0.8% | Muscle +0.4 kg" as UiText,
         progressStatus = ProgressStatus.POSITIVE,
         compositionScore = 88f,
         suggestedWorkouts = previewExercises
@@ -102,9 +103,9 @@ private fun HomeEmptyPreview() {
         isLoading = false,
         user = previewUser,
         currentWeight = "",
-        lastWeightUpdated = "No records yet",
-        primaryChangeText = "Welcome!",
-        secondaryChangeText = "Log your weight to get started",
+        lastWeightUpdated = "No records yet" as UiText,
+        primaryChangeText = "Welcome!" as UiText,
+        secondaryChangeText = "Log your weight to get started" as UiText,
         progressStatus = ProgressStatus.NEUTRAL
     )
 

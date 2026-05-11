@@ -28,6 +28,7 @@ import com.voltfitness.app.core.designsystem.component.voltFieldShape
 import com.voltfitness.app.ui.screens.exercise.components.ExerciseGifImage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.tooling.preview.Preview
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
@@ -57,7 +58,7 @@ sealed interface ExerciseCardTrailing {
 fun ExerciseCard(
     exerciseId: String,
     exerciseName: String,
-    subtitle: String,
+    subtitle: UiText,
     trailing: ExerciseCardTrailing,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
@@ -94,7 +95,7 @@ fun ExerciseCard(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = subtitle,
+                    text = subtitle.asString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -151,7 +152,7 @@ fun PreviewExerciseCardStates() {
             ExerciseCard(
                 exerciseId = "1",
                 exerciseName = "bench press",
-                subtitle = "Chest • Barbell",
+                subtitle = "Chest • Barbell" as UiText,
                 trailing = ExerciseCardTrailing.SelectionToggle(isSelected = false),
                 onClick = { }
             )
@@ -160,7 +161,7 @@ fun PreviewExerciseCardStates() {
             ExerciseCard(
                 exerciseId = "2",
                 exerciseName = "deadlift",
-                subtitle = "Back • Barbell",
+                subtitle = "Back • Barbell" as UiText,
                 trailing = ExerciseCardTrailing.SelectionToggle(isSelected = true),
                 onClick = { }
             )
@@ -169,7 +170,7 @@ fun PreviewExerciseCardStates() {
             ExerciseCard(
                 exerciseId = "3",
                 exerciseName = "pull ups",
-                subtitle = "Bodyweight • 3 sets x 12 reps",
+                subtitle = "Bodyweight • 3 sets x 12 reps" as UiText,
                 trailing = ExerciseCardTrailing.OptionsMenu(onClick = { }),
                 onClick = { }
             )
@@ -185,7 +186,7 @@ fun PreviewExerciseCardDark() {
             ExerciseCard(
                 exerciseId = "4",
                 exerciseName = "squats",
-                subtitle = "Legs • Quadriceps",
+                subtitle = "Legs • Quadriceps" as UiText,
                 trailing = ExerciseCardTrailing.OptionsMenu(onClick = { }),
                 onClick = { }
             )

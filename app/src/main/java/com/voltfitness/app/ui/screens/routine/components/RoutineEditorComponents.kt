@@ -24,12 +24,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.voltfitness.app.R
 import com.voltfitness.app.core.common.ProfileOptions
 import com.voltfitness.app.core.designsystem.component.VoltCheckButton
 import com.voltfitness.app.core.designsystem.component.VoltDropdownSelector
 import com.voltfitness.app.core.designsystem.component.VoltTextField
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.components.cards.ExerciseCard
 import com.voltfitness.app.ui.components.cards.ExerciseCardTrailing
 import com.voltfitness.app.ui.components.cards.VoltDashedPlaceholder
@@ -65,16 +68,18 @@ fun RoutineHeaderFields(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        VoltTextField(value = name, onValueChange = onNameChange, label = "Routine name")
-        VoltTextField(value = description, onValueChange = onDescriptionChange, label = "Description")
+        VoltTextField(value = name, onValueChange = onNameChange, label = stringResource(R.string.routine_name))
+        VoltTextField(value = description, onValueChange = onDescriptionChange, label = stringResource(
+            R.string.description
+        ))
         VoltDropdownSelector(
-            label = "Training Goal",
+            label = stringResource(R.string.training_goal),
             options = ProfileOptions.goals,
             selectedOption = goal,
             onOptionSelected = onGoalChange,
         )
         VoltCheckButton(
-            label = "Set Main Routine",
+            label = stringResource(R.string.set_main_routine),
             checked = isMainRoutine,
             onCheckedChange = onToggleMain,
         )
@@ -125,7 +130,7 @@ fun ExpandableDayItem(
             )
             Spacer(Modifier.width(16.dp))
             Text(
-                text = day.name,
+                text = day.name.asString(),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f),
@@ -176,6 +181,11 @@ fun ExpandableDayItem(
     }
 }
 
-private fun buildEditorSubtitle(exercise: RoutineExerciseUi): String {
-    return "${exercise.sets} sets · ${exercise.repsRange} reps · ${exercise.weightRange}"
+private fun buildEditorSubtitle(exercise: RoutineExerciseUi): UiText {
+    return UiText.StringResource(
+        R.string.sets_reps,
+        exercise.sets,
+        exercise.repsRange,
+        exercise.weightRange
+    )
 }

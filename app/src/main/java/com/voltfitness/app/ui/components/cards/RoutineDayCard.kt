@@ -17,10 +17,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.voltfitness.app.R
 import com.voltfitness.app.ui.screens.home.ActiveRoutineDayUi
 import com.voltfitness.app.ui.theme.VoltSpacing
 import com.voltfitness.app.ui.theme.VoltTheme
@@ -58,7 +60,7 @@ fun RoutineDayCard(
         ) {
             // Day label — e.g. "Day 1"
             Text(
-                text = "Day ${day.dayOrder}",
+                text = stringResource(R.string.day, day.dayOrder),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -92,7 +94,7 @@ fun RoutineDayCard(
                 onClick = { onStartWorkout(day.dayId) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Start Workout")
+                Text(text = stringResource(R.string.start_workout))
             }
         }
     }

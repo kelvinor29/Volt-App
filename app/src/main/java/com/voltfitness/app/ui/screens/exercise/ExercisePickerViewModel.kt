@@ -1,11 +1,12 @@
 package com.voltfitness.app.ui.screens.exercise
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.voltfitness.app.R
 import com.voltfitness.app.domain.model.Exercise
 import com.voltfitness.app.domain.repository.ExerciseRepository
 import com.voltfitness.app.domain.search.FuzzySearchEngine
+import com.voltfitness.app.ui.common.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -33,7 +34,7 @@ data class ExercisePickerUiState(
     val selectedTarget: String? = null,
     val selectedEquipment: String? = null,
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: UiText? = null
 )
 
 // ==================== EVENTS ====================
@@ -145,7 +146,9 @@ class ExercisePickerViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = "Failed to load exercises: ${e.message}"
+                        error = UiText.StringResource(
+                            R.string.failed_to_load_exercises
+                        )
                     )
                 }
             }

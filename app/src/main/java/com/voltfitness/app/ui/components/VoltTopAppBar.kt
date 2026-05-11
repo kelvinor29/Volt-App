@@ -24,10 +24,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.voltfitness.app.R
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.navigation.TopAppBarState
 import com.voltfitness.app.ui.theme.VoltTheme
 
@@ -72,15 +75,15 @@ fun VoltTopAppBar(
                     IconButton(onClick = { state.onBackClick?.invoke() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = stringResource(R.string.navigate_back)
                         )
                     }
                 }
             },
             title = {
                 AppBarTitle(
-                    title = state.title,
-                    subtitle = if (!state.showBackButton) state.subtitle else null
+                    title = state.title.asString(),
+                    subtitle = if (!state.showBackButton) state.subtitle.toString() else null
                 )
             },
             actions = {
@@ -88,7 +91,7 @@ fun VoltTopAppBar(
                     IconButton(onClick = { state.onSettingsClick?.invoke() }) {
                         Icon(
                             imageVector = Icons.Filled.Settings,
-                            contentDescription = "Open settings"
+                            contentDescription = stringResource(R.string.open_settings)
                         )
                     }
                 }
@@ -168,7 +171,7 @@ private fun VoltTopAppBarHomePreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             VoltTopAppBar(
                 state = TopAppBarState(
-                    title = "Hello, Kelvin!",
+                    title = "Hello, Kelvin!" as UiText,
                     subtitle = "Get ready, today is workout day!",
                     showBackButton = false,
                     showSettingsButton = true
@@ -186,7 +189,7 @@ private fun VoltTopAppBarDetailPreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             VoltTopAppBar(
                 state = TopAppBarState(
-                    title = "Push Day Workout",
+                    title = "Push Day Workout" as UiText,
                     showBackButton = true,
                     showSettingsButton = false
                 )

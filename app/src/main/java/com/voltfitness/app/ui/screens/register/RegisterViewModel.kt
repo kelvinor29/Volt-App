@@ -2,10 +2,10 @@ package com.voltfitness.app.ui.screens.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.voltfitness.app.R
 import com.voltfitness.app.domain.model.User
-import com.voltfitness.app.domain.usecase.home.EnsureDefaultFolderUseCase
 import com.voltfitness.app.domain.usecase.user.CompleteUserRegistrationUseCase
-import com.voltfitness.app.domain.usecase.user.UpdateUserUseCase
+import com.voltfitness.app.ui.common.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,7 @@ data class RegisterUiState(
     val experienceLevel: String = "",
     val gymName: String = "",
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
     val currentStep: Int = 0 // For multi-step registration
 ) {
     val isNameValid: Boolean get() = name.isNotBlank()
@@ -123,7 +123,7 @@ class RegisterViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = error.message ?: "Registration failed"
+                            errorMessage = (error.message ?: UiText.StringResource(R.string.registration_failed)) as UiText?
                         )
                     }
                 }

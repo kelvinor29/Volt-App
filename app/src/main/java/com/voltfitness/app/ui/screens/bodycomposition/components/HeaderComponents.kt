@@ -25,9 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.voltfitness.app.R
 import com.voltfitness.app.core.designsystem.component.voltSectionShape
 import com.voltfitness.app.ui.theme.VoltError
 import com.voltfitness.app.ui.theme.VoltIconSize
@@ -98,7 +100,10 @@ private fun HeaderTopRow(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "Latest measurement: ${lastDate.format(SummaryDateFormatter)}",
+                text = stringResource(
+                    R.string.latest_measurement,
+                    lastDate.format(SummaryDateFormatter)
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -125,14 +130,14 @@ private fun MetricsRow(
             icon = Icons.Outlined.MonitorWeight,
             value = "%.1f".format(weight),
             unit = "kg",
-            label = "Weight"
+            label = stringResource(R.string.weight)
         )
         bodyFat?.let {
             QuickStatItem(
                 icon = Icons.Outlined.WaterDrop,
                 value = "%.1f".format(it),
                 unit = "%",
-                label = "Fat"
+                label = stringResource(R.string.fat)
             )
         }
         muscleMass?.let {
@@ -140,7 +145,7 @@ private fun MetricsRow(
                 icon = Icons.Outlined.FitnessCenter,
                 value = "%.1f".format(it),
                 unit = "kg",
-                label = "Muscle"
+                label = stringResource(R.string.muscle)
             )
         }
     }

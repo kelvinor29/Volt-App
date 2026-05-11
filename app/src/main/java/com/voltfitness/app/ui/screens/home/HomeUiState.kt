@@ -1,8 +1,10 @@
 package com.voltfitness.app.ui.screens.home
 
+import com.voltfitness.app.R
 import com.voltfitness.app.domain.model.ProgressStatus
 import com.voltfitness.app.domain.model.User
 import com.voltfitness.app.domain.relations.FolderWithRoutinesDomain
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.components.cards.ExerciseSummary
 
 /**
@@ -21,7 +23,7 @@ import com.voltfitness.app.ui.components.cards.ExerciseSummary
  */
 data class HomeUiState(
     val isLoading: Boolean = true,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
 
     // --- User Context ---
     val user: User? = null,
@@ -29,9 +31,9 @@ data class HomeUiState(
     // --- Weight Card Data ---
     val currentWeight: String = "",
     val weightUnit: String = "kg",
-    val lastWeightUpdated: String = "No records yet",
-    val primaryChangeText: String = "Welcome!",
-    val secondaryChangeText: String? = "Log your weight to get started",
+    val lastWeightUpdated: UiText = UiText.StringResource(R.string.no_records_yet),
+    val primaryChangeText: UiText = UiText.StringResource(R.string.welcome),
+    val secondaryChangeText: UiText? = UiText.StringResource(R.string.log_your_weight_to_get_started),
     val progressStatus: ProgressStatus = ProgressStatus.NEUTRAL,
     val compositionScore: Float? = null,
 

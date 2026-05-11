@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.theme.VoltTheme
 
 /**
@@ -37,7 +38,7 @@ import com.voltfitness.app.ui.theme.VoltTheme
  */
 @Composable
 fun VoltErrorBanner(
-    message: String,
+    message: UiText,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -61,7 +62,7 @@ fun VoltErrorBanner(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = message,
+                text = message.asString(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier.weight(1f)
@@ -88,17 +89,17 @@ private fun VoltErrorBannerPreview() {
         Surface(modifier = Modifier.padding(16.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 VoltErrorBanner(
-                    message = "Failed to sync your workout data.",
+                    message = "Failed to sync your workout data." as UiText,
                     onDismiss = {}
                 )
 
                 VoltErrorBanner(
-                    message = "A connection timeout occurred while attempting to reach the ExerciseDB server. Please verify your internet settings and try again.",
+                    message = "A connection timeout occurred while attempting to reach the ExerciseDB server. Please verify your internet settings and try again." as UiText,
                     onDismiss = {}
                 )
 
                 VoltErrorBanner(
-                    message = "Invalid credentials. Please sign in again.",
+                    message = "Invalid credentials. Please sign in again." as UiText,
                     onDismiss = {}
                 )
             }
@@ -112,7 +113,7 @@ private fun VoltErrorBannerContextPreview() {
     VoltTheme {
         Column(modifier = Modifier.padding(8.dp)) {
             VoltErrorBanner(
-                message = "Limited connectivity detected.",
+                message = "Limited connectivity detected." as UiText,
                 onDismiss = {}
             )
         }

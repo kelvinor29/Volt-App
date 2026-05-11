@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.voltfitness.app.ui.components.cards.ExerciseSummary
@@ -23,6 +24,8 @@ import com.voltfitness.app.ui.navigation.Screen
 import com.voltfitness.app.ui.navigation.TopAppBarState
 import com.voltfitness.app.ui.screens.home.components.list.ActiveRoutineDayList
 import com.voltfitness.app.ui.theme.VoltSpacing
+import com.voltfitness.app.R
+import com.voltfitness.app.ui.common.UiText
 
 /**
  * UI model representing a routine folder for display purposes.
@@ -49,12 +52,18 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val defaultUserName = stringResource(R.string.home_default_user)
+    val userName = uiState.user?.name ?: defaultUserName
+
+    val greetingTitle = UiText.StringResource(R.string.home_greeting, userName)
+    val greetingSubtitle = stringResource(R.string.home_subtitle)
+
     // Sync TopAppBar state based on user profile availability
     LaunchedEffect(uiState.user?.name) {
         onTopAppBarStateChange(
             TopAppBarState(
-                title = "Hello, ${uiState.user?.name ?: "User"}!",
-                subtitle = "Get ready, today is workout day!",
+                title = greetingTitle,
+                subtitle = greetingSubtitle,
                 showBackButton = false,
                 showSettingsButton = true,
                 onSettingsClick = {

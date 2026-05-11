@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,6 +37,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
+import com.voltfitness.app.R
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.components.navigation.VoltStepBottomBar
 import com.voltfitness.app.ui.navigation.Screen
 import com.voltfitness.app.ui.navigation.TopAppBarState
@@ -102,9 +105,13 @@ fun RoutineEditorScreen(
 
     // --- Global UI State Sync ---
     LaunchedEffect(uiState.isNewRoutine) {
+        val titleText = if (uiState.isNewRoutine)
+            UiText.StringResource(R.string.new_routine)
+        else UiText.StringResource(R.string.edit_routine)
+
         onTopAppBarStateChange(
             TopAppBarState(
-                title = if (uiState.isNewRoutine) "New Routine" else "Edit Routine",
+                title = titleText,
                 showBackButton = true,
                 onBackClick = { navController.popBackStack() }
             )
@@ -117,7 +124,7 @@ fun RoutineEditorScreen(
             viewModel.effect.collect { effect ->
                 when (effect) {
                     is RoutineEditorEffect.NavigateBack -> navController.popBackStack()
-                    is RoutineEditorEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+                    is RoutineEditorEffect.ShowError -> snackbarHostState.showSnackbar(effect.message.toString())
                     is RoutineEditorEffect.ShowSuccess -> snackbarHostState.showSnackbar(effect.message)
                 }
             }
@@ -128,7 +135,9 @@ fun RoutineEditorScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             VoltStepBottomBar(
-                primaryText = if (uiState.isNewRoutine) "Save" else "Update",
+                primaryText = if (uiState.isNewRoutine) stringResource(R.string.save) else stringResource(
+                    R.string.update
+                ),
                 primaryIcon = Icons.Filled.Save,
                 primaryEnabled = isFormValid,
                 primaryLoading = uiState.isSaving,
@@ -199,7 +208,7 @@ private fun RoutineEditorContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Training Days",
+                    text = stringResource(R.string.training_days),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
@@ -207,7 +216,7 @@ private fun RoutineEditorContent(
                 IconButton(onClick = { onEvent(RoutineEditorEvent.OnAddDay) }) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Add training day",
+                        contentDescription = stringResource(R.string.add_training_day),
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
@@ -252,7 +261,7 @@ private fun RoutineEditorEditPreview() {
                         RoutineDayUi(
                             id = 1L,
                             order = 1,
-                            name = "Day 1",
+                            name = "Day 1" as UiText,
                             exercises = listOf(
                                 RoutineExerciseUi(
                                     exerciseDbId = "0001",
@@ -263,7 +272,7 @@ private fun RoutineEditorEditPreview() {
                                 )
                             )
                         ),
-                        RoutineDayUi(id = 2L, order = 2, name = "Day 2")
+                        RoutineDayUi(id = 2L, order = 2, name = "Day 2" as UiText)
                     )
                 ),
                 onEvent = {},

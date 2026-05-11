@@ -44,7 +44,9 @@ import com.voltfitness.app.core.designsystem.component.VoltTextField
 import com.voltfitness.app.core.common.ProfileOptions
 import com.voltfitness.app.ui.theme.VoltTheme
 import androidx.compose.material3.Surface
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.voltfitness.app.R
 import com.voltfitness.app.core.designsystem.component.VoltDateSelector
 
 @Composable
@@ -66,7 +68,7 @@ fun RegisterScreen(
 
             // Header
             Text(
-                text = "Welcome to Volt",
+                text = stringResource(R.string.welcome_to_volt),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -74,7 +76,7 @@ fun RegisterScreen(
             )
 
             Text(
-                text = "Set up your profile to get started",
+                text = stringResource(R.string.set_up_your_profile_to_get_started),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -133,7 +135,7 @@ fun RegisterScreen(
                     )
                 }
                 VoltButton(
-                    text = if (uiState.currentStep == 2) "Create Profile" else "Next",
+                    text = if (uiState.currentStep == 2) stringResource(R.string.create_profile) else "Next",
                     onClick = {
                         if (uiState.currentStep == 2) onEvent(RegisterEvent.Submit)
                         else onEvent(RegisterEvent.NextStep)
@@ -160,7 +162,7 @@ private fun StepBasicInfo(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Basic Information",
+            text = stringResource(R.string.basic_information),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold
         )
@@ -168,24 +170,24 @@ private fun StepBasicInfo(
         VoltTextField(
             value = uiState.name,
             onValueChange = { onEvent(RegisterEvent.UpdateName(it)) },
-            label = "Name *",
+            label = stringResource(R.string.name),
             leadingIcon = Icons.Outlined.Person,
             isError = uiState.name.isNotBlank() && !uiState.isNameValid,
-            errorMessage = "Name is required",
+            errorMessage = stringResource(R.string.name_is_required),
             imeAction = ImeAction.Next
         )
 
         VoltTextField(
             value = uiState.email,
             onValueChange = { onEvent(RegisterEvent.UpdateEmail(it)) },
-            label = "Email",
+            label = stringResource(R.string.email),
             leadingIcon = Icons.Outlined.Email,
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next
         )
 
         VoltDropdownSelector(
-            label = "Gender *",
+            label = stringResource(R.string.gender),
             options = ProfileOptions.genders,
             selectedOption = uiState.gender,
             leadingIcon = Icons.Outlined.Wc,
@@ -194,7 +196,7 @@ private fun StepBasicInfo(
         )
 
         VoltDateSelector(
-            label = "Birth Date",
+            label = stringResource(R.string.birth_date),
             selectedDate = uiState.birthDate,
             onDateSelected = { onEvent(RegisterEvent.UpdateBirthDate(it)) },
             icon = Icons.Outlined.CalendarMonth,
@@ -209,13 +211,13 @@ private fun StepFitnessProfile(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Fitness Profile",
+            text = stringResource(R.string.fitness_profile),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold
         )
 
         VoltDropdownSelector(
-            label = "Activity Level",
+            label = stringResource(R.string.activity_level),
             options = ProfileOptions.activityLevels,
             selectedOption = uiState.activityLevel,
             leadingIcon = Icons.Outlined.Speed,
@@ -223,7 +225,7 @@ private fun StepFitnessProfile(
         )
 
         VoltDropdownSelector(
-            label = "Goal",
+            label = stringResource(R.string.goal),
             options = ProfileOptions.goals,
             selectedOption = uiState.goal,
             leadingIcon = Icons.Outlined.TrackChanges,
@@ -231,7 +233,7 @@ private fun StepFitnessProfile(
         )
 
         VoltDropdownSelector(
-            label = "Experience Level",
+            label = stringResource(R.string.experience_level),
             options = ProfileOptions.experienceLevels,
             selectedOption = uiState.experienceLevel,
             leadingIcon = Icons.Outlined.Psychology,
@@ -241,7 +243,7 @@ private fun StepFitnessProfile(
         VoltTextField(
             value = uiState.gymName,
             onValueChange = { onEvent(RegisterEvent.UpdateGymName(it)) },
-            label = "Gym Name",
+            label = stringResource(R.string.gym_name),
             leadingIcon = Icons.Outlined.Place,
             imeAction = ImeAction.Done
         )
@@ -254,23 +256,47 @@ private fun StepReview(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = "Review Your Profile",
+            text = stringResource(R.string.review_your_profile),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            text = "Confirm your details before creating your profile.",
+            text = stringResource(R.string.confirm_your_details_before_creating_your_profile),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        ReviewItem(label = "Name", value = uiState.name)
-        ReviewItem(label = "Email", value = uiState.email.ifBlank { "Not set" })
-        ReviewItem(label = "Gender", value = uiState.gender.ifBlank { "Not set" })
-        ReviewItem(label = "Activity Level", value = uiState.activityLevel.ifBlank { "Not set" })
-        ReviewItem(label = "Goal", value = uiState.goal.ifBlank { "Not set" })
-        ReviewItem(label = "Experience", value = uiState.experienceLevel.ifBlank { "Not set" })
-        ReviewItem(label = "Gym", value = uiState.gymName.ifBlank { "Not set" })
+        ReviewItem(label = stringResource(R.string.name), value = uiState.name)
+        ReviewItem(label = stringResource(R.string.email), value = uiState.email.ifBlank {
+            stringResource(
+                R.string.not_set
+            )
+        })
+        ReviewItem(label = stringResource(R.string.gender), value = uiState.gender.ifBlank {
+            stringResource(
+                R.string.not_set
+            )
+        })
+        ReviewItem(
+            label = stringResource(R.string.activity_level),
+            value = uiState.activityLevel.ifBlank { stringResource(R.string.not_set) })
+        ReviewItem(label = stringResource(R.string.goal), value = uiState.goal.ifBlank {
+            stringResource(
+                R.string.not_set
+            )
+        })
+        ReviewItem(
+            label = stringResource(R.string.experience),
+            value = uiState.experienceLevel.ifBlank {
+                stringResource(
+                    R.string.not_set
+                )
+            })
+        ReviewItem(label = stringResource(R.string.gym), value = uiState.gymName.ifBlank {
+            stringResource(
+                R.string.not_set
+            )
+        })
     }
 }
 

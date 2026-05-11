@@ -24,15 +24,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.voltfitness.app.R
 import com.voltfitness.app.core.designsystem.component.VoltTextField
 import com.voltfitness.app.domain.model.Exercise
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.components.cards.ExerciseCard
 import com.voltfitness.app.ui.components.cards.ExerciseCardTrailing
 import com.voltfitness.app.ui.components.navigation.VoltStepBottomBar
 import com.voltfitness.app.ui.theme.VoltTheme
-import timber.log.Timber
 
 /**
  * Stateless UI for the Exercise Picker screen.
@@ -60,14 +62,14 @@ fun ExercisePickerScreen(
         bottomBar = {
             VoltStepBottomBar(
                 primaryText = when {
-                    selectedCount > 1 -> "Add $selectedCount exercises"
-                    selectedCount == 1 -> "Add 1 exercise"
-                    else -> "Select exercises"
+                    selectedCount > 1 -> stringResource(R.string.add_exercises, selectedCount)
+                    selectedCount == 1 -> stringResource(R.string.add_1_exercise)
+                    else -> stringResource(R.string.select_exercises)
                 },
                 primaryIcon = Icons.Filled.Add,
                 primaryEnabled = isAnySelected && !uiState.isLoading,
                 primaryLoading = uiState.isLoading,
-                secondaryText = "Cancel",
+                secondaryText = stringResource(R.string.cancel),
                 onSecondaryClick = onNavigateBack,
                 onPrimaryClick = { onConfirmSelection(uiState.selectedExerciseIds.toList()) },
             )
@@ -83,7 +85,7 @@ fun ExercisePickerScreen(
             VoltTextField(
                 value = uiState.query,
                 onValueChange = { onEvent(ExercisePickerEvent.OnQueryChanged(it)) },
-                label = "Search exercise",
+                label = stringResource(R.string.search_exercise),
                 leadingIcon = Icons.Outlined.Search,
                 singleLine = true,
             )
@@ -95,17 +97,17 @@ fun ExercisePickerScreen(
                 FilterChip(
                     selected = uiState.filterTab == ExerciseFilterTab.All,
                     onClick = { onEvent(ExercisePickerEvent.OnFilterTabChanged(ExerciseFilterTab.All)) },
-                    label = { Text("All") },
+                    label = { Text(stringResource(R.string.all)) },
                 )
                 FilterChip(
                     selected = uiState.filterTab == ExerciseFilterTab.Muscles,
                     onClick = { onEvent(ExercisePickerEvent.OnFilterTabChanged(ExerciseFilterTab.Muscles)) },
-                    label = { Text("Muscles") },
+                    label = { Text(stringResource(R.string.muscles)) },
                 )
                 FilterChip(
                     selected = uiState.filterTab == ExerciseFilterTab.Equipment,
                     onClick = { onEvent(ExercisePickerEvent.OnFilterTabChanged(ExerciseFilterTab.Equipment)) },
-                    label = { Text("Equipment") },
+                    label = { Text(stringResource(R.string.equipment)) },
                 )
             }
 
@@ -161,11 +163,11 @@ fun ExercisePickerScreen(
  * Each token is individually capitalized so "chest · pectorals · barbell"
  * becomes "Chest · Pectorals · Barbell" regardless of how the API returns them.
  */
-private fun buildPickerSubtitle(exercise: Exercise): String {
+private fun buildPickerSubtitle(exercise: Exercise): UiText {
     val bodyPart = exercise.bodyPart.replaceFirstChar { it.uppercase() }
     val target = exercise.target.replaceFirstChar { it.uppercase() }
     val equipment = exercise.equipment.replaceFirstChar { it.uppercase() }
-    return "$bodyPart · $target · $equipment"
+    return UiText.StringResource(R.string.build_picker_subtitle_returned, bodyPart, target, equipment)
 }
 
 

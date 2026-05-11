@@ -25,10 +25,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import com.voltfitness.app.R
 import com.voltfitness.app.core.designsystem.component.VoltDateSelector
 import com.voltfitness.app.core.designsystem.component.VoltErrorBanner
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.components.navigation.VoltStepBottomBar
 import com.voltfitness.app.ui.screens.bodycomposition.add.components.BodyCompositionTab
 import com.voltfitness.app.ui.screens.bodycomposition.add.components.BodyMeasurementsTab
@@ -61,10 +64,13 @@ fun AddBodyCompositionScreen(
     val pagerState = rememberPagerState(pageCount = { 2 })
     val selectedTabIndex = remember { derivedStateOf { pagerState.currentPage } }
 
-    val tabs = remember {
+    val compositionTitle = stringResource(R.string.composition)
+    val measurementsTitle = stringResource(R.string.measurements)
+
+    val tabs = remember(compositionTitle, measurementsTitle) {
         listOf(
-            TabItem("Composition", Icons.Outlined.FitnessCenter),
-            TabItem("Measurements", Icons.Outlined.Straighten),
+            TabItem(compositionTitle, Icons.Outlined.FitnessCenter),
+            TabItem(measurementsTitle, Icons.Outlined.Straighten),
         )
     }
 
@@ -113,7 +119,7 @@ fun AddBodyCompositionScreen(
 
             // Global measurement date selector
             VoltDateSelector(
-                label = "Date of measurement",
+                label = stringResource(R.string.date_of_measurement),
                 selectedDate = uiState.date,
                 onDateSelected = { onEvent(AddBodyCompositionEvent.UpdateDate(it)) },
                 icon = Icons.Outlined.CalendarMonth,
@@ -208,7 +214,7 @@ private fun AddBodyCompositionErrorPreview() {
     VoltTheme {
         AddBodyCompositionScreen(
             uiState = AddBodyCompositionUiState(
-                errorMessage = "Database constraint violation. Please try again.",
+                errorMessage = "Database constraint violation. Please try again." as UiText,
             ),
             onEvent = {},
             onNavigateBack = {},

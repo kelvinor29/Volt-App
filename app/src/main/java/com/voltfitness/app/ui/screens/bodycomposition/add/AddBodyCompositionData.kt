@@ -1,5 +1,6 @@
 package com.voltfitness.app.ui.screens.bodycomposition.add
 
+import com.voltfitness.app.ui.common.UiText
 import java.time.LocalDate
 
 /**
@@ -14,7 +15,7 @@ data class AddBodyCompositionUiState(
     // --- Form Control ---
     val isSaving: Boolean = false,
     val saveSuccess: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
 
     // --- Body Composition (Scale Metrics) ---
     val heightCm: String = "",
@@ -35,7 +36,7 @@ data class AddBodyCompositionUiState(
     val leftArmCm: String = "",
     val rightArmCm: String = "",
     val leftLegCm: String = "",
-    val rightLegCm: String = ""
+    val rightLegCm: String = "",
 ) {
     /** Validates that weight is a positive numeric value. */
     val isWeightValid: Boolean

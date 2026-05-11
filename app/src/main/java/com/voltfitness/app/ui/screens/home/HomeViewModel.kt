@@ -2,6 +2,7 @@ package com.voltfitness.app.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.voltfitness.app.R
 import com.voltfitness.app.domain.model.BodyCompositionEntry
 import com.voltfitness.app.domain.model.User
 import com.voltfitness.app.domain.repository.RoutineRepository
@@ -12,6 +13,7 @@ import com.voltfitness.app.domain.usecase.home.EnsureDefaultFolderUseCase
 import com.voltfitness.app.domain.usecase.home.GetUserFoldersWithRoutinesUseCase
 import com.voltfitness.app.domain.usecase.user.EvaluateProgressUseCase
 import com.voltfitness.app.domain.usecase.user.GetCurrentUserUseCase
+import com.voltfitness.app.ui.common.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -140,8 +142,10 @@ class HomeViewModel @Inject constructor(
             it.copy(
                 currentWeight = "%.1f".format(latest.weightKg),
                 lastWeightUpdated = formatRelativeDate(latest.date),
-                primaryChangeText = evaluation.primaryText,
-                secondaryChangeText = evaluation.secondaryText,
+                primaryChangeText = UiText.DynamicString(evaluation.primaryText),
+                secondaryChangeText = evaluation.secondaryText?.let { text ->
+                    UiText.DynamicString(text)
+                },
                 progressStatus = evaluation.status,
                 compositionScore = latest.compositionScore
             )
@@ -169,14 +173,14 @@ class HomeViewModel @Inject constructor(
     /**
      * Formats a [LocalDate] into a user-friendly relative duration string.
      */
-    private fun formatRelativeDate(date: LocalDate): String {
+    private fun formatRelativeDate(date: LocalDate): UiText {
         val daysAgo = ChronoUnit.DAYS.between(date, LocalDate.now())
         return when {
-            daysAgo == 0L -> "Updated today"
-            daysAgo == 1L -> "Updated yesterday"
-            daysAgo in 2..6 -> "Updated $daysAgo days ago"
-            daysAgo < 30 -> "Updated ${daysAgo / 7} weeks ago"
-            else -> "Updated ${daysAgo / 30} months ago"
+            daysAgo == 0L -> UiText.StringResource(R.string.updated_today)
+            daysAgo == 1L -> UiText.StringResource(R.string.updated_yesterday)
+            daysAgo in 2..6 -> UiText.StringResource(R.string.updated_days_ago, daysAgo)
+            daysAgo < 30 -> UiText.StringResource(R.string.updated_weeks_ago, daysAgo / 7)
+            else -> UiText.StringResource(R.string.updated_months_ago, daysAgo / 30)
         }
     }
 }

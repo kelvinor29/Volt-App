@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.voltfitness.app.R
@@ -60,7 +61,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun CompositionTab(entry: BodyCompositionDisplayItem?) {
     if (entry == null) {
-        EmptyStateMessage(message = "No data available. Add your first measurement.")
+        EmptyStateMessage(message = stringResource(R.string.no_data_available_add_your_first_measurement))
         return
     }
 
@@ -74,12 +75,12 @@ fun CompositionTab(entry: BodyCompositionDisplayItem?) {
         verticalArrangement = Arrangement.spacedBy(VoltSpacing.medium),
         modifier = Modifier.fillMaxSize()
     ) {
-        item { SectionTitle(title = "Primary Metrics") }
+        item { SectionTitle(title = stringResource(R.string.primary_metrics)) }
         item { MainMetricsRow(entry) }
 
         item {
             Spacer(modifier = Modifier.height(VoltSpacing.extraSmall))
-            SectionTitle(title = "Advanced Composition")
+            SectionTitle(title = stringResource(R.string.advanced_composition))
         }
         item { AdvancedMetricsRow(entry) }
         item { AdvancedDataRow1(entry) }
@@ -87,7 +88,7 @@ fun CompositionTab(entry: BodyCompositionDisplayItem?) {
 
         item {
             Spacer(modifier = Modifier.height(VoltSpacing.extraSmall))
-            SectionTitle(title = "Calculated Indices")
+            SectionTitle(title = stringResource(R.string.calculated_indices))
         }
         item { FatLeanRow(entry) }
         item { IndexRatioRow(entry) }
@@ -100,7 +101,7 @@ fun CompositionTab(entry: BodyCompositionDisplayItem?) {
 @Composable
 fun MeasurementsTab(entry: BodyCompositionDisplayItem?) {
     if (entry == null) {
-        EmptyStateMessage(message = "No body measurements recorded.")
+        EmptyStateMessage(message = stringResource(R.string.no_body_measurements_recorded))
         return
     }
 
@@ -114,18 +115,18 @@ fun MeasurementsTab(entry: BodyCompositionDisplayItem?) {
         verticalArrangement = Arrangement.spacedBy(VoltSpacing.medium),
         modifier = Modifier.fillMaxSize()
     ) {
-        item { SectionTitle(title = "Torso") }
+        item { SectionTitle(title = stringResource(R.string.torso)) }
         item { TorsoRow(entry) }
 
         item {
             Spacer(modifier = Modifier.height(VoltSpacing.extraSmall))
-            SectionTitle(title = "Arms")
+            SectionTitle(title = stringResource(R.string.arms))
         }
         item { ArmsRow(entry) }
 
         item {
             Spacer(modifier = Modifier.height(VoltSpacing.extraSmall))
-            SectionTitle(title = "Legs")
+            SectionTitle(title = stringResource(R.string.legs))
         }
         item { LegsRow(entry) }
     }
@@ -140,7 +141,7 @@ fun HistoryTab(
     onEntryClick: (Long) -> Unit
 ) {
     if (entries.isEmpty()) {
-        EmptyStateMessage(message = "No measurement history available.")
+        EmptyStateMessage(message = stringResource(R.string.no_measurement_history_available))
         return
     }
 
@@ -176,7 +177,7 @@ private fun MainMetricsRow(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.MonitorWeight,
-            label = "Weight",
+            label = stringResource(R.string.weight),
             value = "%.1f".format(entry.weightKg),
             unit = "kg",
             color = MaterialTheme.colorScheme.primary
@@ -184,7 +185,7 @@ private fun MainMetricsRow(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.WaterDrop,
-            label = "Body Fat",
+            label = stringResource(R.string.body_fat),
             value = entry.bodyFatPercent?.let { "%.1f".format(it) } ?: "—",
             unit = "%",
             color = VoltError
@@ -201,7 +202,7 @@ private fun AdvancedMetricsRow(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.FitnessCenter,
-            label = "Muscle Mass",
+            label = stringResource(R.string.muscle_mass),
             value = entry.muscleMassKg?.let { "%.1f".format(it) } ?: "—",
             unit = "kg",
             color = VoltSuccess
@@ -209,7 +210,7 @@ private fun AdvancedMetricsRow(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.Opacity,
-            label = "Water",
+            label = stringResource(R.string.water),
             value = entry.waterPercent?.let { "%.1f".format(it) } ?: "—",
             unit = "%",
             color = VoltInfo
@@ -226,7 +227,7 @@ private fun AdvancedDataRow1(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.Whatshot,
-            label = "Visceral Fat",
+            label = stringResource(R.string.visceral_fat),
             value = entry.visceralFatPercent?.let { "%.1f".format(it) } ?: "—",
             unit = "%",
             color = VoltAccentOrange
@@ -234,9 +235,9 @@ private fun AdvancedDataRow1(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.LocalFireDepartment,
-            label = "BMR",
+            label = stringResource(R.string.bmr),
             value = entry.basalCalories?.toString() ?: "—",
-            unit = "kcal",
+            unit = stringResource(R.string.kcal),
             color = VoltAccentPurple
         )
     }
@@ -251,15 +252,15 @@ private fun AdvancedDataRow2(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.Elderly,
-            label = "Metabolic Age",
+            label = stringResource(R.string.metabolic_age),
             value = entry.metabolicAge?.toString() ?: "—",
-            unit = "years",
+            unit = stringResource(R.string.years),
             color = VoltSuccessDim
         )
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.BrokenImage,
-            label = "Bone Mass",
+            label = stringResource(R.string.bone_mass),
             value = entry.boneMassKg?.let { "%.1f".format(it) } ?: "—",
             unit = "kg",
             color = VoltTextTertiary
@@ -276,7 +277,7 @@ private fun FatLeanRow(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.Balance,
-            label = "Fat Mass",
+            label = stringResource(R.string.fat_mass),
             value = entry.fatMassKg?.let { "%.1f".format(it) } ?: "—",
             unit = "kg",
             color = VoltErrorDim
@@ -284,7 +285,7 @@ private fun FatLeanRow(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.AutoMirrored.Outlined.TrendingUp,
-            label = "Lean Mass",
+            label = stringResource(R.string.lean_mass),
             value = entry.leanMassKg?.let { "%.1f".format(it) } ?: "—",
             unit = "kg",
             color = VoltSuccessDim
@@ -301,7 +302,7 @@ private fun IndexRatioRow(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.Speed,
-            label = "FFMI",
+            label = stringResource(R.string.ffmi),
             value = entry.ffmi?.let { "%.1f".format(it) } ?: "—",
             unit = "",
             color = VoltAccentBlue
@@ -309,7 +310,7 @@ private fun IndexRatioRow(entry: BodyCompositionDisplayItem) {
         MetricCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Outlined.Straighten,
-            label = "Waist/Hip",
+            label = stringResource(R.string.waist_hip),
             value = entry.waistHipRatio?.let { "%.2f".format(it) } ?: "—",
             unit = "",
             color = VoltWarning
@@ -325,7 +326,7 @@ private fun IndexRatioRow(entry: BodyCompositionDisplayItem) {
 private fun TorsoRow(entry: BodyCompositionDisplayItem) {
     MeasurementCard(
         modifier = Modifier.fillMaxWidth(),
-        label = "Chest",
+        label = stringResource(R.string.chest),
         value = entry.chestCm,
         iconRes = R.drawable.ic_chest
     )
@@ -336,13 +337,13 @@ private fun TorsoRow(entry: BodyCompositionDisplayItem) {
     ) {
         MeasurementCard(
             modifier = Modifier.weight(1f),
-            label = "Waist",
+            label = stringResource(R.string.waist),
             value = entry.waistCm,
             iconRes = R.drawable.ic_hips
         )
         MeasurementCard(
             modifier = Modifier.weight(1f),
-            label = "Hip",
+            label = stringResource(R.string.hip),
             value = entry.hipCm,
             iconRes = R.drawable.ic_hips
         )
@@ -357,13 +358,13 @@ private fun ArmsRow(entry: BodyCompositionDisplayItem) {
     ) {
         MeasurementCard(
             modifier = Modifier.weight(1f),
-            label = "Left Arm",
+            label = stringResource(R.string.left_arm),
             value = entry.leftArmCm,
             iconRes = R.drawable.ic_arms
         )
         MeasurementCard(
             modifier = Modifier.weight(1f),
-            label = "Right Arm",
+            label = stringResource(R.string.right_arm),
             value = entry.rightArmCm,
             iconRes = R.drawable.ic_arms
         )
@@ -374,7 +375,7 @@ private fun ArmsRow(entry: BodyCompositionDisplayItem) {
 private fun LegsRow(entry: BodyCompositionDisplayItem) {
     MeasurementCard(
         modifier = Modifier.fillMaxWidth(),
-        label = "Glutes",
+        label = stringResource(R.string.glutes),
         value = entry.gluteCm,
         iconRes = R.drawable.ic_glutes
     )
@@ -385,13 +386,13 @@ private fun LegsRow(entry: BodyCompositionDisplayItem) {
     ) {
         MeasurementCard(
             modifier = Modifier.weight(1f),
-            label = "Left Leg",
+            label = stringResource(R.string.left_leg),
             value = entry.leftLegCm,
             iconRes = R.drawable.ic_legs
         )
         MeasurementCard(
             modifier = Modifier.weight(1f),
-            label = "Right Leg",
+            label = stringResource(R.string.right_leg),
             value = entry.rightLegCm,
             iconRes = R.drawable.ic_legs
         )
@@ -454,14 +455,14 @@ private fun HistoryEntryCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(VoltSpacing.medium)) {
                     entry.bodyFatPercent?.let {
                         Text(
-                            text = "Fat: %.1f%%".format(it),
+                            text = stringResource(R.string.fat_1f).format(it),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     entry.muscleMassKg?.let {
                         Text(
-                            text = "Muscle: %.1f kg".format(it),
+                            text = stringResource(R.string.muscle_1f_kg).format(it),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

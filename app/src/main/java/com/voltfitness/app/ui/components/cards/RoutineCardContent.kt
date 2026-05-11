@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale.Companion.Crop
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -106,7 +107,9 @@ private fun RoutineCardContent(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_volt_logo),
-                    contentDescription = if (routine.isMainRoutine) "Active Main Routine" else "Inactive Routine",
+                    contentDescription = if (routine.isMainRoutine) {
+                        stringResource(R.string.active_main_routine)
+                    } else stringResource(R.string.inactive_routine),
                     modifier = Modifier
                         .fillMaxSize()
                         .alpha(if (routine.isMainRoutine) 1f else 0.7f),
@@ -133,7 +136,7 @@ private fun RoutineCardContent(
             ) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Open routine options",
+                    contentDescription = stringResource(R.string.open_routine_options),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -143,7 +146,7 @@ private fun RoutineCardContent(
 
         // Frequency Label
         Text(
-            text = "${routine.daysCount} Days a Week",
+            text = stringResource(R.string.days_a_week, routine.daysCount),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
             color = if (routine.isMainRoutine) MaterialTheme.colorScheme.primary

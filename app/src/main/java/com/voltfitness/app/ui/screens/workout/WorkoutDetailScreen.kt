@@ -9,7 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.voltfitness.app.R
+import com.voltfitness.app.ui.common.UiText
 import com.voltfitness.app.ui.navigation.TopAppBarState
 import com.voltfitness.app.ui.theme.VoltSpacing
 
@@ -19,11 +22,12 @@ fun WorkoutDetailScreen(
     navController: NavController,
     onTopAppBarStateChange: (TopAppBarState) -> Unit
 ) {
-    // Configurar la TopAppBar al entrar
     LaunchedEffect(Unit) {
+
+        val title = UiText.StringResource(R.string.workout_details)
         onTopAppBarStateChange(
             TopAppBarState(
-                title = "Workout Details",
+                title = title,
                 showBackButton = true,
                 onBackClick = { navController.popBackStack() }
             )
@@ -32,7 +36,6 @@ fun WorkoutDetailScreen(
 
     Scaffold(
         bottomBar = {
-            // Botón flotante o fijo para iniciar la sesión real
             Button(
                 onClick = { /* Iniciar cronómetro/entrenamiento */ },
                 modifier = Modifier
@@ -60,8 +63,6 @@ fun WorkoutDetailScreen(
                 )
             }
 
-            // Aquí iterarás los ejercicios que traigas de la base de datos
-            // Por ahora usamos un placeholder
             items(5) { index ->
                 ExerciseSetCard(name = "Exercise #$index", info = "4 Sets x 12 Reps")
             }

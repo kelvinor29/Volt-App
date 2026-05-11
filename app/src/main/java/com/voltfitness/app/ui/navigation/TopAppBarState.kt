@@ -1,6 +1,7 @@
 package com.voltfitness.app.ui.navigation
 
 import androidx.compose.runtime.Composable
+import com.voltfitness.app.ui.common.UiText
 
 /**
  * Represents the global configuration for the application's top navigation header.
@@ -19,7 +20,7 @@ import androidx.compose.runtime.Composable
  * @property isCollapsibleVisible Lambda used to determine the current display state of the [collapsibleContent].
  */
 data class TopAppBarState(
-    val title: String = "",
+    val title:  UiText = UiText.Empty,
     val subtitle: String? = null,
     val showBackButton: Boolean = false,
     val showSettingsButton: Boolean = false,
@@ -27,7 +28,7 @@ data class TopAppBarState(
     val onSettingsClick: (() -> Unit)? = null,
 
     // Slot for dynamic components like search fields or filter chips
-    val collapsibleContent: (@Composable () -> Unit)? = null,
+    val collapsibleContent: @Composable (() -> Unit)? = null,
 
     // Logic-driven visibility check for the collapsible slot
     val isCollapsibleVisible: () -> Boolean = { true },

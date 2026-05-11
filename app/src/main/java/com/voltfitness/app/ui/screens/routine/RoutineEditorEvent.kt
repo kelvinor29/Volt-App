@@ -1,5 +1,8 @@
 package com.voltfitness.app.ui.screens.routine
 
+import com.voltfitness.app.R
+import com.voltfitness.app.ui.common.UiText
+
 /**
  * UI-specific representation of an exercise within the editor context.
  *
@@ -26,7 +29,7 @@ data class RoutineExerciseUi(
 data class RoutineDayUi(
     val id: Long = 0L,
     val order: Int = 1,
-    val name: String = "Day 1",
+    val name: UiText = UiText.StringResource(R.string.day_1),
     val exercises: List<RoutineExerciseUi> = emptyList()
 )
 
@@ -47,7 +50,7 @@ data class RoutineEditorUiState(
     val isNewRoutine: Boolean = true,
     val isSaving: Boolean = false,
     val isDeleting: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
     val createdAt: Long? = null,
 )
 
@@ -83,6 +86,6 @@ sealed interface RoutineEditorEvent {
  */
 sealed interface RoutineEditorEffect {
     data object NavigateBack : RoutineEditorEffect
-    data class ShowError(val message: String) : RoutineEditorEffect
+    data class ShowError(val message: UiText) : RoutineEditorEffect
     data class ShowSuccess(val message: String) : RoutineEditorEffect
 }

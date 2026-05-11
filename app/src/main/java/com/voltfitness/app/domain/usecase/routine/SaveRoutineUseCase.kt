@@ -32,31 +32,6 @@ class SaveRoutineUseCase @Inject constructor(
         routine: Routine,
         daysWithExercises: List<Pair<RoutineDay, List<RoutineExercise>>>
     ): Long {
-        // Step 1 — persist the routine, get the real ID
-        val routineId = routineRepository.upsertRoutine(routine)
-
-        // Step 2 — upsert days bound to the real routineId, collect real dayIds
-        val days = daysWithExercises.map { (day, _) -> day.copy(routineId = routineId) }
-        val dayIds: List<Long> = routineRepository.upsertRoutineDays(days)
-
-        // Step 3 — remove days that are no longer in the list (for edit mode)
-        routineRepository.deleteOrphanDays(routineId, dayIds)
-
-        // Step 4 — build exercises with real IDs and upsert them
-        val exercises = daysWithExercises.flatMapIndexed { index, (_, exercisesForDay) ->
-            val realDayId = dayIds[index]
-            exercisesForDay.mapIndexed { order, exercise ->
-                exercise.copy(
-                    routineId = routineId,
-                    dayId = realDayId
-                )
-            }
-        }
-
-        if (exercises.isNotEmpty()) {
-            routineRepository.upsertRoutineExercises(exercises)
-        }
-
-        return routineId
+        return routineRepository.saveFullRoutine(routine, daysWithExercises)
     }
 }

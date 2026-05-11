@@ -6,7 +6,9 @@ import com.voltfitness.app.data.mappers.toEntity
 import com.voltfitness.app.domain.model.Folder
 import com.voltfitness.app.domain.relations.FolderWithRoutinesDomain
 import com.voltfitness.app.domain.repository.FolderRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -31,9 +33,9 @@ class FolderRepositoryImpl @Inject constructor(
      * Maps database relation objects to domain relation models.
      */
     override fun getFoldersWithRoutines(userId: Long): Flow<List<FolderWithRoutinesDomain>> =
-        folderDao.getFoldersWithRoutinesFlow(userId).map { list ->
-            list.map { it.toDomain() }
-        }
+        folderDao.getFoldersWithRoutinesFlow(userId)
+            .map { list -> list.map { it.toDomain() }
+        }.flowOn(Dispatchers.IO)
 
     /**
      * Retrieves a single folder by its unique identifier.

@@ -10,8 +10,11 @@ import com.voltfitness.app.domain.model.RoutineExercise
 import com.voltfitness.app.domain.relations.RoutineWithDaysDomain
 import com.voltfitness.app.domain.relations.RoutineWithFullDaysDomain
 import com.voltfitness.app.domain.repository.RoutineRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -24,13 +27,24 @@ class RoutineRepositoryImpl @Inject constructor(
 
     // ==================== ROUTINES ====================
 
+    /** Upsert full routine with days and exercises. */
+    override suspend fun saveFullRoutine(
+        routine: Routine,
+        daysWithExercises: List<Pair<RoutineDay, List<RoutineExercise>>>
+    ) = withContext(Dispatchers.IO) {
+        val entities = daysWithExercises.map { (day, exercises) ->
+            day.toEntity() to exercises.map { it.toEntity() }
+        }
+        routineDao.saveFullRoutineAtomic(routine.toEntity(), entities)
+    }
+
     /**
      * Observes a complete routine hierarchy including nested days, exercises, and sets.
      */
     override fun getRoutineWithFullDays(routineId: Long): Flow<RoutineWithFullDaysDomain?> =
-        routineDao.getRoutineWithFullDaysFlow(routineId).map { relation ->
-            relation?.toDomain()
-        }
+        routineDao.getRoutineWithFullDaysFlow(routineId)
+            .map { relation -> relation?.toDomain() }
+            .flowOn(Dispatchers.IO)
 
     /**
      * Provides a reactive stream of training days for the currently active routine.
@@ -44,13 +58,6 @@ class RoutineRepositoryImpl @Inject constructor(
      */
     override suspend fun getRoutineById(routineId: Long): Routine? =
         routineDao.getRoutineById(routineId)?.toDomain()
-
-    /**
-     * Persists routine metadata and triggers necessary maintenance tasks (like timestamp updates).
-     * @return The canonical routine ID.
-     */
-    override suspend fun upsertRoutine(routine: Routine): Long =
-        routineDao.upsertRoutineWithMaintenance(routine.toEntity())
 
     /**
      * Removes a routine. Dependencies are managed via database CASCADE constraints.
@@ -103,10 +110,7 @@ class RoutineRepositoryImpl @Inject constructor(
     // ==================== ROUTINE EXERCISES ====================
 
     /**
-     * Persists exercises assigned to routine days.
-     *
-     * WARNING: Currently returns IDs from the domain model. If the domain model
-     * uses temporary IDs (e.g., 0), this will not return the database-generated IDs.
+     * Persists exercises assigned to routine days
      */
     override suspend fun upsertRoutineExercises(exercises: List<RoutineExercise>): List<Long> {
         routineDao.upsertRoutineExercises(exercises.map { it.toEntity() })

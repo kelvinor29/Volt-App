@@ -11,13 +11,22 @@ import com.voltfitness.app.domain.usecase.routine.DeleteRoutineUseCase
 import com.voltfitness.app.domain.usecase.routine.GetRoutineDetailUseCase
 import com.voltfitness.app.domain.usecase.routine.SaveRoutineUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -59,10 +68,29 @@ class RoutineEditorViewModel @Inject constructor(
     )
     val uiState: StateFlow<RoutineEditorUiState> = _uiState.asStateFlow()
 
+    val isFormValid: StateFlow<Boolean> = _uiState
+        .map { it.routineName.isNotBlank() && it.description.isNotBlank() && it.goal.isNotBlank() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false
+        )
+
     private val _effect = Channel<RoutineEditorEffect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
     init {
+        savedStateHandle.getStateFlow<List<String>?>("exercise_selection_result", null)
+            .filterNotNull()
+            .onEach { exerciseIds ->
+                val dayIndex = _uiState.value.expandedDayIndex
+                if (dayIndex != -1) {
+                    handleExercisesSelected(exerciseIds, dayIndex)
+                }
+                savedStateHandle["exercise_selection_result"] = null
+            }
+            .launchIn(viewModelScope)
+
         if (isNew) {
             _uiState.update {
                 it.copy(days = listOf(RoutineDayUi(order = 1, name = "Day 1")))
@@ -72,7 +100,6 @@ class RoutineEditorViewModel @Inject constructor(
         }
     }
 
-    // ─── Load ────────────────────────────────────────────────────────────────
 
     /**
      * Loads routine metadata, its days, and the full exercise list for each day.
@@ -87,46 +114,50 @@ class RoutineEditorViewModel @Inject constructor(
      * [ExerciseGifImage] can load the correct GIF.
      */
     private fun loadExistingRoutine(routineId: Long) {
-        viewModelScope.launch {
-            getRoutineDetailUseCase(routineId).collect { detail ->
-                detail?.let { data ->
-                    _uiState.update { state ->
-                        state.copy(
-                            routineId = data.routine.id,
-                            folderId = data.routine.folderId,
-                            routineName = data.routine.name,
-                            description = data.routine.description ?: "",
-                            goal = data.routine.goal ?: "",
-                            isMainRoutine = data.routine.isActive,
-                            isNewRoutine = false,
-                            days = data.days.map { dayFull ->
-                                RoutineDayUi(
-                                    id = dayFull.day.id,
-                                    order = dayFull.day.dayOrder,
-                                    name = dayFull.day.name,
-                                    exercises = dayFull.exercises.map { exerciseWithSets ->
-                                        val re = exerciseWithSets.routineExercise
-                                        RoutineExerciseUi(
-                                            routineExerciseId = re.routineExerciseId,
-                                            exerciseDbId = re.exerciseId,
-                                            name = re.exerciseName.ifBlank { re.exerciseId },
-                                            sets = re.sets,
-                                            repsRange = re.repsRange,
-                                            weightRange = re.weightRange
-                                        )
-                                    }
-                                )
-                            }.ifEmpty {
-                                listOf(RoutineDayUi(order = 1, name = "Day 1"))
-                            }
-                        )
-                    }
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val detail = getRoutineDetailUseCase(routineId).first() ?: return@launch
+
+                val updatedDays = detail.days.map { dayFull ->
+                    RoutineDayUi(
+                        id = dayFull.day.id,
+                        order = dayFull.day.dayOrder,
+                        name = dayFull.day.name,
+                        exercises = dayFull.exercises.map { exerciseWithSets ->
+                            val re = exerciseWithSets.routineExercise
+                            RoutineExerciseUi(
+                                routineExerciseId = re.routineExerciseId,
+                                exerciseDbId = re.exerciseId,
+                                name = re.exerciseName.ifBlank { re.exerciseId },
+                                sets = re.sets,
+                                repsRange = re.repsRange,
+                                weightRange = re.weightRange
+                            )
+                        }
+                    )
+                }.ifEmpty {
+                    listOf(RoutineDayUi(order = 1, name = "Day 1"))
                 }
+
+                _uiState.update { state ->
+                    state.copy(
+                        routineId = detail.routine.id,
+                        folderId = detail.routine.folderId,
+                        routineName = detail.routine.name,
+                        description = detail.routine.description ?: "",
+                        goal = detail.routine.goal ?: "",
+                        isMainRoutine = detail.routine.isActive,
+                        isNewRoutine = false,
+                        days = updatedDays,
+                        createdAt = detail.routine.createdAt
+                    )
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error loading routine $routineId")
+                _effect.send(RoutineEditorEffect.ShowError("Could not load routine details"))
             }
         }
     }
-
-    // ─── Event handler ───────────────────────────────────────────────────────
 
     fun onEvent(event: RoutineEditorEvent) {
         when (event) {
@@ -195,7 +226,6 @@ class RoutineEditorViewModel @Inject constructor(
         }
     }
 
-    // ─── Exercise selection ──────────────────────────────────────────────────
 
     /**
      * Resolves the full [Exercise] domain model for each selected ID and
@@ -209,31 +239,35 @@ class RoutineEditorViewModel @Inject constructor(
      * @param dayIndex    Index of the target day in [RoutineEditorUiState.days].
      */
     private suspend fun handleExercisesSelected(exerciseIds: List<String>, dayIndex: Int) {
+
         val state = _uiState.value
         if (dayIndex !in state.days.indices) return
 
         try {
-            val exerciseMap = exerciseRepository.getExercisesByIds(exerciseIds)
-                .associateBy { it.id }
+            withContext(Dispatchers.IO) {
 
-            val newExercises = exerciseIds.mapNotNull { id ->
-                exerciseMap[id]?.let { exercise ->
-                    RoutineExerciseUi(
-                        exerciseDbId = exercise.id,
-                        name = exercise.name.replaceFirstChar { it.uppercase() }
-                    )
-                }
-            }
+                val exerciseMap = exerciseRepository.getExercisesByIds(exerciseIds)
+                    .associateBy { it.id }
 
-            _uiState.update { current ->
-                val currentDay = current.days[dayIndex]
-                current.copy(
-                    days = current.days.toMutableList().apply {
-                        this[dayIndex] = currentDay.copy(
-                            exercises = currentDay.exercises + newExercises
+                val newExercises = exerciseIds.mapNotNull { id ->
+                    exerciseMap[id]?.let { exercise ->
+                        RoutineExerciseUi(
+                            exerciseDbId = exercise.id,
+                            name = exercise.name.replaceFirstChar { it.uppercase() }
                         )
                     }
-                )
+                }
+
+                _uiState.update { current ->
+                    val currentDay = current.days[dayIndex]
+                    current.copy(
+                        days = current.days.toMutableList().apply {
+                            this[dayIndex] = currentDay.copy(
+                                exercises = currentDay.exercises + newExercises
+                            )
+                        }
+                    )
+                }
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to load selected exercises")
@@ -241,7 +275,6 @@ class RoutineEditorViewModel @Inject constructor(
         }
     }
 
-    // ─── Save ────────────────────────────────────────────────────────────────
 
     /**
      * Maps the current UI state to domain models and calls [SaveRoutineUseCase].
@@ -258,7 +291,7 @@ class RoutineEditorViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isSaving = true) }
             try {
                 val routine = Routine(
@@ -276,15 +309,15 @@ class RoutineEditorViewModel @Inject constructor(
                 val daysWithExercises = state.days.map { dayUi ->
                     val day = RoutineDay(
                         id = dayUi.id,
-                        routineId = 0L,
+                        routineId = if (state.isNewRoutine) 0L else state.routineId,
                         dayOrder = dayUi.order,
                         name = dayUi.name.trim()
                     )
                     val exercises = dayUi.exercises.mapIndexed { index, exUi ->
                         RoutineExercise(
                             routineExerciseId = exUi.routineExerciseId,
-                            routineId = 0L,
-                            dayId = 0L,
+                            routineId = day.routineId,
+                            dayId = day.id,
                             exerciseId = exUi.exerciseDbId,
                             exerciseName = exUi.name,
                             orderInDay = index + 1,
@@ -308,7 +341,6 @@ class RoutineEditorViewModel @Inject constructor(
         }
     }
 
-    // ─── Delete ──────────────────────────────────────────────────────────────
 
     private fun deleteRoutine() {
         val state = _uiState.value

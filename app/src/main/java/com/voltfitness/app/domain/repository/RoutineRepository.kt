@@ -19,6 +19,13 @@ interface RoutineRepository {
 
     // ==================== ROUTINES ====================
 
+    /** Upsert full routine with days and exercises. */
+    suspend fun saveFullRoutine(
+        routine: Routine,
+        daysWithExercises: List<Pair<RoutineDay, List<RoutineExercise>>>
+    ): Long
+
+
     /** Observes a routine with all its training days and exercises. **/
     fun getRoutineWithFullDays(routineId: Long): Flow<RoutineWithFullDaysDomain?>
 
@@ -26,9 +33,6 @@ interface RoutineRepository {
 
     /** Retrieves a single routine by ID (one-shot). */
     suspend fun getRoutineById(routineId: Long): Routine?
-
-    /** Creates or updates a routine. Returns the routine ID. */
-    suspend fun upsertRoutine(routine: Routine): Long
 
     /** Deletes a routine and all associated days/exercises (via CASCADE). */
     suspend fun deleteRoutine(routineId: Long)

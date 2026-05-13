@@ -21,20 +21,27 @@ import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.voltfitness.app.data.repository.ThemeRepository
 import com.voltfitness.app.ui.navigation.Screen
 import com.voltfitness.app.ui.session.SessionState
 import com.voltfitness.app.ui.session.SessionViewModel
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var themeRepository: ThemeRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            VoltTheme {
+            val isDarkMode by themeRepository.isDarkMode.collectAsState(initial = true)
+            VoltTheme(darkTheme = isDarkMode) {
                 VoltRoot()
             }
         }

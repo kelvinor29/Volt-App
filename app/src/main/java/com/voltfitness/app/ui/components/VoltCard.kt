@@ -40,15 +40,17 @@ enum class VoltBorderStyle { SOLID, DASHED }
 fun VoltCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null, // <- Optional click action
-    backgroundColor: Color = VoltSurfaceDark,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
     enabled: Boolean = true,
     borderStyle: VoltBorderStyle? = VoltBorderStyle.SOLID,
     content: @Composable ColumnScope.() -> Unit // <- SLOT for content
 ) {
+
+    val colorScheme = MaterialTheme.colorScheme
+
     val cardColors = CardDefaults.cardColors(
         containerColor = backgroundColor,
-        disabledContainerColor = backgroundColor.copy(alpha = 0.6f)
-    )
+        disabledContainerColor = backgroundColor.copy(alpha = 0.6f)    )
 
     // If backgroundColor is transparent, don't apply elevation
     val finalElevation = if (backgroundColor == Color.Transparent) 0.dp else VoltElevation.small
@@ -56,7 +58,7 @@ fun VoltCard(
 
     val shape = voltFieldShape
     val borderWidth: Dp = 2.dp
-    val borderColor: Color = VoltSurfaceVariant
+    val borderColor: Color = colorScheme.outline
 
     // Border configuration
     val borderModifier = if (borderStyle != null) {

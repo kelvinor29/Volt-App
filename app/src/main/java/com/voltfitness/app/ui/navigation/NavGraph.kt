@@ -33,6 +33,8 @@ import com.voltfitness.app.ui.screens.register.RegisterNavigationEffect.*
 import com.voltfitness.app.ui.screens.register.RegisterScreen
 import com.voltfitness.app.ui.screens.register.RegisterViewModel
 import com.voltfitness.app.ui.screens.routine.RoutineEditorScreen
+import com.voltfitness.app.ui.screens.settings.SettingsScreen
+import com.voltfitness.app.ui.screens.settings.SettingsViewModel
 import com.voltfitness.app.ui.screens.workout.WorkoutDetailScreen
 import com.voltfitness.app.ui.session.SessionState
 import com.voltfitness.app.ui.session.SessionViewModel
@@ -266,9 +268,21 @@ fun VoltNavGraph(
             )
         }
 
-        // ========== FUTURE SCREENS ==========
+        // ========== SETTINGS SCREEN ==========
         composable(route = Screen.Settings.route) {
-            // Future Implementation
+            val viewModel: SettingsViewModel = hiltViewModel()
+
+            LaunchedEffect(Unit) {
+                topAppBarState.value = TopAppBarState(
+                    title = UiText.StringResource(R.string.open_settings),
+                    showBackButton = true,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            SettingsScreen(
+                viewModel = viewModel,
+            )
         }
     }
 }

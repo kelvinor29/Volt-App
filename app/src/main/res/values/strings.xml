@@ -116,8 +116,8 @@
     <string name="glutes">Glutes</string>
     <string name="left_leg">Left Leg</string>
     <string name="right_leg">Right Leg</string>
-    <string name="fat_1f">Fat: %.1f%%</string>
-    <string name="muscle_1f_kg">Muscle: %.1f kg</string>
+    <string name="fat_1f">Fat: %1$s%%</string>
+    <string name="muscle_1f_kg">Muscle: %1$s%% kg</string>
     <string name="body_composition_subtitle">Track your physical progress</string>
     <string name="add_exercise">Add exercise</string>
     <string name="build_picker_subtitle_returned">%1$s · %2$s · %3$s</string>
@@ -135,7 +135,7 @@
     <string name="first_assessment">First assessment</string>
     <string name="no_fat_data">No fat data</string>
     <string name="fat_unchanged">Fat unchanged</string>
-    <string name="fat_label">Fat %1$s%%</string> <!-- Example: Fat +1.2% -->
+    <string name="fat_label">Fat %1$s%%</string>
     <!-- Intensity level -->
     <string name="activity_sedentary">Sedentary</string>
     <string name="activity_moderate">Moderate</string>
@@ -150,5 +150,10 @@
 
     <string name="score_data">Score %1$s%%</string>
     <string name="score_unchanged">Score unchanged</string>
+    <string name="height">Height *</string>
+    <string name="weight_required">Weight *</string>
+    <string name="basal_calories">Basal Calories</string>
+    <string name="yrs">yrs</string>
+    <string name="dark_mode">Dark Mode</string>
 
 </resources>

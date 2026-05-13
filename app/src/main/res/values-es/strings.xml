@@ -116,8 +116,8 @@
     <string name="glutes">Glúteos</string>
     <string name="left_leg">Pierna Izquierda</string>
     <string name="right_leg">Pierna Derecha</string>
-    <string name="fat_1f">Grasa: %.1f%%</string>
-    <string name="muscle_1f_kg">Músculo: %.1f kg</string>
+    <string name="fat_1f">Grasa: %1$s%%</string>
+    <string name="muscle_1f_kg">Músculo: %1$s%%</string>
     <string name="body_composition_subtitle">Rastrea tu progreso físico</string>
     <string name="add_exercise">Agregar ejercicio</string>
     <string name="build_picker_subtitle_returned">%1$s · %2$s · %3$s</string>
@@ -144,4 +144,15 @@
     <string name="exp_beginner">Principiante</string>
     <string name="exp_intermediate">Intermedio</string>
     <string name="exp_advanced">Avanzado</string>
+
+    <string name="no_muscle_data">No hay datos musculares</string>
+    <string name="muscle_unchanged">Músculo sin cambios</string>
+
+    <string name="score_data">Puntuación %1$s%%</string>
+    <string name="score_unchanged">Puntuación sin cambios</string>
+    <string name="height">Altura *</string>
+    <string name="weight_required">Peso *</string>
+    <string name="basal_calories">Calorías Basales</string>
+    <string name="yrs">años</string>
+    <string name="dark_mode">Modo Oscuro</string>
 </resources>

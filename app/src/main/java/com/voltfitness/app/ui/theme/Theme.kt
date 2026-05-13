@@ -1,8 +1,10 @@
 package com.voltfitness.app.ui.theme
 
 import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
@@ -57,6 +59,35 @@ private val VoltDarkColorScheme = darkColorScheme(
     onErrorContainer = Color.White
 )
 
+private val VoltLightColorScheme = lightColorScheme(
+    primary = VoltCyan,
+    onPrimary = Color.White,
+    primaryContainer = VoltCyanLight,
+    onPrimaryContainer = VoltCyanDark,
+
+    secondary = VoltSurfaceVariantLight,
+    onSecondary = VoltTextPrimaryLight,
+    secondaryContainer = VoltSurfaceLight,
+    onSecondaryContainer = VoltTextSecondaryLight,
+
+    tertiary = VoltAccentBlue,
+    onTertiary = Color.White,
+
+    background = VoltBackgroundLight,
+    onBackground = VoltTextPrimaryLight,
+
+    surface = VoltSurfaceLight,
+    onSurface = VoltTextPrimaryLight,
+    surfaceVariant = VoltSurfaceVariantLight,
+    onSurfaceVariant = VoltTextSecondaryLight,
+
+    outline = VoltBorderLight,
+    outlineVariant = VoltDividerLight,
+
+    error = VoltError,
+    onError = Color.White
+)
+
 /**
  * Root theme composable for the Volt Fitness application.
  *
@@ -67,9 +98,10 @@ private val VoltDarkColorScheme = darkColorScheme(
  */
 @Composable
 fun VoltTheme(
+    darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = VoltDarkColorScheme
+    val colorScheme = if (darkTheme) VoltDarkColorScheme else VoltLightColorScheme
     val view = LocalView.current
 
     // Update status bar appearance to match brand background
@@ -77,7 +109,7 @@ fun VoltTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 

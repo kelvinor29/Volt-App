@@ -81,3 +81,16 @@ val VoltGradientStart = Color(0xFF1E3A5F) // Cyan Dark
 val VoltGradientEnd = Color(0xFF0F0F1E)   // Deep blue-black
 
 // endregion
+
+// region ========== LIGHT MODE SPECIFIC COLORS ==========
+val VoltBackgroundLight = Color(0xFFF8F9FA)
+val VoltSurfaceLight = Color(0xFFFFFFFF)
+val VoltSurfaceVariantLight = Color(0xFFE9ECEF)
+
+val VoltTextPrimaryLight = Color(0xFF1A1A1A)
+val VoltTextSecondaryLight = Color(0xFF495057)
+val VoltTextTertiaryLight = Color(0xFF6C757D)
+
+val VoltBorderLight = Color(0xFFDEE2E6)
+val VoltDividerLight = Color(0xFFCED4DA)
+// endregion

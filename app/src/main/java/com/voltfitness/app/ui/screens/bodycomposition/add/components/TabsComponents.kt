@@ -28,7 +28,9 @@ import androidx.compose.material.icons.outlined.Whatshot
 import androidx.compose.material.icons.outlined.WidthNormal
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.voltfitness.app.R
 import com.voltfitness.app.core.designsystem.component.VoltMeasurementField
 import com.voltfitness.app.ui.screens.bodycomposition.add.AddBodyCompositionEvent
 import com.voltfitness.app.ui.screens.bodycomposition.add.AddBodyCompositionUiState
@@ -62,7 +64,7 @@ fun BodyCompositionTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.heightCm,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateHeight(it)) },
-                label = "Height *",
+                label = stringResource(R.string.height),
                 suffix = "cm",
                 icon = Icons.Outlined.Height,
                 isError = uiState.heightCm.isNotBlank() && !uiState.isHeightValid,
@@ -72,7 +74,7 @@ fun BodyCompositionTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.weightKg,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateWeight(it)) },
-                label = "Weight *",
+                label = stringResource(R.string.weight_required),
                 suffix = "kg",
                 icon = Icons.Outlined.MonitorWeight,
                 isError = uiState.weightKg.isNotBlank() && !uiState.isWeightValid,
@@ -84,7 +86,7 @@ fun BodyCompositionTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.bodyFatPercent,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateBodyFat(it)) },
-                label = "Body Fat",
+                label = stringResource(R.string.body_fat),
                 suffix = "%",
                 icon = Icons.Outlined.WaterDrop,
             )
@@ -92,7 +94,7 @@ fun BodyCompositionTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.waterPercent,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateWater(it)) },
-                label = "Water",
+                label = stringResource(R.string.water),
                 suffix = "%",
                 icon = Icons.Outlined.Opacity,
             )
@@ -101,7 +103,7 @@ fun BodyCompositionTab(
         VoltMeasurementField(
             value = uiState.muscleMassKg,
             onValueChange = { onEvent(AddBodyCompositionEvent.UpdateMuscleMass(it)) },
-            label = "Muscle Mass",
+            label = stringResource(R.string.muscle_mass),
             suffix = "kg",
             icon = Icons.Outlined.FitnessCenter,
         )
@@ -111,7 +113,7 @@ fun BodyCompositionTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.basalCalories,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateBasalCalories(it)) },
-                label = "Basal Calories",
+                label = stringResource(R.string.basal_calories),
                 suffix = "kcal",
                 icon = Icons.Outlined.LocalFireDepartment,
             )
@@ -119,8 +121,8 @@ fun BodyCompositionTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.metabolicAge,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateMetabolicAge(it)) },
-                label = "Metabolic Age",
-                suffix = "yrs",
+                label = stringResource(R.string.metabolic_age),
+                suffix = stringResource(R.string.yrs),
                 icon = Icons.Outlined.Elderly,
             )
         }
@@ -130,7 +132,7 @@ fun BodyCompositionTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.boneMassKg,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateBoneMass(it)) },
-                label = "Bone Mass",
+                label = stringResource(R.string.bone_mass),
                 suffix = "kg",
                 icon = Icons.Outlined.BrokenImage,
             )
@@ -138,7 +140,7 @@ fun BodyCompositionTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.visceralFatPercent,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateVisceralFat(it)) },
-                label = "Visceral Fat",
+                label = stringResource(R.string.visceral_fat),
                 suffix = "%",
                 icon = Icons.Outlined.Whatshot,
             )
@@ -173,7 +175,7 @@ fun BodyMeasurementsTab(
         VoltMeasurementField(
             value = uiState.chestCm,
             onValueChange = { onEvent(AddBodyCompositionEvent.UpdateChest(it)) },
-            label = "Chest",
+            label = stringResource(R.string.chest),
             suffix = "cm",
             icon = Icons.Outlined.Accessibility
         )
@@ -181,7 +183,7 @@ fun BodyMeasurementsTab(
         VoltMeasurementField(
             value = uiState.waistCm,
             onValueChange = { onEvent(AddBodyCompositionEvent.UpdateWaist(it)) },
-            label = "Waist",
+            label = stringResource(R.string.waist),
             suffix = "cm",
             icon = Icons.Outlined.CenterFocusStrong
         )
@@ -191,7 +193,7 @@ fun BodyMeasurementsTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.hipCm,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateHip(it)) },
-                label = "Hips",
+                label = stringResource(R.string.hip),
                 suffix = "cm",
                 icon = Icons.Outlined.WidthNormal
             )
@@ -199,7 +201,7 @@ fun BodyMeasurementsTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.gluteCm,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateGlute(it)) },
-                label = "Glutes",
+                label = stringResource(R.string.glutes),
                 suffix = "cm",
                 icon = Icons.Outlined.SportsGymnastics
             )
@@ -210,7 +212,7 @@ fun BodyMeasurementsTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.leftArmCm,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateLeftArm(it)) },
-                label = "Left Arm",
+                label = stringResource(R.string.left_arm),
                 suffix = "cm",
                 icon = Icons.Outlined.FitnessCenter,
             )
@@ -218,7 +220,7 @@ fun BodyMeasurementsTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.rightArmCm,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateRightArm(it)) },
-                label = "Right Arm",
+                label = stringResource(R.string.right_arm),
                 suffix = "cm",
                 icon = Icons.Outlined.FitnessCenter,
             )
@@ -229,7 +231,7 @@ fun BodyMeasurementsTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.leftLegCm,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateLeftLeg(it)) },
-                label = "Left Leg",
+                label = stringResource(R.string.left_leg),
                 suffix = "cm",
                 icon = Icons.AutoMirrored.Outlined.DirectionsRun,
             )
@@ -237,7 +239,7 @@ fun BodyMeasurementsTab(
                 modifier = Modifier.weight(1f),
                 value = uiState.rightLegCm,
                 onValueChange = { onEvent(AddBodyCompositionEvent.UpdateRightLeg(it)) },
-                label = "Right Leg",
+                label = stringResource(R.string.right_leg),
                 suffix = "cm",
                 icon = Icons.AutoMirrored.Outlined.DirectionsRun,
             )

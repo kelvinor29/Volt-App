@@ -116,7 +116,7 @@ fun VoltTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = VoltTypography,
-        shapes = VoltShapes, // Centralized in Shape.kt
+        shapes = VoltShapes,
         content = content
     )
 }

@@ -76,7 +76,7 @@ fun AddBodyCompositionScreen(
 
     // Contextual logic for the multi-step bottom bar
     val isLastTab = selectedTabIndex.value == tabs.lastIndex
-    val primaryText = if (isLastTab) "Save" else "Next"
+    val primaryText = if (isLastTab) stringResource(R.string.save) else stringResource(R.string.next)
     val primaryIcon = if (isLastTab) Icons.Filled.Save else Icons.AutoMirrored.Filled.ArrowForward
     val primaryEnabled = if (isLastTab) uiState.isFormValid else true
 

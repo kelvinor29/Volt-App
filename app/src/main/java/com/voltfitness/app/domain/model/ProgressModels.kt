@@ -1,5 +1,7 @@
 package com.voltfitness.app.domain.model
 
+import com.voltfitness.app.ui.common.UiText
+
 enum class ProgressStatus {
     POSITIVE,
     NEUTRAL,
@@ -8,6 +10,6 @@ enum class ProgressStatus {
 
 data class ProgressEvaluation(
     val status: ProgressStatus,
-    val primaryText: String,
-    val secondaryText: String?
+    val primaryText: UiText,
+    val secondaryText: UiText?
 )

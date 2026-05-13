@@ -188,7 +188,7 @@ private fun StepBasicInfo(
 
         VoltDropdownSelector(
             label = stringResource(R.string.gender),
-            options = ProfileOptions.genders,
+            options = ProfileOptions.Gender.entries.map { gender -> stringResource(gender.labelRes) },
             selectedOption = uiState.gender,
             leadingIcon = Icons.Outlined.Wc,
             onOptionSelected = { onEvent(RegisterEvent.UpdateGender(it)) },
@@ -218,7 +218,7 @@ private fun StepFitnessProfile(
 
         VoltDropdownSelector(
             label = stringResource(R.string.activity_level),
-            options = ProfileOptions.activityLevels,
+            options = ProfileOptions.ActivityLevel.entries.map { gender -> stringResource(gender.labelRes) },
             selectedOption = uiState.activityLevel,
             leadingIcon = Icons.Outlined.Speed,
             onOptionSelected = { onEvent(RegisterEvent.UpdateActivityLevel(it)) },
@@ -226,7 +226,7 @@ private fun StepFitnessProfile(
 
         VoltDropdownSelector(
             label = stringResource(R.string.goal),
-            options = ProfileOptions.goals,
+            options = ProfileOptions.FitnessGoal.entries.map { gender -> stringResource(gender.labelRes) },
             selectedOption = uiState.goal,
             leadingIcon = Icons.Outlined.TrackChanges,
             onOptionSelected = { onEvent(RegisterEvent.UpdateGoal(it)) }
@@ -234,7 +234,7 @@ private fun StepFitnessProfile(
 
         VoltDropdownSelector(
             label = stringResource(R.string.experience_level),
-            options = ProfileOptions.experienceLevels,
+            options = ProfileOptions.ExperienceLevel.entries.map { gender -> stringResource(gender.labelRes) },
             selectedOption = uiState.experienceLevel,
             leadingIcon = Icons.Outlined.Psychology,
             onOptionSelected = { onEvent(RegisterEvent.UpdateExperienceLevel(it)) }

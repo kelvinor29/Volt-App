@@ -68,13 +68,19 @@ fun RoutineHeaderFields(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        VoltTextField(value = name, onValueChange = onNameChange, label = stringResource(R.string.routine_name))
-        VoltTextField(value = description, onValueChange = onDescriptionChange, label = stringResource(
-            R.string.description
-        ))
+        VoltTextField(
+            value = name,
+            onValueChange = onNameChange,
+            label = stringResource(R.string.routine_name)
+        )
+        VoltTextField(
+            value = description, onValueChange = onDescriptionChange, label = stringResource(
+                R.string.description
+            )
+        )
         VoltDropdownSelector(
             label = stringResource(R.string.training_goal),
-            options = ProfileOptions.goals,
+            options = ProfileOptions.FitnessGoal.entries.map { goal -> stringResource(goal.labelRes)},
             selectedOption = goal,
             onOptionSelected = onGoalChange,
         )

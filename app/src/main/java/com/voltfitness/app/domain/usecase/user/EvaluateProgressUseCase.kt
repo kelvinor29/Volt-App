@@ -1,10 +1,15 @@
 package com.voltfitness.app.domain.usecase.user
 
+import androidx.compose.ui.res.stringResource
+import com.voltfitness.app.R
+import com.voltfitness.app.core.common.ProfileOptions
 import com.voltfitness.app.domain.model.BodyCompositionEntry
 import com.voltfitness.app.domain.model.ProgressEvaluation
 import com.voltfitness.app.domain.model.ProgressStatus
+import com.voltfitness.app.ui.common.UiText
 import javax.inject.Inject
 import kotlin.math.abs
+import kotlin.text.lowercase
 
 /**
  * Evaluates a user's body composition progress by comparing the most recent
@@ -47,16 +52,32 @@ class EvaluateProgressUseCase @Inject constructor() {
         if (previous == null) {
             return ProgressEvaluation(
                 status = ProgressStatus.NEUTRAL,
-                primaryText = "First assessment",
+                primaryText = UiText.StringResource(R.string.first_assessment),
                 secondaryText = null
             )
         }
 
         return when (userGoal?.lowercase()) {
-            "fat loss" -> evaluateFatLoss(current, previous)
-            "hypertrophy" -> evaluateHypertrophy(current, previous)
-            "recomposition" -> evaluateRecomposition(current, previous)
-            "maintenance" -> evaluateMaintenance(current, previous)
+            ProfileOptions.FitnessGoal.FAT_LOSS.dbValue.lowercase() -> evaluateFatLoss(
+                current,
+                previous
+            )
+
+            ProfileOptions.FitnessGoal.HYPERTROPHY.dbValue.lowercase() -> evaluateHypertrophy(
+                current,
+                previous
+            )
+
+            ProfileOptions.FitnessGoal.RECOMPOSITION.dbValue.lowercase() -> evaluateRecomposition(
+                current,
+                previous
+            )
+
+            ProfileOptions.FitnessGoal.MAINTENANCE.dbValue.lowercase() -> evaluateMaintenance(
+                current,
+                previous
+            )
+
             else -> evaluateGeneral(current, previous)
         }
     }
@@ -83,10 +104,13 @@ class EvaluateProgressUseCase @Inject constructor() {
         val status = when {
             hasFatData && fatChange <= -0.5f && muscleChange >= -0.3f ->
                 ProgressStatus.POSITIVE
+
             hasFatData && fatChange <= -0.5f && muscleChange < -0.3f ->
                 ProgressStatus.NEUTRAL
+
             hasFatData && fatChange >= 0.5f ->
                 ProgressStatus.NEGATIVE
+
             scoreChange > 2f -> ProgressStatus.POSITIVE
             scoreChange < -2f -> ProgressStatus.NEGATIVE
             else -> ProgressStatus.NEUTRAL
@@ -122,8 +146,10 @@ class EvaluateProgressUseCase @Inject constructor() {
         val status = when {
             hasMuscleData && muscleChange > 0.3f && fatChange < 3f ->
                 ProgressStatus.POSITIVE
+
             hasMuscleData && muscleChange < -0.3f ->
                 ProgressStatus.NEGATIVE
+
             fatChange >= 3f -> ProgressStatus.NEGATIVE
             else -> ProgressStatus.NEUTRAL
         }
@@ -161,8 +187,8 @@ class EvaluateProgressUseCase @Inject constructor() {
         }
 
         val primaryText = if (abs(scoreChange) >= 0.1f)
-            "Score ${formatDelta(scoreChange)}"
-         else "Score unchanged"
+            UiText.StringResource(R.string.score_data, formatDelta(scoreChange))
+        else UiText.StringResource(R.string.score_unchanged)
 
 
         val hasFat = current.bodyFatPercent != null && previous.bodyFatPercent != null
@@ -170,20 +196,20 @@ class EvaluateProgressUseCase @Inject constructor() {
 
         val secondary = buildString {
             if (hasFat && abs(fatChange) >= 0.1f) {
-                append("Fat ${formatDelta(fatChange)}%")
+                append(UiText.StringResource(R.string.fat_1f, formatDelta(fatChange)))
             }
             if (hasFat && abs(fatChange) >= 0.1f && hasMuscle && abs(muscleChange) >= 0.1f) {
                 append(" | ")
             }
             if (hasMuscle && abs(muscleChange) >= 0.1f) {
-                append("Muscle ${formatDelta(muscleChange)} kg")
+                append(UiText.StringResource(R.string.muscle_1f_kg, formatDelta(muscleChange)))
             }
         }.ifEmpty { null }
 
         return ProgressEvaluation(
             status = status,
-            primaryText = primaryText,
-            secondaryText = secondary
+            primaryText = primaryText as UiText,
+            secondaryText = secondary as UiText
         )
     }
 
@@ -213,7 +239,7 @@ class EvaluateProgressUseCase @Inject constructor() {
 
         return ProgressEvaluation(
             status = status,
-            primaryText = "Score ${formatDelta(scoreChange)}",
+            primaryText = UiText.StringResource(R.string.score_data, formatDelta(scoreChange)),
             secondaryText = null
         )
     }
@@ -236,7 +262,7 @@ class EvaluateProgressUseCase @Inject constructor() {
 
         return ProgressEvaluation(
             status = status,
-            primaryText = "Score ${formatDelta(scoreChange)}",
+            primaryText = UiText.StringResource(R.string.score_data, formatDelta(scoreChange)),
             secondaryText = null
         )
     }
@@ -260,10 +286,10 @@ class EvaluateProgressUseCase @Inject constructor() {
      * @param hasData whether both current and previous values were available.
      * @return a human-readable string, e.g. `"Fat -1.2%"` or `"No fat data"`.
      */
-    private fun formatFatChange(delta: Float, hasData: Boolean): String {
-        if (!hasData) return "No fat data"
-        if (abs(delta) < 0.1f) return "Fat unchanged"
-        return "Fat ${formatDelta(delta)}%"
+    private fun formatFatChange(delta: Float, hasData: Boolean): UiText {
+        if (!hasData) return UiText.StringResource(R.string.no_fat_data)
+        if (abs(delta) < 0.1f) return UiText.StringResource(R.string.fat_unchanged)
+        return UiText.StringResource(R.string.fat_label, formatDelta(delta))
     }
 
     /**
@@ -273,10 +299,11 @@ class EvaluateProgressUseCase @Inject constructor() {
      * @param hasData whether both current and previous values were available.
      * @return a human-readable string, e.g. `"Muscle +0.8 kg"` or `"No muscle data"`.
      */
-    private fun formatMuscleChange(delta: Float, hasData: Boolean): String {
-        if (!hasData) return "No muscle data"
-        if (abs(delta) < 0.1f) return "Muscle unchanged"
-        return "Muscle ${formatDelta(delta)} kg"
+    private fun formatMuscleChange(delta: Float, hasData: Boolean): UiText {
+        if (!hasData) return UiText.StringResource(R.string.no_muscle_data)
+        if (abs(delta) < 0.1f) return UiText.StringResource(R.string.muscle_unchanged)
+        return UiText.StringResource(R.string.muscle_1f_kg, formatDelta(delta))
+
     }
 
     /**

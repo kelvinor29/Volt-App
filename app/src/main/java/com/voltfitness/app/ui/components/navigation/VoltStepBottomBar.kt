@@ -7,13 +7,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,7 @@ import com.voltfitness.app.core.designsystem.component.VoltButton
 import com.voltfitness.app.core.designsystem.component.VoltOutlinedButton
 import com.voltfitness.app.ui.theme.VoltSpacing
 import com.voltfitness.app.ui.theme.VoltTheme
+import com.voltfitness.app.R
 
 /**
  * A persistent footer component designed for multi-step processes or confirmation screens.
@@ -42,13 +44,14 @@ fun VoltStepBottomBar(
     primaryText: String,
     onPrimaryClick: () -> Unit,
     modifier: Modifier = Modifier,
-    secondaryText: String = "Dismiss",
+    secondaryText: String? = null,
     onSecondaryClick: () -> Unit,
     primaryIcon: ImageVector? = null,
     primaryEnabled: Boolean = true,
     primaryLoading: Boolean = false,
     shadowElevation: Dp = 6.dp,
 ) {
+    val finalSecondaryText = secondaryText ?: stringResource(id = R.string.dismiss)
     Surface(
         modifier = modifier,
         shadowElevation = shadowElevation,
@@ -67,7 +70,7 @@ fun VoltStepBottomBar(
         ) {
             // Secondary action (Usually Dismiss, Back, or Cancel)
             VoltOutlinedButton(
-                text = secondaryText,
+                text = finalSecondaryText,
                 onClick = onSecondaryClick,
                 modifier = Modifier.weight(1f),
             )
@@ -125,7 +128,11 @@ fun PreviewVoltStepBottomBarStates() {
     }
 }
 
-@Preview(showBackground = true, name = "Dark Mode", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(
+    showBackground = true,
+    name = "Dark Mode",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 fun PreviewVoltStepBottomBarDark() {
     VoltTheme {

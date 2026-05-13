@@ -142,9 +142,9 @@ class HomeViewModel @Inject constructor(
             it.copy(
                 currentWeight = "%.1f".format(latest.weightKg),
                 lastWeightUpdated = formatRelativeDate(latest.date),
-                primaryChangeText = UiText.DynamicString(evaluation.primaryText),
+                primaryChangeText = evaluation.primaryText,
                 secondaryChangeText = evaluation.secondaryText?.let { text ->
-                    UiText.DynamicString(text)
+                    text
                 },
                 progressStatus = evaluation.status,
                 compositionScore = latest.compositionScore
